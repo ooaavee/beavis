@@ -6,7 +6,7 @@
 ////{
 ////    internal class LoginCommand : AbstractApplicationCommand
 ////    {
-////        public static void Register(CommandLineApplication app, TerminalExecutionContext context)
+////        public static void Register(CommandLineApplication app, CliContext context)
 ////        {
 ////            app.Command("login", "Authenticates and logs in to the server.", config =>
 ////            {

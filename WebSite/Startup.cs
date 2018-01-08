@@ -21,6 +21,9 @@ namespace WebSite
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<Kantaluokka, Eka>();
+            services.AddSingleton<Kantaluokka, Toka>();
+
             services.AddMvc();
         }
 
@@ -47,4 +50,26 @@ namespace WebSite
             });
         }
     }
+
+    public abstract class Kantaluokka
+    {
+        public abstract string HelloWorld();
+    }
+
+    public class Eka : Kantaluokka
+    {
+        public override string HelloWorld()
+        {
+            return "Hello";
+        }
+    }
+
+    public class Toka : Kantaluokka
+    {
+        public override string HelloWorld()
+        {
+            return "World";
+        }
+    }
+
 }

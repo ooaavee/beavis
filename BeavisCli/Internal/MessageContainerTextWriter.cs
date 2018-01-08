@@ -2,9 +2,9 @@
 using System.IO;
 using System.Text;
 
-namespace BeavisCli
+namespace BeavisCli.Internal
 {
-    internal class MessageContainerTextWriter : TextWriter
+    internal sealed class MessageContainerTextWriter : TextWriter
     {
         private readonly Action<string> _action;
 
@@ -25,9 +25,14 @@ namespace BeavisCli
 
         public override void Write(char value)
         {
-            throw new NotImplementedException("Sheeeeet! This method is not implemented, because we should not be here :(");
+            throw new WeShouldNeverEverBeHereException();
         }
 
         public override Encoding Encoding => Encoding.UTF8;
+
+        private class WeShouldNeverEverBeHereException : Exception
+        {
+            public WeShouldNeverEverBeHereException() : base("fuck") { }
+        }
     }
 }

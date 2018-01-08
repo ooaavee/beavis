@@ -1,9 +1,9 @@
-﻿namespace BeavisCli.ClientSideStatements
+﻿namespace BeavisCli.JavaScriptStatements
 {
     /// <summary>
     /// This statement clears the terminal history.
     /// </summary>
-    public class ClearTerminalHistoryStatement : IClientSideStatement
+    public sealed class ClearTerminalHistory : IJavaScriptStatement
     {
         public string GetJavaScript()
         {

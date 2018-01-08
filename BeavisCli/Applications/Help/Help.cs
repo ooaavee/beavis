@@ -7,15 +7,14 @@ namespace Jemma.Terminal.Applications.Help
 {
     internal class Help : AbstractBeavisApplication
     {
-        public static readonly BeavisApplicationInfo Definition = new BeavisApplicationInfo
+        public static readonly ApplicationInfo Definition = new ApplicationInfo
         {
             ////Type = typeof(Help),
             Name = "help",
-            Description = "Help",
-            AllowAnonymous = true
+            Description = "Help"
         };
 
-        protected override async Task OnRunAsync(TerminalExecutionContext context)
+        protected override async Task OnRunAsync(CliContext context)
         {
             var app = CreateApplication(Definition, context);
 
@@ -40,13 +39,14 @@ namespace Jemma.Terminal.Applications.Help
 
                     int maxLen = 0;
 
-                    List<BeavisApplicationInfo> tahanPitaaJostakinHommataKaikkiApplicaatiot = new List<BeavisApplicationInfo>();
+                    List<ApplicationInfo> tahanPitaaJostakinHommataKaikkiApplicaatiot = new List<ApplicationInfo>();
 
-                    foreach (BeavisApplicationInfo info in tahanPitaaJostakinHommataKaikkiApplicaatiot)
+                    foreach (ApplicationInfo info in tahanPitaaJostakinHommataKaikkiApplicaatiot)
                     {
-                        if (BeavisApplicationInfo.IsAvailable(info, context))
+                        // TODO: Tämä IsAvailable pitää toteuttaa tai vastaava!!!
+                        //if (ApplicationInfo.IsAvailable(info, context))
                         {
-                            if (info.Type != typeof(Help))
+                            //if (info.Type != typeof(Help))
                             {
                                 int len = info.Name.Length;
                                 if (len > maxLen)
@@ -57,11 +57,12 @@ namespace Jemma.Terminal.Applications.Help
                         }
                     }
 
-                    foreach (BeavisApplicationInfo info in tahanPitaaJostakinHommataKaikkiApplicaatiot)
+                    foreach (ApplicationInfo info in tahanPitaaJostakinHommataKaikkiApplicaatiot)
                     {
-                        if (BeavisApplicationInfo.IsAvailable(info, context))
+                        // TODO: Tämä IsAvailable pitää toteuttaa tai vastaava!!!
+                        //if (ApplicationInfo.IsAvailable(info, context))
                         {
-                            if (info.Type != typeof(Help))
+                            //if (info.Type != typeof(Help))
                             {
                                 string name = (info.Name + new string(' ', maxLen)).Substring(0, maxLen + 1);
                                 context.Response.WriteInformation(string.Format("   {0}   {1}", name, info.Description));

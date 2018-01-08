@@ -9,6 +9,11 @@ namespace WebSite.Pages
 {
     public class IndexModel : PageModel
     {
+        public IndexModel(IEnumerable<Kantaluokka> kkkk)
+        {
+
+        }
+
         public void OnGet()
         {
 

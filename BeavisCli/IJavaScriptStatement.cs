@@ -1,6 +1,6 @@
 ﻿namespace BeavisCli
 {
-    public interface IClientSideStatement
+    public interface IJavaScriptStatement
     {
         string GetJavaScript();
     }

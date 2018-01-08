@@ -1,21 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using BeavisCli.Internal;
 using Newtonsoft.Json;
 
 namespace BeavisCli
 {
-    public class TerminalResponse
+    public class CliResponse
     {
         [JsonProperty("messages")]
-        public List<TerminalMessage> Messages { get; set; } = new List<TerminalMessage>();
+        public List<ResponseMessage> Messages { get; set; } = new List<ResponseMessage>();
 
         [JsonProperty("statements")]
         public List<string> Statements { get; set; } = new List<string>();
 
-        public ITerminalMessageScope BeginInteraction()
+        public IMessagingScope BeginInteraction()
         {
-            return new TerminalMessageScope(this);
+            return new MessagingScope(this);
         }
 
         /// <summary>
@@ -93,9 +94,9 @@ namespace BeavisCli
         }
 
         /// <summary>
-        /// Adds a client-side statement.
+        /// Adds a JavaScript statement.
         /// </summary>
-        public void AddStatement(IClientSideStatement statement)
+        public void AddStatement(IJavaScriptStatement statement)
         {
             if (statement == null)
             {

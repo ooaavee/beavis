@@ -3,9 +3,9 @@
 namespace BeavisCli
 {
     /// <summary>
-    /// This is the base class for all terminal messages.
+    /// This is the base class for all response messages.
     /// </summary>
-    public abstract class TerminalMessage
+    public abstract class ResponseMessage
     {
         [JsonProperty("text")]
         public virtual string Text { get; set; }

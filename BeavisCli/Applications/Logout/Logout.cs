@@ -1,28 +1,27 @@
 ﻿using BeavisCli;
 using System.Threading.Tasks;
-using BeavisCli.ClientSideStatements;
+using BeavisCli.JavaScriptStatements;
 
 namespace Jemma.Terminal.Applications.Logout
 {
     internal class Logout : AbstractBeavisApplication
     {
-        public static readonly BeavisApplicationInfo Definition = new BeavisApplicationInfo
+        public static readonly ApplicationInfo Definition = new ApplicationInfo
         {
             ////Type = typeof(Logout),
             Name = "logout",
-            Description = "Logs out from the server.",
-            AllowAnonymous = true
+            Description = "Logs out from the server."
         };
 
 
-        protected override async Task OnRunAsync(TerminalExecutionContext context)
+        protected override async Task OnRunAsync(CliContext context)
         {
             var app = CreateApplication(Definition, context);
 
             app.OnExecute(() =>
             {
-                context.Response.AddStatement(new ClearTerminalStatement());
-                context.Response.AddStatement(new ClearTerminalHistoryStatement());
+                context.Response.AddStatement(new ClearTerminal());
+                context.Response.AddStatement(new ClearTerminalHistory());
 
                 return Exit();
             });

@@ -4,12 +4,12 @@ using System.Linq;
 
 namespace BeavisCli
 {
-    public sealed class BeavisApplicationInfo
+    public sealed class ApplicationInfo
     {
         /////// <summary>
         /////// All registered applications.
         /////// </summary>
-        ////public static List<BeavisApplicationInfo> RegisteredApplications { get; } = new List<BeavisApplicationInfo>();
+        ////public static List<ApplicationInfo> RegisteredApplications { get; } = new List<ApplicationInfo>();
 
         /////// <summary>
         /////// Application type
@@ -29,21 +29,21 @@ namespace BeavisCli
 
 
 
-        /// <summary>
-        /// Allow application execution without authentication?
-        /// </summary>
-        public bool AllowAnonymous { get; set; }
+        /////// <summary>
+        /////// Allow application execution without authentication?
+        /////// </summary>
+        ////public bool AllowAnonymous { get; set; }
 
         /////// <summary>
         /////// Creates an application instance by it's name.
         /////// </summary>
         /////// <param name="name">application name</param>
         /////// <returns>an application instance or null if not found</returns>
-        ////public static AbstractBeavisApplication CreateApplicationInstance(string name, TerminalExecutionContext context)
+        ////public static AbstractBeavisApplication CreateApplicationInstance(string name, CliContext context)
         ////{
         ////    throw new NotImplementedException();
         ////    ////AbstractApplication app = null;
-        ////    ////BeavisApplicationInfo info = RegisteredApplications.FirstOrDefault(x => x.Name == name);
+        ////    ////ApplicationInfo info = RegisteredApplications.FirstOrDefault(x => x.Name == name);
 
         ////    ////if (info != null)
         ////    ////{
@@ -57,7 +57,7 @@ namespace BeavisCli
         ////    ////return app;
         ////}
 
-        ////public static bool IsAvailable(BeavisApplicationInfo info, TerminalExecutionContext context)
+        ////public static bool IsAvailable(ApplicationInfo info, CliContext context)
         ////{
             
         ////    return true;

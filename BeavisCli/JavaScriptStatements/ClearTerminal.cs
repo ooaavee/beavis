@@ -1,9 +1,9 @@
-﻿namespace BeavisCli.ClientSideStatements
+﻿namespace BeavisCli.JavaScriptStatements
 {
     /// <summary>
     /// This statement clears the terminal.
     /// </summary>
-    public class ClearTerminalStatement : IClientSideStatement
+    public sealed class ClearTerminal : IJavaScriptStatement
     {
         public string GetJavaScript()
         {

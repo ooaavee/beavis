@@ -4,11 +4,12 @@ using System.Threading.Tasks;
 
 namespace BeavisCli
 {
+    //TÄMÄ POIS!!!
     internal abstract class AbstractBeavisApplication
     {
-        public Func<BeavisApplicationInfo> GetInfo { get; set; }
+        public Func<ApplicationInfo> GetInfo { get; set; }
 
-        public async Task RunAsync(TerminalExecutionContext context)
+        public async Task RunAsync(CliContext context)
         {
             ////if (true)
             ////{
@@ -33,9 +34,9 @@ namespace BeavisCli
             ////}
         }      
 
-        protected abstract Task OnRunAsync(TerminalExecutionContext context);
+        protected abstract Task OnRunAsync(CliContext context);
 
-        protected CommandLineApplication CreateApplication(BeavisApplicationInfo info, TerminalExecutionContext context)
+        protected CommandLineApplication CreateApplication(ApplicationInfo info, CliContext context)
         {
             var app = new CommandLineApplication
             {
@@ -110,9 +111,9 @@ namespace BeavisCli
         }
 
 
-        protected void Execute(CommandLineApplication app, TerminalExecutionContext context)
+        protected void Execute(CommandLineApplication app, CliContext context)
         {
-            string[] args = context.Request.GetApplicationArgs();
+            string[] args = context.Request.ParseArgs();
             app.Execute(args);
         }
 

@@ -1,20 +1,20 @@
 ﻿using System.Threading.Tasks;
 using BeavisCli;
 using BeavisCli.Microsoft.Extensions.CommandLineUtils;
+using CommandOptionType = BeavisCli.Microsoft.Extensions.CommandLineUtils.CommandOptionType;
 
 namespace Jemma.Terminal.Applications.El
 {
     internal class El : AbstractBeavisApplication
     {
-        public static readonly BeavisApplicationInfo Definition = new BeavisApplicationInfo
+        public static readonly ApplicationInfo Definition = new ApplicationInfo
         {
             ////Type = typeof(El),
             Name = "el",
-            Description = "This utility is used to manage and query data.",
-            AllowAnonymous = true
+            Description = "This utility is used to manage and query data."
         };
 
-        protected override async Task OnRunAsync(TerminalExecutionContext context)
+        protected override async Task OnRunAsync(CliContext context)
         {
             CommandLineApplication app = CreateApplication(Definition, context);
             app.FullName = "event-lake command line util";

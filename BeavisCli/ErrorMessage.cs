@@ -3,7 +3,7 @@
     /// <summary>
     /// Error message
     /// </summary>
-    public class ErrorMessage : TerminalMessage
+    public class ErrorMessage : ResponseMessage
     {
         public override string Type => "error";
     }

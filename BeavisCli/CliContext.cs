@@ -2,9 +2,9 @@
 
 namespace BeavisCli
 {
-    public class TerminalExecutionContext
+    public class CliContext
     {
-        public TerminalExecutionContext(TerminalRequest request, TerminalResponse response, HttpContext httpContext)
+        public CliContext(CliRequest request, CliResponse response, HttpContext httpContext)
         {
             Request = request;
             Response = response;
@@ -19,12 +19,12 @@ namespace BeavisCli
         /// <summary>
         /// Request
         /// </summary>
-        public TerminalRequest Request { get; }
+        public CliRequest Request { get; }
 
         /// <summary>
         /// Response
         /// </summary>
-        public TerminalResponse Response { get; }
+        public CliResponse Response { get; }
     }
 
 }

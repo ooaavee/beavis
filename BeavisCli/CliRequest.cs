@@ -4,15 +4,18 @@ using Newtonsoft.Json;
 
 namespace BeavisCli
 {
-    public class TerminalRequest
+    public class CliRequest
     {
+        /// <summary>
+        /// An input string from the web client.
+        /// </summary>
         [JsonProperty("input")]
         public string Input { get; set; }
 
         /// <summary>
         /// Gets the application name from the request.
         /// </summary>
-        public string GetApplicationName()
+        public string ParseApplicationName()
         {
             var value = Input.Trim();
             var tokens = value.Split(' ');
@@ -26,7 +29,7 @@ namespace BeavisCli
         /// <summary>
         /// Gets application arguments from the request.
         /// </summary>
-        public string[] GetApplicationArgs()
+        public string[] ParseArgs()
         {
             var args = new List<string>();
             var input = Input.Trim();

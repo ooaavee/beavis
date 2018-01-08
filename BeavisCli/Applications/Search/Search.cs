@@ -8,7 +8,7 @@
 //{
 //    internal class Search : AbstractApplication
 //    {
-//        public static readonly BeavisApplicationInfo Definition = new BeavisApplicationInfo
+//        public static readonly ApplicationInfo Definition = new ApplicationInfo
 //        {
 //            Type = typeof(Search),
 //            Name = "search",
@@ -16,7 +16,7 @@
 //            AllowAnonymous = true
 //        };
 
-//        protected override async Task OnRunAsync(TerminalExecutionContext context)
+//        protected override async Task ExecuteAsync(CliContext context)
 //        {
 //            var app = CreateApplication(Definition, context);
 
@@ -173,7 +173,7 @@
 //            }
 //        }
 
-//        private static void WriteDateTimeOptionError(string option, string optionValue, TerminalExecutionContext context)
+//        private static void WriteDateTimeOptionError(string option, string optionValue, CliContext context)
 //        {
 //            using (context.Response.BeginInteraction())
 //            {
@@ -198,7 +198,7 @@
 //            }
 //        }
 
-//        private static void WriteLevelOptionError(string option, string optionValue, TerminalExecutionContext context)
+//        private static void WriteLevelOptionError(string option, string optionValue, CliContext context)
 //        {
 //            using (context.Response.BeginInteraction())
 //            {

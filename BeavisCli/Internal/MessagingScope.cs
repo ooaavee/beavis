@@ -1,13 +1,12 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
-namespace BeavisCli
+namespace BeavisCli.Internal
 {
-    internal class TerminalMessageScope : ITerminalMessageScope
+    internal class MessagingScope : IMessagingScope
     {
-        private readonly TerminalResponse _response;
+        private readonly CliResponse _response;
 
-        public TerminalMessageScope(TerminalResponse response)
+        public MessagingScope(CliResponse response)
         {
             _response = response;
         }

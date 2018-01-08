@@ -3,7 +3,7 @@
     /// <summary>
     /// Information message
     /// </summary>
-    public class InformationMessage : TerminalMessage
+    public class InformationMessage : ResponseMessage
     {
         public override string Type => "information";
     }

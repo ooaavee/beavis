@@ -6,15 +6,14 @@ namespace Jemma.Terminal.Applications.Login
 {
     internal class Login : AbstractBeavisApplication
     {
-        public static readonly BeavisApplicationInfo Definition = new BeavisApplicationInfo
+        public static readonly ApplicationInfo Definition = new ApplicationInfo
         {
             ////Type = typeof(Login),
             Name = "login",
-            Description = "Authenticates and logs in to the server.",
-            AllowAnonymous = true
+            Description = "Authenticates and logs in to the server."
         };
 
-        protected override async Task OnRunAsync(TerminalExecutionContext context)
+        protected override async Task OnRunAsync(CliContext context)
         {
             var app = CreateApplication(Definition, context);
 

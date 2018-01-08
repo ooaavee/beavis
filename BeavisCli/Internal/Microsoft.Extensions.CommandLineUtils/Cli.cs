@@ -844,4 +844,5 @@ namespace BeavisCli.Microsoft.Extensions.CommandLineUtils
 
         public CommandLineApplication Command { get; }
     }
+
 }
