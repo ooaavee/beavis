@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "noEmitOnError": true,
+    "removeComments": true,
+    "sourceMap": false,
+    "target": "es5",
+    "outFile": "../Resources/terminal.js"
+  },
+    "exclude": [
+        "node_modules",
+        "wwwroot"
+    ],
+    "files": [
+        "terminal.ts"
+    ],
+  "compileOnSave": true
+}

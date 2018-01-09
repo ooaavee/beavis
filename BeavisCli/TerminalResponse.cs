@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace BeavisCli
 {
-    public class CliResponse
+    public class TerminalResponse
     {
         [JsonProperty("messages")]
         public List<ResponseMessage> Messages { get; set; } = new List<ResponseMessage>();

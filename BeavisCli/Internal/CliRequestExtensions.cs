@@ -1,23 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
 
-namespace BeavisCli
+namespace BeavisCli.Internal
 {
-    public class CliRequest
+    internal static class CliRequestExtensions
     {
-        /// <summary>
-        /// An input string from the web client.
-        /// </summary>
-        [JsonProperty("input")]
-        public string Input { get; set; }
-
         /// <summary>
         /// Gets the application name from the request.
         /// </summary>
-        public string ParseApplicationName()
+        internal static string GetApplicationName(this TerminalRequest request)
         {
-            var value = Input.Trim();
+            var value = request.Input.Trim();
             var tokens = value.Split(' ');
             if (tokens.Any())
             {
@@ -29,19 +22,17 @@ namespace BeavisCli
         /// <summary>
         /// Gets application arguments from the request.
         /// </summary>
-        public string[] ParseArgs()
+        internal static string[] GetArgs(this TerminalRequest request)
         {
             var args = new List<string>();
-            var input = Input.Trim();
+            var input = request.Input.Trim();
             var all = input.Split(' ');
 
             if (all.Length > 1)
             {
                 for (var i = 1; i <= all.Length - 1; i++)
                 {
-                    var arg = all[i];
-                    arg = arg.Trim();
-
+                    var arg = all[i].Trim();
                     if (arg.Length > 0)
                     {
                         args.Add(arg);
@@ -51,6 +42,5 @@ namespace BeavisCli
 
             return args.ToArray();
         }
-
     }
 }

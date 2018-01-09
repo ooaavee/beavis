@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,10 +22,10 @@ namespace WebSite
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<Kantaluokka, Eka>();
-            services.AddSingleton<Kantaluokka, Toka>();
-
             services.AddMvc();
+            services.AddBeavis();
+
+          
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,6 +41,8 @@ namespace WebSite
                 app.UseExceptionHandler("/Error");
             }
 
+            app.UseBeavis();
+
             app.UseStaticFiles();
 
             app.UseMvc(routes =>
@@ -48,28 +51,13 @@ namespace WebSite
                     name: "default",
                     template: "{controller}/{action=Index}/{id?}");
             });
+
+
         }
+
     }
 
-    public abstract class Kantaluokka
-    {
-        public abstract string HelloWorld();
-    }
 
-    public class Eka : Kantaluokka
-    {
-        public override string HelloWorld()
-        {
-            return "Hello";
-        }
-    }
-
-    public class Toka : Kantaluokka
-    {
-        public override string HelloWorld()
-        {
-            return "World";
-        }
-    }
+   
 
 }

@@ -1,50 +1,50 @@
-﻿using System.Threading.Tasks;
-using BeavisCli;
-using BeavisCli.Microsoft.Extensions.CommandLineUtils;
+﻿//using System.Threading.Tasks;
+//using BeavisCli;
+//using BeavisCli.Microsoft.Extensions.CommandLineUtils;
 
-namespace Jemma.Terminal.Applications.Login
-{
-    internal class Login : AbstractBeavisApplication
-    {
-        public static readonly ApplicationInfo Definition = new ApplicationInfo
-        {
-            ////Type = typeof(Login),
-            Name = "login",
-            Description = "Authenticates and logs in to the server."
-        };
+//namespace Jemma.Terminal.Applications.Login
+//{
+//    internal class Login : AbstractBeavisApplication
+//    {
+//        public static readonly ApplicationInfo Definition = new ApplicationInfo
+//        {
+//            ////Type = typeof(Login),
+//            Name = "login",
+//            Description = "Authenticates and logs in to the server."
+//        };
 
-        protected override async Task OnRunAsync(CliContext context)
-        {
-            var app = CreateApplication(Definition, context);
+//        protected override async Task OnRunAsync(CliContext context)
+//        {
+//            var app = CreateApplication(Definition, context);
 
-            CommandArgument apiKey = app.Argument("[key]", "API key used for authentication.");
+//            CommandArgument apiKey = app.Argument("[key]", "API key used for authentication.");
 
-            app.OnExecute(() =>
-            {             
-                if (!HasArgument(apiKey))
-                {
-                    app.ShowHelp(Definition.Name);
-                    return Exit();
-                }
+//            app.OnExecute(() =>
+//            {             
+//                if (!HasArgument(apiKey))
+//                {
+//                    app.ShowHelp(Definition.Name);
+//                    return Exit();
+//                }
 
 
-                using (context.Response.BeginInteraction())
-                {
-                    if (true)
-                    {
-                        context.Response.WriteSucceed("Login succeed.");
-                    }
-                    else
-                    {
-                        context.Response.WriteError("Login failed.");
-                    }
-                }
+//                using (context.Response.BeginInteraction())
+//                {
+//                    if (true)
+//                    {
+//                        context.Response.WriteSucceed("Login succeed.");
+//                    }
+//                    else
+//                    {
+//                        context.Response.WriteError("Login failed.");
+//                    }
+//                }
 
-                return Exit();
-            });
+//                return Exit();
+//            });
 
-            Execute(app, context);
-        }
+//            Execute(app, context);
+//        }
 
-    }
-}
+//    }
+//}

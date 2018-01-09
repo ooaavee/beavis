@@ -7,36 +7,17 @@ namespace BeavisCli
 {
     public abstract class AbstractApplication
     {
-        public ICommandLineApplication CreateCommandLineApplication(CliContext context)
-        {
-            var info = GetInfo();
-
-            var app = new CommandLineApplication
-            {
-                Name = info.Name,
-                FullName = info.Name,
-                Description = info.Description,
-                Out = context.Response.CreateTextWriterForInformationMessages(),
-                Error = context.Response.CreateTextWriterForErrorMessages()
-            };
-
-            app.HelpOption("-?|-h|--help");
-
-            return new DefaultCommandLineApplication(app, this);
-        }
+        private ApplicationInfo _info;
 
         public abstract ApplicationInfo GetInfo();
 
         public abstract Task ExecuteAsync(ICommandLineApplication app, CliContext context);
 
-
-
-        protected async Task<int> ExitWithHelp(ICommandLineApplication cli)
+        protected Task<int> ExitWithHelp(ICommandLineApplication cli)
         {
-            var info = GetInfo();
-            var target = FindCli(cli);
-            target.ShowHelp(info.Name);
-            return await Exit();
+            var target = FindTarget(cli);
+            target.ShowHelp(Info.Name);
+            return Task.FromResult(2);
         }
 
         protected Task<int> Exit()
@@ -46,13 +27,51 @@ namespace BeavisCli
 
         protected async Task OnExecuteAsync(Func<Task<int>> invoke, ICommandLineApplication app, CliContext context)
         {
-            string[] args = context.Request.ParseArgs();
-            CommandLineApplication cli = FindCli(app);
+            if (invoke == null)
+            {
+                throw new ArgumentNullException(nameof(invoke));
+            }
+
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            string[] args = context.Request.GetArgs();
+            CommandLineApplication cli = FindTarget(app);
             await cli.OnExecuteAsync(invoke);
             cli.Execute(args);
         }
 
-        private CommandLineApplication FindCli(ICommandLineApplication app)
+        internal ApplicationInfo Info
+        {
+            get { return _info ?? (_info = GetInfo()); }
+        }
+
+        internal async Task ExecuteAsync(CliContext context)
+        {
+            var target = new CommandLineApplication
+            {
+                Name = Info.Name,
+                FullName = Info.Name,
+                Description = Info.Description,
+                Out = context.Response.CreateTextWriterForInformationMessages(),
+                Error = context.Response.CreateTextWriterForErrorMessages()
+            };
+
+            target.HelpOption("-?|-h|--help");
+
+            ICommandLineApplication app = new DefaultCommandLineApplication(target);
+
+            await ExecuteAsync(app, context);
+        }
+
+        private CommandLineApplication FindTarget(ICommandLineApplication app)
         {
             var impl = app as DefaultCommandLineApplication;
             if (impl == null)

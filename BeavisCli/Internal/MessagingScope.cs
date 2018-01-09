@@ -4,9 +4,9 @@ namespace BeavisCli.Internal
 {
     internal class MessagingScope : IMessagingScope
     {
-        private readonly CliResponse _response;
+        private readonly TerminalResponse _response;
 
-        public MessagingScope(CliResponse response)
+        public MessagingScope(TerminalResponse response)
         {
             _response = response;
         }

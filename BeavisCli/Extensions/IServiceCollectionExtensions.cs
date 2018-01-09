@@ -1,19 +1,42 @@
 ﻿using System;
-using System.Linq;
-using System.Reflection;
-using Jemma;
-using Jemma.Terminal;
-using Jemma.Terminal.Applications;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using BeavisCli.Internal;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class IServiceCollectionExtensions
     {
-        public static IServiceCollection AddBeavisCli(this IServiceCollection services)
+        public static IServiceCollection AddBeavis(this IServiceCollection services)
         {
-            throw new NotImplementedException();
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+
+            services.AddSingleton<ApplicationSpace>();
+            services.AddSingleton<RequestHandler>();
+            services.AddSingleton<WebTerminalRenderer>();
+
+            services.AddSingleton<Kanta, K1>();
+            services.AddSingleton<Kanta, K2>();
+
+            return services;
         }
+
+    }
+
+    public abstract class Kanta
+    {
+
+    }
+
+    public class K1 : Kanta
+    {
+
+    }
+
+
+    public class K2 : Kanta
+    {
 
     }
 }

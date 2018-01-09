@@ -14,19 +14,15 @@ namespace BeavisCli.Internal
             _space = space;
         }
 
-        public async Task HandleAsync(CliRequest request, HttpContext httpContext)
+        public async Task HandleAsync(TerminalRequest request, HttpContext httpContext)
         {
-            CliContext context = new CliContext(request, new CliResponse(), httpContext);
+            CliContext context = new CliContext(request, new TerminalResponse(), httpContext);
 
             try
             {
-                string name = request.ParseApplicationName();
+                AbstractApplication app = _space.FindApplicaton(context);
 
-                AbstractApplication app = _space.FindApplicaton(name);
-
-                ICommandLineApplication cli = app.CreateCommandLineApplication(context);
-
-                await app.ExecuteAsync(cli, context);
+                await app.ExecuteAsync(context);
             }
             catch (ApplicationSpaceException ex)
             {

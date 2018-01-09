@@ -6,12 +6,10 @@ namespace BeavisCli.Internal
     internal class DefaultCommandLineApplication : ICommandLineApplication
     {
         private readonly CommandLineApplication _target;
-        private readonly AbstractApplication _service;
 
-        public DefaultCommandLineApplication(CommandLineApplication target, AbstractApplication service)
+        public DefaultCommandLineApplication(CommandLineApplication target)
         {
             _target = target;
-            _service = service;
         }
 
         public CommandLineApplication Target => _target;
