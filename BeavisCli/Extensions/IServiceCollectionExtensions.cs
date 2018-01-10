@@ -12,9 +12,10 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(services));
             }
 
-            services.AddSingleton<ApplicationSpace>();
-            services.AddSingleton<RequestHandler>();
-            services.AddSingleton<WebTerminalRenderer>();
+            services.AddSingleton<ApplicationProvider>();
+            services.AddSingleton<ApplicationExecutor>();
+            services.AddSingleton<WebRenderer>();
+            services.AddSingleton<UnauthorizedApplicationExecutionAttemptHandler>();
 
             services.AddSingleton<Kanta, K1>();
             services.AddSingleton<Kanta, K2>();

@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace BeavisCli
 {
-    public class TerminalResponse
+    public class ApplicationExecutionResponse
     {
         [JsonProperty("messages")]
         public List<ResponseMessage> Messages { get; set; } = new List<ResponseMessage>();
@@ -14,15 +14,10 @@ namespace BeavisCli
         [JsonProperty("statements")]
         public List<string> Statements { get; set; } = new List<string>();
 
-        public IMessagingScope BeginInteraction()
-        {
-            return new MessagingScope(this);
-        }
-
         /// <summary>
         /// Writes an empty line.
         /// </summary>
-        public void WriteEmptyLine()
+        public virtual void WriteEmptyLine()
         {
             Messages.Add(new InformationMessage { Text = string.Empty });
         }
@@ -30,7 +25,7 @@ namespace BeavisCli
         /// <summary>
         /// Writes an information message.
         /// </summary>
-        public void WriteInformation(string text)
+        public virtual void WriteInformation(string text)
         {
             if (text == null)
             {
@@ -43,7 +38,7 @@ namespace BeavisCli
         /// <summary>
         /// Writes a succeed/ very positive message.
         /// </summary>
-        public void WriteSucceed(string text)
+        public virtual void WriteSucceed(string text)
         {
             if (text == null)
             {
@@ -56,12 +51,14 @@ namespace BeavisCli
         /// <summary>
         /// Writes an error message.
         /// </summary>
-        public void WriteError(string text)
+        public virtual void WriteError(Exception e, bool returnStackTrace = false)
         {
-            if (text == null)
+            if (e == null)
             {
-                throw new ArgumentNullException(nameof(text));
+                throw new ArgumentNullException(nameof(e));
             }
+
+            string text = returnStackTrace ? e.ToString() : e.Message;
 
             Messages.Add(new ErrorMessage { Text = text });
         }
@@ -69,14 +66,14 @@ namespace BeavisCli
         /// <summary>
         /// Writes an error message.
         /// </summary>
-        public void WriteError(Exception e)
+        public virtual void WriteError(string text)
         {
-            if (e == null)
+            if (text == null)
             {
-                throw new ArgumentNullException(nameof(e));
+                throw new ArgumentNullException(nameof(text));
             }
 
-            Messages.Add(new ErrorMessage { Text = e.Message });
+            Messages.Add(new ErrorMessage { Text = text });
         }
 
         /// <summary>
@@ -96,7 +93,7 @@ namespace BeavisCli
         /// <summary>
         /// Adds a JavaScript statement.
         /// </summary>
-        public void AddStatement(IJavaScriptStatement statement)
+        public virtual void AddStatement(IJavaScriptStatement statement)
         {
             if (statement == null)
             {
@@ -109,7 +106,7 @@ namespace BeavisCli
         /// <summary>
         /// Creates a TextWriter for information messages.
         /// </summary>
-        public TextWriter CreateTextWriterForInformationMessages()
+        public virtual TextWriter CreateTextWriterForInformationMessages()
         {
             return new MessageContainerTextWriter(WriteInformation);
         }
@@ -117,7 +114,7 @@ namespace BeavisCli
         /// <summary>
         /// Creates a TextWriter for error messages.
         /// </summary>
-        public TextWriter CreateTextWriterForErrorMessages()
+        public virtual TextWriter CreateTextWriterForErrorMessages()
         {
             return new MessageContainerTextWriter(WriteError);
         }

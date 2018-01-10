@@ -3,12 +3,12 @@ using System.Linq;
 
 namespace BeavisCli.Internal
 {
-    internal static class CliRequestExtensions
+    internal static class ApplicationExecutionRequestExtensions
     {
         /// <summary>
         /// Gets the application name from the request.
         /// </summary>
-        internal static string GetApplicationName(this TerminalRequest request)
+        public static string GetApplicationName(this ApplicationExecutionRequest request)
         {
             var value = request.Input.Trim();
             var tokens = value.Split(' ');
@@ -22,7 +22,7 @@ namespace BeavisCli.Internal
         /// <summary>
         /// Gets application arguments from the request.
         /// </summary>
-        internal static string[] GetArgs(this TerminalRequest request)
+        public static string[] GetArgs(this ApplicationExecutionRequest request)
         {
             var args = new List<string>();
             var input = request.Input.Trim();

@@ -14,7 +14,7 @@
 //            Description = "Help"
 //        };
 
-//        protected override async Task OnRunAsync(CliContext context)
+//        protected override async Task OnRunAsync(ApplicationExecutionContext context)
 //        {
 //            var app = CreateApplication(Definition, context);
 

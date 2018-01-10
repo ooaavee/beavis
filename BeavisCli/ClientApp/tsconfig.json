@@ -5,14 +5,14 @@
     "removeComments": true,
     "sourceMap": false,
     "target": "es5",
-    "outFile": "../Resources/terminal.js"
+    "outFile": "../Resources/beavis-cli.js"
   },
     "exclude": [
         "node_modules",
         "wwwroot"
     ],
     "files": [
-        "terminal.ts"
+        "beavis-cli.ts"
     ],
   "compileOnSave": true
 }

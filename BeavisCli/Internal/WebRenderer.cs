@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BeavisCli.Internal
 {
-    internal class WebTerminalRenderer
+    internal class WebRenderer
     {
         public string GetTerminalHtml()
         {

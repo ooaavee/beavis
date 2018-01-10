@@ -2,7 +2,7 @@
 
 namespace BeavisCli
 {
-    public class TerminalRequest
+    public class ApplicationExecutionRequest
     {
         /// <summary>
         /// An input string from the web client.

@@ -8,20 +8,20 @@ namespace BeavisCli {
         terminal: Terminal;
     }
 
-    interface ICliRequest {
+    interface IApplicationExecutionRequest {
         input: string;
     }
      
-    interface ICliResponse {
+    interface IApplicationExecutionResponse {
         messages: IResponseMessage[];
         statements: string[];
     }
-
+    
     interface IResponseMessage {
         text: string;
         type: string;
     }
-
+    
 
     class Terminal {
         constructor(public handle: any) {
@@ -56,8 +56,8 @@ namespace BeavisCli {
         private handleTerminalInput(evt: ITerminalInputEvent) {
             let self = this;
             if (evt.value.trim().length > 0) {
-                self.$http.post<ICliResponse>("/jemma/command", JSON.stringify({ input: evt.value }), { headers: { 'Content-Type': "application/json" } })
-                    .success((data: ICliResponse) => {
+                self.$http.post<IApplicationExecutionResponse>("/jemma/command", JSON.stringify({ input: evt.value }), { headers: { 'Content-Type': "application/json" } })
+                    .success((data: IApplicationExecutionResponse) => {
 
                         // 1. display terminal messages
                         self.$rootScope.$emit("terminal.main.messages", data.messages);

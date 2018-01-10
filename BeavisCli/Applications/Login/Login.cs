@@ -13,7 +13,7 @@
 //            Description = "Authenticates and logs in to the server."
 //        };
 
-//        protected override async Task OnRunAsync(CliContext context)
+//        protected override async Task OnRunAsync(ApplicationExecutionContext context)
 //        {
 //            var app = CreateApplication(Definition, context);
 

@@ -14,14 +14,14 @@ namespace BeavisCli.Internal
     internal class BeavisMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly RequestHandler _requestHandler;
-        private readonly WebTerminalRenderer _renderer;
+        private readonly ApplicationExecutor _applicationExecutor;
+        private readonly WebRenderer _renderer;
         private readonly Dictionary<string, Func<HttpContext, Task>> _funcs = new Dictionary<string, Func<HttpContext, Task>>();
 
-        public BeavisMiddleware(RequestDelegate next, RequestHandler requestHandler, WebTerminalRenderer renderer)
+        public BeavisMiddleware(RequestDelegate next, ApplicationExecutor applicationExecutor, WebRenderer renderer)
         {
             _next = next;
-            _requestHandler = requestHandler;
+            _applicationExecutor = applicationExecutor;
             _renderer = renderer;
 
             _funcs["/beavis"] = HandleGetHtmlAsync;

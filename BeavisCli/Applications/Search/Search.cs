@@ -16,7 +16,7 @@
 //            AllowAnonymous = true
 //        };
 
-//        protected override async Task ExecuteAsync(CliContext context)
+//        protected override async Task ExecuteInternalAsync(ApplicationExecutionContext context)
 //        {
 //            var app = CreateApplication(Definition, context);
 
@@ -173,7 +173,7 @@
 //            }
 //        }
 
-//        private static void WriteDateTimeOptionError(string option, string optionValue, CliContext context)
+//        private static void WriteDateTimeOptionError(string option, string optionValue, ApplicationExecutionContext context)
 //        {
 //            using (context.Response.BeginInteraction())
 //            {
@@ -198,7 +198,7 @@
 //            }
 //        }
 
-//        private static void WriteLevelOptionError(string option, string optionValue, CliContext context)
+//        private static void WriteLevelOptionError(string option, string optionValue, ApplicationExecutionContext context)
 //        {
 //            using (context.Response.BeginInteraction())
 //            {

@@ -10,18 +10,18 @@ namespace BeavisCli
             throw new NotImplementedException();
         }
 
-        public override async Task ExecuteAsync(ICommandLineApplication app, CliContext context)
+        public override async Task ExecuteAsync(ApplicationExecutionContext context)
         {
-            ICommandOption opt1 = app.Option("-opt1", "Description", CommandOptionType.SingleValue);
+            ICommandOption opt1 = context.Host.Option("-opt1", "Description", CommandOptionType.SingleValue);
           
             await base.OnExecuteAsync(() =>
             {
                 string sss = null;
 
-                return ExitWithHelp(app);
+                return ExitWithHelp(context);
                 //return Exit();
 
-            }, app, context);
+            }, context);
 
         }
     }

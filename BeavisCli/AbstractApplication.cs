@@ -2,39 +2,33 @@
 using System.Threading.Tasks;
 using BeavisCli.Internal;
 using BeavisCli.Microsoft.Extensions.CommandLineUtils;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BeavisCli
 {
     public abstract class AbstractApplication
     {
-        private ApplicationInfo _info;
+        private const int ExitStatusCode = 2;
 
         public abstract ApplicationInfo GetInfo();
 
-        public abstract Task ExecuteAsync(ICommandLineApplication app, CliContext context);
-
-        protected Task<int> ExitWithHelp(ICommandLineApplication cli)
+        public virtual Task<AuthorizeResult> OnAuthorize(ApplicationExecutionContext context)
         {
-            var target = FindTarget(cli);
-            target.ShowHelp(Info.Name);
-            return Task.FromResult(2);
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            return Task.FromResult((AuthorizeResult) new AuthorizedByDefaultAuthorizeResult());
         }
 
-        protected Task<int> Exit()
-        {
-            return Task.FromResult(2);
-        }
+        public abstract Task ExecuteAsync(ApplicationExecutionContext context);
 
-        protected async Task OnExecuteAsync(Func<Task<int>> invoke, ICommandLineApplication app, CliContext context)
+        protected async Task OnExecuteAsync(Func<Task<int>> invoke, ApplicationExecutionContext context)
         {
             if (invoke == null)
             {
                 throw new ArgumentNullException(nameof(invoke));
-            }
-
-            if (app == null)
-            {
-                throw new ArgumentNullException(nameof(app));
             }
 
             if (context == null)
@@ -43,42 +37,38 @@ namespace BeavisCli
             }
 
             string[] args = context.Request.GetArgs();
-            CommandLineApplication cli = FindTarget(app);
+            CommandLineApplication cli = FindCli(context.Host);
             await cli.OnExecuteAsync(invoke);
             cli.Execute(args);
         }
-
-        internal ApplicationInfo Info
+      
+        protected Task<int> Exit(ApplicationExecutionContext context)
         {
-            get { return _info ?? (_info = GetInfo()); }
+            return Task.FromResult(ExitStatusCode);
         }
 
-        internal async Task ExecuteAsync(CliContext context)
+        protected Task<int> ExitWithHelp(ApplicationExecutionContext context)
         {
-            var target = new CommandLineApplication
-            {
-                Name = Info.Name,
-                FullName = Info.Name,
-                Description = Info.Description,
-                Out = context.Response.CreateTextWriterForInformationMessages(),
-                Error = context.Response.CreateTextWriterForErrorMessages()
-            };
-
-            target.HelpOption("-?|-h|--help");
-
-            ICommandLineApplication app = new DefaultCommandLineApplication(target);
-
-            await ExecuteAsync(app, context);
+            CommandLineApplication cli = FindCli(context.Host);
+            cli.ShowHelp(context.Info.Name);
+            return Task.FromResult(ExitStatusCode);
         }
 
-        private CommandLineApplication FindTarget(ICommandLineApplication app)
+        protected Task<int> Unauthorized(ApplicationExecutionContext context)
         {
-            var impl = app as DefaultCommandLineApplication;
-            if (impl == null)
+            UnauthorizedApplicationExecutionAttemptHandler unauthorized = context.HttpContext.RequestServices.GetRequiredService<UnauthorizedApplicationExecutionAttemptHandler>();
+            unauthorized.HandleUnauthorizedApplicationExecution(context);
+            return Task.FromResult(ExitStatusCode);
+        }
+
+        private CommandLineApplication FindCli(ICommandLineApplication host)
+        {
+            if (!(host is DefaultCommandLineApplication obj))
             {
                 throw new InvalidOperationException($"Cannot find the {nameof(DefaultCommandLineApplication)} object, operation terminated...");
             }
-            return impl.Target;
+            return obj.Cli;
         }
+
     }
 }

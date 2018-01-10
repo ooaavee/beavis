@@ -12,7 +12,7 @@
 //            Description = "Clears the terminal."
 //        };
 
-//        protected override async Task OnRunAsync(CliContext context)
+//        protected override async Task OnRunAsync(ApplicationExecutionContext context)
 //        {
 //            var app = CreateApplication(Definition, context);
 //            app.OnExecute(() => Exit());

@@ -82,4 +82,3 @@ var BeavisCli;
     TerminalController.$inject = ["terminalService"];
     app.controller("terminalController", TerminalController);
 })(BeavisCli || (BeavisCli = {}));
-//# sourceMappingURL=terminal.js.map
