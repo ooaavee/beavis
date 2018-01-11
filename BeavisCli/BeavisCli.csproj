@@ -6,6 +6,27 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\css\site.css" />
+    <None Remove="Resources\html\index.html" />
+    <None Remove="Resources\js\angular.min.js" />
+    <None Remove="Resources\js\beavis-cli.js" />
+    <None Remove="Resources\js\jquery.min.js" />
+    <None Remove="Resources\js\jquery.mousewheel-min.js" />
+    <None Remove="Resources\js\jquery.terminal.min.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\css\jquery.terminal.min.css" />
+    <EmbeddedResource Include="Resources\css\site.css" />
+    <EmbeddedResource Include="Resources\html\index.html" />
+    <EmbeddedResource Include="Resources\js\angular.min.js" />
+    <EmbeddedResource Include="Resources\js\beavis-cli.js" />
+    <EmbeddedResource Include="Resources\js\jquery.min.js" />
+    <EmbeddedResource Include="Resources\js\jquery.mousewheel-min.js" />
+    <EmbeddedResource Include="Resources\js\jquery.terminal.min.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
 

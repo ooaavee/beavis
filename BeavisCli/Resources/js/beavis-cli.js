@@ -11,20 +11,20 @@ var BeavisCli;
         };
         return Terminal;
     }());
-    var app = angular.module("BeavisCli", []);
+    var app = angular.module('BeavisCli', []);
     var TerminalService = (function () {
         function TerminalService($rootScope, $http) {
             this.$rootScope = $rootScope;
             this.$http = $http;
             var self = this;
-            self.$rootScope.$on("terminal.main", function (e, input, terminal) {
+            self.$rootScope.$on('terminal.main', function (e, input, terminal) {
                 self.handleTerminalInput({ value: input, terminal: new Terminal(terminal) });
             });
         }
         TerminalService.prototype.handleTerminalInput = function (evt) {
             var self = this;
             if (evt.value.trim().length > 0) {
-                self.$http.post("/jemma/command", JSON.stringify({ input: evt.value }), { headers: { 'Content-Type': "application/json" } })
+                self.$http.post("/beavis/request", JSON.stringify({ input: evt.value }), { headers: { 'Content-Type': "application/json" } })
                     .success(function (data) {
                     self.$rootScope.$emit("terminal.main.messages", data.messages);
                     for (var i = 0; i < data.statements.length; i++) {
@@ -46,7 +46,7 @@ var BeavisCli;
             return {
                 restrict: "A",
                 link: function (scope, element, attrs) {
-                    var namespace = "terminal.main";
+                    var namespace = "terminal." + (attrs.angularTerminal || "default");
                     var terminal = element.terminal(function (input, terminal) {
                         $rootScope.$emit(namespace, input, terminal);
                     }, { greetings: attrs.greetings || "" });

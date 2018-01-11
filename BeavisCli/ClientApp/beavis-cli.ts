@@ -3,25 +3,25 @@
 
 namespace BeavisCli {
 
-    interface ITerminalInputEvent {
+    interface IInputEvent {
         value: string;
         terminal: Terminal;
     }
 
-    interface IApplicationExecutionRequest {
+    interface IRequest {
         input: string;
     }
-     
-    interface IApplicationExecutionResponse {
-        messages: IResponseMessage[];
+
+    interface IResponse {
+        messages: IMessage[];
         statements: string[];
     }
-    
-    interface IResponseMessage {
+
+    interface IMessage {
         text: string;
         type: string;
     }
-    
+
 
     class Terminal {
         constructor(public handle: any) {
@@ -30,7 +30,7 @@ namespace BeavisCli {
         /**
          * Clears terminal history.
          */
-        clearHistory() {
+        public clearHistory() {
             let self = this;
             let history = self.handle.history();
             history.clear();
@@ -38,14 +38,15 @@ namespace BeavisCli {
     }
 
 
-    const app: ng.IModule = angular.module("BeavisCli", []);
+    const app: ng.IModule = angular.module('BeavisCli', []);
+
 
     class TerminalService {
         static $inject = ["$rootScope", "$http"];
 
         constructor(private $rootScope: ng.IRootScopeService, private $http: ng.IHttpService) {
             let self = this;
-            self.$rootScope.$on("terminal.main", function (e, input, terminal) {
+            self.$rootScope.$on('terminal.main', function (e, input, terminal) {
                 self.handleTerminalInput({ value: input, terminal: new Terminal(terminal) });
             });
         }
@@ -53,11 +54,11 @@ namespace BeavisCli {
         /**
          * Handles terminal input events.
          */
-        private handleTerminalInput(evt: ITerminalInputEvent) {
+        private handleTerminalInput(evt: IInputEvent) {
             let self = this;
             if (evt.value.trim().length > 0) {
-                self.$http.post<IApplicationExecutionResponse>("/jemma/command", JSON.stringify({ input: evt.value }), { headers: { 'Content-Type': "application/json" } })
-                    .success((data: IApplicationExecutionResponse) => {
+                self.$http.post<IResponse>("/beavis/request", JSON.stringify({ input: evt.value }), { headers: { 'Content-Type': "application/json" } })
+                    .success((data: IResponse) => {
 
                         // 1. display terminal messages
                         self.$rootScope.$emit("terminal.main.messages", data.messages);
@@ -79,22 +80,23 @@ namespace BeavisCli {
     }
     app.service("terminalService", TerminalService);
 
+
     app.directive("angularTerminal", ["$rootScope", function ($rootScope) {
         return {
             restrict: "A",
             link: function (scope, element, attrs) {
-                let namespace = "terminal.main";
+                let namespace = "terminal." + (attrs.angularTerminal || "default");
 
                 let terminal = element.terminal(function (input, terminal) {
                     $rootScope.$emit(namespace, input, terminal);
                 }, { greetings: attrs.greetings || "" });
 
-                $rootScope.$on(namespace + ".messages", function (e, messages: IResponseMessage[]) {
+                $rootScope.$on(namespace + ".messages", function (e, messages: IMessage[]) {
                     let messageCount: number = messages.length;
 
                     for (let i = 0; i < messageCount; i++) {
 
-                        let message: IResponseMessage = messages[i];
+                        let message: IMessage = messages[i];
                         let text: string = message.text;
 
                         if (text === "") {
@@ -120,9 +122,10 @@ namespace BeavisCli {
         };
     }]);
 
+
     class TerminalController {
         static $inject = ["terminalService"];
-        constructor(readonly terminalService: TerminalService) {
+        constructor(private terminalService: TerminalService) {
         }
     }
     app.controller("terminalController", TerminalController);
