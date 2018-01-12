@@ -1,86 +1,79 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 
 namespace BeavisCli.Internal
 {
     internal class WebRenderer
     {
-        private static string _htmlFile = "BeavisCli.Resources.html.index.html";
-
-        private static string[] _jsFiles = {
-            "BeavisCli.Resources.js.jquery.min.js",
-            "BeavisCli.Resources.js.jquery.terminal.min.js",
-            "BeavisCli.Resources.js.jquery.mousewheel-min.js",
-            "BeavisCli.Resources.js.angular.min.js",
-            "BeavisCli.Resources.js.beavis-cli.js"
-        };
-
-        private static string[] _cssFiles = {
-            "BeavisCli.Resources.css.jquery.terminal.min.css",
-            "BeavisCli.Resources.css.site.css"
-        };
-
         public async Task RenderHtmlAsync(HttpResponse response)
         {
-            string s = ReadFiles(_htmlFile);
-            byte[] content = Encoding.UTF8.GetBytes(s);
+            var text = ReadFilesAsText("BeavisCli.Resources.html.index.html");
 
-            response.ContentType = "text/html";
-            response.StatusCode = (int)HttpStatusCode.OK;
+            await WriteAsync(text, response, "text/html");
 
-            await response.Body.WriteAsync(content, 0, content.Length);
         }
 
         public async Task RenderCssAsync(HttpResponse response)
         {
-            string s = ReadFiles(_cssFiles);
-            byte[] content = Encoding.UTF8.GetBytes(s);
+            var text = ReadFilesAsText("BeavisCli.Resources.css.jquery.terminal.min.css",
+                                       "BeavisCli.Resources.css.site.css");
 
-            response.ContentType = "text/css";
-            response.StatusCode = (int)HttpStatusCode.OK;
-
-            await response.Body.WriteAsync(content, 0, content.Length);
+            await WriteAsync(text, response, "text/css");
         }
 
         public async Task RenderJsAsync(HttpResponse response)
         {
-            string s = ReadFiles(_jsFiles);
-            byte[] content = Encoding.UTF8.GetBytes(s);
+            var text = ReadFilesAsText("BeavisCli.Resources.js.jquery.min.js",
+                                       "BeavisCli.Resources.js.jquery.terminal.min.js",
+                                       "BeavisCli.Resources.js.jquery.mousewheel-min.js",
+                                       "BeavisCli.Resources.js.angular.min.js",
+                                       "BeavisCli.Resources.js.beavis-cli.js");
 
-            response.ContentType = "application/javascript";
+            await WriteAsync(text, response, "application/javascript");
+        }
+
+        public async Task RenderResponseAsync(ApplicationExecutionResponse data, HttpResponse response)
+        {
+            var text = JsonConvert.SerializeObject(data);
+
+            await WriteAsync(text, response, "application/json");
+        }
+
+        private static async Task WriteAsync(string text, HttpResponse response, string contentType)
+        {
+            var content = Encoding.UTF8.GetBytes(text);
+            response.ContentType = contentType;
             response.StatusCode = (int)HttpStatusCode.OK;
-
             await response.Body.WriteAsync(content, 0, content.Length);
         }
 
-        private static string ReadFiles(params string[] files)
+        private static string ReadFilesAsText(params string[] files)
         {
-            StringBuilder buf = new StringBuilder();
-            foreach (string file in files)
+            var assembly = Assembly.GetAssembly(typeof(WebRenderer));
+
+            var buf = new StringBuilder();
+
+            foreach (var file in files)
             {
-                string s = ReadEmbededResource(file);
-                buf.AppendLine(s);
+                using (var resourceStream = assembly.GetManifestResourceStream(file))
+                {
+                    using (var streamReader = new StreamReader(resourceStream))
+                    {
+                        var text = streamReader.ReadToEnd();
+                        buf.AppendLine(text);
+                    }
+                }
             }
+
             return buf.ToString();
         }
 
-        public static string ReadEmbededResource(string name)
-        {
-            var assembly = Assembly.GetAssembly(typeof(WebRenderer));
-            using (var resourceStream = assembly.GetManifestResourceStream(name))
-            {
-                using (var streamReader = new StreamReader(resourceStream))
-                {
-                    return streamReader.ReadToEnd();
-                }
-            }
-        }
+
 
     }
 }
