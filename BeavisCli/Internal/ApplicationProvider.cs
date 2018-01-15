@@ -1,13 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace BeavisCli.Internal
 {
     internal class ApplicationProvider
     {
+        private readonly BeavisCliOptions _options;
+
+        public ApplicationProvider(IOptions<BeavisCliOptions> options)
+        {
+            _options = options.Value;
+        }
+
         public AbstractApplication FindApplicaton(string name, HttpContext httpContext)
         {
             int matchCount = 0;
@@ -32,7 +39,14 @@ namespace BeavisCli.Internal
 
             if (matchCount == 0)
             {
-                throw new ApplicationProviderException($"{name} is not a valid application.{Environment.NewLine}Usage 'help' to get list of applications.");
+                if (_options.UseDefaultApplications)
+                {
+                    throw new ApplicationProviderException($"{name} is not a valid application.{Environment.NewLine}Usage 'help' to get list of applications.");
+                }
+                else
+                {
+                    throw new ApplicationProviderException($"{name} is not a valid application.");
+                }
             }
 
             return result;

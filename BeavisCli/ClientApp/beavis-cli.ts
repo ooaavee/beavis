@@ -3,11 +3,6 @@
 
 namespace BeavisCli {
 
-    interface IInputEvent {
-        value: string;
-        terminal: Terminal;
-    }
-
     interface IRequest {
         input: string;
     }
@@ -22,7 +17,6 @@ namespace BeavisCli {
         type: string;
     }
 
-
     class Terminal {
         constructor(public handle: any) {
         }
@@ -31,9 +25,7 @@ namespace BeavisCli {
          * Clears terminal history.
          */
         public clearHistory() {
-            let self = this;
-            let history = self.handle.history();
-            history.clear();
+            this.handle.history().clear();
         }
     }
 
@@ -47,36 +39,55 @@ namespace BeavisCli {
         constructor(private $rootScope: ng.IRootScopeService, private $http: ng.IHttpService) {
             let self = this;
             self.$rootScope.$on('terminal.main', function (e, input, terminal) {
-                self.handleTerminalInput({ value: input, terminal: new Terminal(terminal) });
+                self.handleInput(input, new Terminal(terminal));
             });
+        }
+
+        welcome() {
+            let self = this;
+            self.$http.post<IResponse>("/beavis/api/welcome", null, { headers: { 'Content-Type': "application/json" } })
+                .success((data: IResponse) => {
+                    self.handleMessages(data.messages);
+                    self.handleStatements(data.statements);
+                }).error((data, status) => {
+                    debugger;
+                });
         }
 
         /**
          * Handles terminal input events.
          */
-        private handleTerminalInput(evt: IInputEvent) {
+        private handleInput(input: string, terminal: Terminal) {
             let self = this;
-            if (evt.value.trim().length > 0) {
-                self.$http.post<IResponse>("/beavis/request", JSON.stringify({ input: evt.value }), { headers: { 'Content-Type': "application/json" } })
-                    .success((data: IResponse) => {
 
-                        // 1. display terminal messages
-                        self.$rootScope.$emit("terminal.main.messages", data.messages);
+            if (input.trim().length === 0) {
+                return;
+            }
 
-                        // 2. evaluate statements received from the server
-                        for (let i = 0; i < data.statements.length; i++) {
-                            self.evalTerminalStatement(data.statements[i], evt.terminal.handle);
-                        }
+            self.$http.post<IResponse>("/beavis/api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
+                .success((data: IResponse) => {
+                    self.handleMessages(data.messages);
+                    self.handleStatements(data.statements);
+                }).error((data, status) => {
+                    debugger;
+                });
+        }
 
-                    }).error((data, status) => {
-                        debugger;
-                    });
+        private handleMessages(messages: IMessage[]) {
+            this.$rootScope.$emit("terminal.main.messages", messages);
+        }
+
+        private handleStatements(statements: string[]) {
+            for (let i = 0; i < statements.length; i++) {
+                eval(statements[i]);
+//                self.evalTerminalStatement(data.statements[i], evt.terminal.handle);
             }
         }
 
-        private evalTerminalStatement(statement: string, terminal: any) {
-            eval(statement);
-        }
+
+        //private evalTerminalStatement(statement: string, terminal: any) {
+        //    eval(statement);
+        //}
     }
     app.service("terminalService", TerminalService);
 
@@ -116,6 +127,11 @@ namespace BeavisCli {
                             default:
                                 debugger;
                         }
+
+
+                        //$('html,body').animate({ scrollTop: document.body.scrollHeight }, "fast");
+                        //window.scrollBy(0, document.body.scrollHeight || document.documentElement.scrollHeight);
+
                     }
                 });
             }
@@ -125,8 +141,11 @@ namespace BeavisCli {
 
     class TerminalController {
         static $inject = ["terminalService"];
+
         constructor(private terminalService: TerminalService) {
+            terminalService.welcome();
         }
+
     }
     app.controller("terminalController", TerminalController);
 

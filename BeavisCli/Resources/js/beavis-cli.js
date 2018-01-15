@@ -5,9 +5,7 @@ var BeavisCli;
             this.handle = handle;
         }
         Terminal.prototype.clearHistory = function () {
-            var self = this;
-            var history = self.handle.history();
-            history.clear();
+            this.handle.history().clear();
         };
         return Terminal;
     }());
@@ -18,25 +16,39 @@ var BeavisCli;
             this.$http = $http;
             var self = this;
             self.$rootScope.$on('terminal.main', function (e, input, terminal) {
-                self.handleTerminalInput({ value: input, terminal: new Terminal(terminal) });
+                self.handleInput(input, new Terminal(terminal));
             });
         }
-        TerminalService.prototype.handleTerminalInput = function (evt) {
+        TerminalService.prototype.welcome = function () {
             var self = this;
-            if (evt.value.trim().length > 0) {
-                self.$http.post("/beavis/request", JSON.stringify({ input: evt.value }), { headers: { 'Content-Type': "application/json" } })
-                    .success(function (data) {
-                    self.$rootScope.$emit("terminal.main.messages", data.messages);
-                    for (var i = 0; i < data.statements.length; i++) {
-                        self.evalTerminalStatement(data.statements[i], evt.terminal.handle);
-                    }
-                }).error(function (data, status) {
-                    debugger;
-                });
-            }
+            self.$http.post("/beavis/api/welcome", null, { headers: { 'Content-Type': "application/json" } })
+                .success(function (data) {
+                self.handleMessages(data.messages);
+                self.handleStatements(data.statements);
+            }).error(function (data, status) {
+                debugger;
+            });
         };
-        TerminalService.prototype.evalTerminalStatement = function (statement, terminal) {
-            eval(statement);
+        TerminalService.prototype.handleInput = function (input, terminal) {
+            var self = this;
+            if (input.trim().length === 0) {
+                return;
+            }
+            self.$http.post("/beavis/api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
+                .success(function (data) {
+                self.handleMessages(data.messages);
+                self.handleStatements(data.statements);
+            }).error(function (data, status) {
+                debugger;
+            });
+        };
+        TerminalService.prototype.handleMessages = function (messages) {
+            this.$rootScope.$emit("terminal.main.messages", messages);
+        };
+        TerminalService.prototype.handleStatements = function (statements) {
+            for (var i = 0; i < statements.length; i++) {
+                eval(statements[i]);
+            }
         };
         return TerminalService;
     }());
@@ -76,6 +88,7 @@ var BeavisCli;
     var TerminalController = (function () {
         function TerminalController(terminalService) {
             this.terminalService = terminalService;
+            terminalService.welcome();
         }
         return TerminalController;
     }());

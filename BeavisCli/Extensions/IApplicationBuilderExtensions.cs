@@ -13,14 +13,14 @@ namespace Microsoft.AspNetCore.Builder
 {
     public static class IApplicationBuilderExtensions
     {
-        public static IApplicationBuilder UseBeavis(this IApplicationBuilder app)
+        public static IApplicationBuilder UseBeavisCli(this IApplicationBuilder app)
         {
             if (app == null)
             {
                 throw new ArgumentNullException(nameof(app));
             }
 
-            app.UseMiddleware<BeavisMiddleware>();
+            app.UseMiddleware<BeavisCliMiddleware>();
 
             return app;
         }

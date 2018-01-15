@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
@@ -39,6 +40,11 @@ namespace BeavisCli.Internal
 
         public async Task RenderResponseAsync(ApplicationExecutionResponse data, HttpResponse response)
         {
+            if (data.Messages.Any())
+            {
+                data.WriteEmptyLine();
+            }
+
             var text = JsonConvert.SerializeObject(data);
 
             await WriteAsync(text, response, "application/json");
@@ -72,8 +78,6 @@ namespace BeavisCli.Internal
 
             return buf.ToString();
         }
-
-
 
     }
 }

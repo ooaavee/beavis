@@ -2,18 +2,19 @@
 using System.Threading.Tasks;
 using BeavisCli.Microsoft.Extensions.CommandLineUtils;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
 
 namespace BeavisCli.Internal
 {
     internal class ApplicationExecutor
     {
         private readonly ApplicationProvider _provider;
-        private readonly UnauthorizedApplicationExecutionAttemptHandler _unauthorized;
+        private readonly BeavisCliOptions _options;
 
-        public ApplicationExecutor(ApplicationProvider provider, UnauthorizedApplicationExecutionAttemptHandler unauthorized)
+        public ApplicationExecutor(ApplicationProvider provider, IOptions<BeavisCliOptions> options)
         {
             _provider = provider;
-            _unauthorized = unauthorized;
+            _options = options.Value;
         }
 
         public async Task HandleAsync(ApplicationExecutionRequest request, ApplicationExecutionResponse response, HttpContext httpContext)
@@ -49,7 +50,10 @@ namespace BeavisCli.Internal
                 }
                 else
                 {
-                    _unauthorized.HandleUnauthorizedApplicationExecution(context);
+                    if (_options.UnauthorizedApplicationExecutionAttemptHandler != null)
+                    {
+                        _options.UnauthorizedApplicationExecutionAttemptHandler.HandleUnauthorizedApplicationExecution(context);
+                    }
                 }
             }
             catch (ApplicationProviderException ex)

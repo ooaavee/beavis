@@ -1,8 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using BeavisCli.Internal;
+﻿using BeavisCli.Internal;
 using BeavisCli.Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using System;
+using System.Threading.Tasks;
 
 namespace BeavisCli
 {
@@ -56,8 +57,11 @@ namespace BeavisCli
 
         protected Task<int> Unauthorized(ApplicationExecutionContext context)
         {
-            UnauthorizedApplicationExecutionAttemptHandler unauthorized = context.HttpContext.RequestServices.GetRequiredService<UnauthorizedApplicationExecutionAttemptHandler>();
-            unauthorized.HandleUnauthorizedApplicationExecution(context);
+            IOptions<BeavisCliOptions> options = context.HttpContext.RequestServices.GetRequiredService<IOptions<BeavisCliOptions>>();
+            if (options.Value.UnauthorizedApplicationExecutionAttemptHandler != null)
+            {
+                options.Value.UnauthorizedApplicationExecutionAttemptHandler.HandleUnauthorizedApplicationExecution(context);
+            }
             return Task.FromResult(ExitStatusCode);
         }
 

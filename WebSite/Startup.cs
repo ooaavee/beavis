@@ -23,7 +23,7 @@ namespace WebSite
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddBeavis();
+            services.AddBeavisCli();
 
           
         }
@@ -41,7 +41,7 @@ namespace WebSite
                 app.UseExceptionHandler("/Error");
             }
 
-            app.UseBeavis();
+            app.UseBeavisCli();
 
             app.UseStaticFiles();
 

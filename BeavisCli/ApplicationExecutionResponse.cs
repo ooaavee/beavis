@@ -88,6 +88,8 @@ namespace BeavisCli
 
             //terminal.echo('[[;#00ff00;]' + text + ']' + "Tämä on normaalia tekstiä normaalillä värillä!!!");
             return "[[;#00ff00;]" + text + "]";
+            
+            // + '] ]';
         }
 
         /// <summary>
