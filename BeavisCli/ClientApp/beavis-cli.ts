@@ -17,38 +17,44 @@ namespace BeavisCli {
         type: string;
     }
 
-    class Terminal {
-        constructor(public handle: any) {
-        }
+    ////class Terminal {
+    ////    constructor(public handle: any) {
+    ////    }
 
-        /**
-         * Clears terminal history.
-         */
-        public clearHistory() {
-            this.handle.history().clear();
-        }
-    }
-
-
-    const app: ng.IModule = angular.module('BeavisCli', []);
+    ////    /**
+    ////     * Clears terminal history.
+    ////     */
+    ////    public clearHistory() {
+    ////        this.handle.history().clear();
+    ////    }
+    ////}
 
 
-    class TerminalService {
+    const app: ng.IModule = angular.module("BeavisCli", []);
+
+
+    class CliService {
         static $inject = ["$rootScope", "$http"];
 
         constructor(private $rootScope: ng.IRootScopeService, private $http: ng.IHttpService) {
-            let self = this;
-            self.$rootScope.$on('terminal.main', function (e, input, terminal) {
-                self.handleInput(input, new Terminal(terminal));
+            //let self = this;
+
+            this.$rootScope.$on("terminal.mounted", (e, terminal) => {
+                this.onMount(terminal);
             });
+
+            this.$rootScope.$on("terminal.input", (e, input, terminal) => {
+                this.handleInput(input, terminal);
+            });
+
         }
 
-        welcome() {
+        private onMount(terminal: any) {
             let self = this;
-            self.$http.post<IResponse>("/beavis/api/welcome", null, { headers: { 'Content-Type': "application/json" } })
+            self.$http.post<IResponse>("/beavis-cli/api/welcome", null, { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
                     self.handleMessages(data.messages);
-                    self.handleStatements(data.statements);
+                    self.handleStatements(data.statements, terminal);
                 }).error((data, status) => {
                     debugger;
                 });
@@ -57,30 +63,30 @@ namespace BeavisCli {
         /**
          * Handles terminal input events.
          */
-        private handleInput(input: string, terminal: Terminal) {
+        private handleInput(input: string, terminal: any) {
             let self = this;
 
             if (input.trim().length === 0) {
                 return;
             }
 
-            self.$http.post<IResponse>("/beavis/api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
+            self.$http.post<IResponse>("/beavis-cli/api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
                     self.handleMessages(data.messages);
-                    self.handleStatements(data.statements);
+                    self.handleStatements(data.statements, terminal);
                 }).error((data, status) => {
                     debugger;
                 });
         }
 
         private handleMessages(messages: IMessage[]) {
-            this.$rootScope.$emit("terminal.main.messages", messages);
+            this.$rootScope.$emit("terminal.output", messages);
         }
 
-        private handleStatements(statements: string[]) {
+        private handleStatements(statements: string[], terminal: any) {
             for (let i = 0; i < statements.length; i++) {
                 eval(statements[i]);
-//                self.evalTerminalStatement(data.statements[i], evt.terminal.handle);
+                //                self.evalTerminalStatement(data.statements[i], evt.terminal.handle);
             }
         }
 
@@ -89,64 +95,69 @@ namespace BeavisCli {
         //    eval(statement);
         //}
     }
-    app.service("terminalService", TerminalService);
+    app.service("backend", CliService);
 
 
     app.directive("angularTerminal", ["$rootScope", function ($rootScope) {
         return {
             restrict: "A",
-            link: function (scope, element, attrs) {
-                let namespace = "terminal." + (attrs.angularTerminal || "default");
+            link(scope, element, attrs) {
 
-                let terminal = element.terminal(function (input, terminal) {
-                    $rootScope.$emit(namespace, input, terminal);
+                //const namespace = `terminal.${attrs.angularTerminal || "default"}`;
+
+                /**
+                 * Receive terminal input events and notify the CliService about that
+                 */
+                const terminal = element.terminal((input, terminal) => {
+                    $rootScope.$emit("terminal.input", input, terminal);
                 }, { greetings: attrs.greetings || "" });
 
-                $rootScope.$on(namespace + ".messages", function (e, messages: IMessage[]) {
-                    let messageCount: number = messages.length;
+                /**
+                 * Notify CliService that we are ready to go!
+                 */
+                $rootScope.$emit("terminal.mounted", terminal);
 
-                    for (let i = 0; i < messageCount; i++) {
+                /**
+                 * Receive terminal output evens from the CliService
+                 */
+                $rootScope.$on("terminal.output", (e, messages: IMessage[]) => {
+                    for (let i = 0; i < messages.length; i++) {
 
-                        let message: IMessage = messages[i];
-                        let text: string = message.text;
-
+                        let text: string = messages[i].text;
                         if (text === "") {
                             text = "\n";
                         }
 
-                        switch (message.type) {
+                        switch (messages[i].type) {
                             case "information":
                                 terminal.echo(text);
-
-                                //terminal.echo('[[;#00ff00;]' + text + ']' + "Tämä on normaalia tekstiä normaalillä värillä!!!");
-
                                 break;
+
+                            case "success":
+                                terminal.echo(text, {
+                                    finalize(div) {
+                                        div.css("color", "#00ff00");
+                                    }
+                                });
+                                break;
+
                             case "error":
                                 terminal.error(text);
                                 break;
-                            default:
-                                debugger;
                         }
-
-
-                        //$('html,body').animate({ scrollTop: document.body.scrollHeight }, "fast");
-                        //window.scrollBy(0, document.body.scrollHeight || document.documentElement.scrollHeight);
 
                     }
                 });
+
             }
         };
     }]);
 
 
-    class TerminalController {
-        static $inject = ["terminalService"];
-
-        constructor(private terminalService: TerminalService) {
-            terminalService.welcome();
-        }
-
+    class CliController {
+        static $inject = ["backend"];
+        constructor(private backend: CliService) { }
     }
-    app.controller("terminalController", TerminalController);
+    app.controller("cli", CliController);
 
 }

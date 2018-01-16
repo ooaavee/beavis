@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:63488/beavis",
+      "applicationUrl": "http://localhost:63488/beavis-cli",
       "sslPort": 0
     }
   },

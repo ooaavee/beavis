@@ -25,25 +25,25 @@ namespace BeavisCli.Internal
 
         public async Task InvokeAsync(HttpContext httpContext)
         {
-            if (IsPath("/beavis", HttpMethods.Get, httpContext))
+            if (IsPath("/beavis-cli", HttpMethods.Get, httpContext))
             {
                 await _renderer.RenderHtmlAsync(httpContext.Response);
                 return;
             }
 
-            if (IsPath("/beavis/content/css", HttpMethods.Get, httpContext))
+            if (IsPath("/beavis-cli/content/css", HttpMethods.Get, httpContext))
             {
                 await _renderer.RenderCssAsync(httpContext.Response);
                 return;
             }
 
-            if (IsPath("/beavis/content/js", HttpMethods.Get, httpContext))
+            if (IsPath("/beavis-cli/content/js", HttpMethods.Get, httpContext))
             {
                 await _renderer.RenderJsAsync(httpContext.Response);
                 return;
             }
 
-            if (IsPath("/beavis/api/welcome", HttpMethods.Post, httpContext))
+            if (IsPath("/beavis-cli/api/welcome", HttpMethods.Post, httpContext))
             {
                 var response = new ApplicationExecutionResponse();
                 if (_options.WelcomeHandler != null)
@@ -54,7 +54,7 @@ namespace BeavisCli.Internal
                 return;
             }
 
-            if (IsPath("/beavis/api/request", HttpMethods.Post, httpContext))
+            if (IsPath("/beavis-cli/api/request", HttpMethods.Post, httpContext))
             {
                 var body = ReadBodyAsText(httpContext.Request);
                 var request = JsonConvert.DeserializeObject<ApplicationExecutionRequest>(body);

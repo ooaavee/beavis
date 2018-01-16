@@ -45,7 +45,7 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(text));
             }
 
-            Messages.Add(new InformationMessage { Text = Green(text) });
+            Messages.Add(new SuccessMessage { Text = text });
         }
 
         /// <summary>
@@ -76,21 +76,21 @@ namespace BeavisCli
             Messages.Add(new ErrorMessage { Text = text });
         }
 
-        /// <summary>
-        /// Returns green text.
-        /// </summary>
-        private static string Green(string text)
-        {
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
+        ///////// <summary>
+        ///////// Returns green text.
+        ///////// </summary>
+        //////private static string GreenXXXX(string text)
+        //////{
+        //////    if (text == null)
+        //////    {
+        //////        throw new ArgumentNullException(nameof(text));
+        //////    }
 
-            //terminal.echo('[[;#00ff00;]' + text + ']' + "Tämä on normaalia tekstiä normaalillä värillä!!!");
-            return "[[;#00ff00;]" + text + "]";
+        //////    //terminal.echo('[[;#00ff00;]' + text + ']' + "Tämä on normaalia tekstiä normaalillä värillä!!!");
+        //////    return "[[;#00ff00;]" + text + "]";
             
-            // + '] ]';
-        }
+        //////    // + '] ]';
+        //////}
 
         /// <summary>
         /// Adds a JavaScript statement.

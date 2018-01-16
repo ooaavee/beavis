@@ -1,97 +1,93 @@
 var BeavisCli;
 (function (BeavisCli) {
-    var Terminal = (function () {
-        function Terminal(handle) {
-            this.handle = handle;
-        }
-        Terminal.prototype.clearHistory = function () {
-            this.handle.history().clear();
-        };
-        return Terminal;
-    }());
-    var app = angular.module('BeavisCli', []);
-    var TerminalService = (function () {
-        function TerminalService($rootScope, $http) {
+    var app = angular.module("BeavisCli", []);
+    var CliService = (function () {
+        function CliService($rootScope, $http) {
+            var _this = this;
             this.$rootScope = $rootScope;
             this.$http = $http;
-            var self = this;
-            self.$rootScope.$on('terminal.main', function (e, input, terminal) {
-                self.handleInput(input, new Terminal(terminal));
+            this.$rootScope.$on("terminal.mounted", function (e, terminal) {
+                _this.onMount(terminal);
+            });
+            this.$rootScope.$on("terminal.input", function (e, input, terminal) {
+                _this.handleInput(input, terminal);
             });
         }
-        TerminalService.prototype.welcome = function () {
+        CliService.prototype.onMount = function (terminal) {
             var self = this;
-            self.$http.post("/beavis/api/welcome", null, { headers: { 'Content-Type': "application/json" } })
+            self.$http.post("/beavis-cli/api/welcome", null, { headers: { 'Content-Type': "application/json" } })
                 .success(function (data) {
                 self.handleMessages(data.messages);
-                self.handleStatements(data.statements);
+                self.handleStatements(data.statements, terminal);
             }).error(function (data, status) {
                 debugger;
             });
         };
-        TerminalService.prototype.handleInput = function (input, terminal) {
+        CliService.prototype.handleInput = function (input, terminal) {
             var self = this;
             if (input.trim().length === 0) {
                 return;
             }
-            self.$http.post("/beavis/api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
+            self.$http.post("/beavis-cli/api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
                 .success(function (data) {
                 self.handleMessages(data.messages);
-                self.handleStatements(data.statements);
+                self.handleStatements(data.statements, terminal);
             }).error(function (data, status) {
                 debugger;
             });
         };
-        TerminalService.prototype.handleMessages = function (messages) {
-            this.$rootScope.$emit("terminal.main.messages", messages);
+        CliService.prototype.handleMessages = function (messages) {
+            this.$rootScope.$emit("terminal.output", messages);
         };
-        TerminalService.prototype.handleStatements = function (statements) {
+        CliService.prototype.handleStatements = function (statements, terminal) {
             for (var i = 0; i < statements.length; i++) {
                 eval(statements[i]);
             }
         };
-        return TerminalService;
+        return CliService;
     }());
-    TerminalService.$inject = ["$rootScope", "$http"];
-    app.service("terminalService", TerminalService);
+    CliService.$inject = ["$rootScope", "$http"];
+    app.service("backend", CliService);
     app.directive("angularTerminal", ["$rootScope", function ($rootScope) {
             return {
                 restrict: "A",
                 link: function (scope, element, attrs) {
-                    var namespace = "terminal." + (attrs.angularTerminal || "default");
                     var terminal = element.terminal(function (input, terminal) {
-                        $rootScope.$emit(namespace, input, terminal);
+                        $rootScope.$emit("terminal.input", input, terminal);
                     }, { greetings: attrs.greetings || "" });
-                    $rootScope.$on(namespace + ".messages", function (e, messages) {
-                        var messageCount = messages.length;
-                        for (var i = 0; i < messageCount; i++) {
-                            var message = messages[i];
-                            var text = message.text;
+                    $rootScope.$emit("terminal.mounted", terminal);
+                    $rootScope.$on("terminal.output", function (e, messages) {
+                        for (var i = 0; i < messages.length; i++) {
+                            var text = messages[i].text;
                             if (text === "") {
                                 text = "\n";
                             }
-                            switch (message.type) {
+                            switch (messages[i].type) {
                                 case "information":
                                     terminal.echo(text);
+                                    break;
+                                case "success":
+                                    terminal.echo(text, {
+                                        finalize: function (div) {
+                                            div.css("color", "#00ff00");
+                                        }
+                                    });
                                     break;
                                 case "error":
                                     terminal.error(text);
                                     break;
-                                default:
-                                    debugger;
                             }
                         }
                     });
                 }
             };
         }]);
-    var TerminalController = (function () {
-        function TerminalController(terminalService) {
-            this.terminalService = terminalService;
-            terminalService.welcome();
+    var CliController = (function () {
+        function CliController(backend) {
+            this.backend = backend;
         }
-        return TerminalController;
+        return CliController;
     }());
-    TerminalController.$inject = ["terminalService"];
-    app.controller("terminalController", TerminalController);
+    CliController.$inject = ["backend"];
+    app.controller("cli", CliController);
 })(BeavisCli || (BeavisCli = {}));
