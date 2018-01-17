@@ -9,49 +9,49 @@ namespace BeavisCli
     public class WebCliResponse
     {
         [JsonProperty("messages")]
-        public List<ResponseMessage> Messages { get; set; } = new List<ResponseMessage>();
+        public List<ResponseMessage> Messages { get; } = new List<ResponseMessage>();
 
         [JsonProperty("statements")]
-        public List<string> Statements { get; set; } = new List<string>();
+        public List<string> Statements { get; } = new List<string>();
 
         /// <summary>
         /// Writes an empty line.
         /// </summary>
-        public virtual void WriteEmptyLine()
+        public void WriteEmptyLine()
         {
-            Messages.Add(new InformationMessage { Text = string.Empty });
+            Messages.Add(new InformationMessage(string.Empty));
         }
 
         /// <summary>
         /// Writes an information message.
         /// </summary>
-        public virtual void WriteInformation(string text)
+        public void WriteInformation(string text)
         {
             if (text == null)
             {
                 throw new ArgumentNullException(nameof(text));
             }
 
-            Messages.Add(new InformationMessage { Text = text });
+            Messages.Add(new InformationMessage(text));
         }
 
         /// <summary>
-        /// Writes a succeed/ very positive message.
+        /// Writes a success/ very positive message.
         /// </summary>
-        public virtual void WriteSucceed(string text)
+        public void WriteSuccess(string text)
         {
             if (text == null)
             {
                 throw new ArgumentNullException(nameof(text));
             }
 
-            Messages.Add(new SuccessMessage { Text = text });
+            Messages.Add(new SuccessMessage(text));
         }
 
         /// <summary>
         /// Writes an error message.
         /// </summary>
-        public virtual void WriteError(Exception e, bool returnStackTrace = false)
+        public void WriteError(Exception e, bool returnStackTrace = false)
         {
             if (e == null)
             {
@@ -60,50 +60,52 @@ namespace BeavisCli
 
             string text = returnStackTrace ? e.ToString() : e.Message;
 
-            Messages.Add(new ErrorMessage { Text = text });
+            Messages.Add(new ErrorMessage(text));
         }
 
         /// <summary>
         /// Writes an error message.
         /// </summary>
-        public virtual void WriteError(string text)
+        public void WriteError(string text)
         {
             if (text == null)
             {
                 throw new ArgumentNullException(nameof(text));
             }
 
-            Messages.Add(new ErrorMessage { Text = text });
+            Messages.Add(new ErrorMessage(text));
         }
 
         /// <summary>
         /// Adds a JavaScript statement.
         /// </summary>
-        public virtual void AddStatement(IJavaScriptStatement statement)
+        public void AddStatement(IJavaScriptStatement statement)
         {
             if (statement == null)
             {
                 throw new ArgumentNullException(nameof(statement));
             }
 
-            Statements.Add(statement.GetJavaScript());
+            string js = statement.GetJavaScript();
+
+            Statements.Add(js);
         }
 
-        /// <summary>
-        /// Creates a TextWriter for information messages.
-        /// </summary>
-        public virtual TextWriter CreateTextWriterForInformationMessages()
-        {
-            return new MessageContainerTextWriter(WriteInformation);
-        }
+        /////// <summary>
+        /////// Creates a TextWriter for information messages.
+        /////// </summary>
+        ////public TextWriter CreateTextWriterForInformationMessages()
+        ////{
+        ////    return new ResponseMessageTextWriter(WriteInformation);
+        ////}
 
-        /// <summary>
-        /// Creates a TextWriter for error messages.
-        /// </summary>
-        public virtual TextWriter CreateTextWriterForErrorMessages()
-        {
-            return new MessageContainerTextWriter(WriteError);
-        }
+        /////// <summary>
+        /////// Creates a TextWriter for error messages.
+        /////// </summary>
+        ////public TextWriter CreateTextWriterForErrorMessages()
+        ////{
+        ////    return new ResponseMessageTextWriter(WriteError);
+        ////}
 
     }
 }

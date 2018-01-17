@@ -12,8 +12,8 @@ namespace BeavisCli.Internal
             AssemblyCopyrightAttribute copyright = assembly.GetCustomAttribute<AssemblyCopyrightAttribute>();
             string version = $"{name.Version.Major}.{name.Version.Minor}.{name.Version.Build}";
 
-            response.WriteSucceed($"{product.Product} {version}");
-            response.WriteSucceed($"{copyright.Copyright}. MIT License.");
+            response.WriteSuccess($"{product.Product} {version}");
+            response.WriteSuccess($"{copyright.Copyright}. MIT License.");
         }
     }
 }

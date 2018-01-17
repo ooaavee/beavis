@@ -32,7 +32,7 @@
 //                {
 //                    if (true)
 //                    {
-//                        context.Response.WriteSucceed("Login succeed.");
+//                        context.Response.WriteSuccess("Login succeed.");
 //                    }
 //                    else
 //                    {

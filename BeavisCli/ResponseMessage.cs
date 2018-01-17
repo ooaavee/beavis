@@ -19,6 +19,11 @@ namespace BeavisCli
     /// </summary>
     public sealed class SuccessMessage : ResponseMessage
     {
+        public SuccessMessage(string text)
+        {
+            Text = text;
+        }
+
         public override string Type => "success";
     }
 
@@ -27,6 +32,11 @@ namespace BeavisCli
     /// </summary>
     public sealed class ErrorMessage : ResponseMessage
     {
+        public ErrorMessage(string text)
+        {
+            Text = text;
+        }
+
         public override string Type => "error";
     }
 
@@ -35,6 +45,10 @@ namespace BeavisCli
     /// </summary>
     public sealed class InformationMessage : ResponseMessage
     {
+        public InformationMessage(string text)
+        {
+            Text = text;
+        }
         public override string Type => "information";
     }
 

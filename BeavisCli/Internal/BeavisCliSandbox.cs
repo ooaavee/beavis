@@ -30,8 +30,8 @@ namespace BeavisCli.Internal
                     Name = application.Name,
                     FullName = application.Name,
                     Description = application.Description,
-                    Out = response.CreateTextWriterForInformationMessages(),
-                    Error = response.CreateTextWriterForErrorMessages()
+                    Out = new ResponseMessageTextWriter(response.WriteInformation),
+                    Error = new ResponseMessageTextWriter(response.WriteError)
                 };
 
                 cli.HelpOption("-?|-h|--help");

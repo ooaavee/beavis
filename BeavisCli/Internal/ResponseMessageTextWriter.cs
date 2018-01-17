@@ -4,11 +4,11 @@ using System.Text;
 
 namespace BeavisCli.Internal
 {
-    internal sealed class MessageContainerTextWriter : TextWriter
+    internal class ResponseMessageTextWriter : TextWriter
     {
         private readonly Action<string> _action;
 
-        public MessageContainerTextWriter(Action<string> action)
+        public ResponseMessageTextWriter(Action<string> action)
         {
             _action = action;
         }
