@@ -51,7 +51,7 @@ namespace BeavisCli {
 
         private onMount(terminal: any) {
             let self = this;
-            self.$http.post<IResponse>("/beavis-cli/api/welcome", null, { headers: { 'Content-Type': "application/json" } })
+            self.$http.post<IResponse>("/beavis-cli/api/init", null, { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
                     self.handleMessages(data.messages);
                     self.handleStatements(data.statements, terminal);

@@ -38,7 +38,7 @@ namespace BeavisCli.Internal
             await WriteAsync(text, response, "application/javascript");
         }
 
-        public async Task RenderResponseAsync(ApplicationExecutionResponse data, HttpResponse response)
+        public async Task RenderResponseAsync(WebCliResponse data, HttpResponse response)
         {
             if (data.Messages.Any())
             {

@@ -2,9 +2,9 @@
 
 namespace BeavisCli.Internal
 {
-    internal class DefaultWelcomeHandler : IWelcomeHandler
+    internal class DefaultGreeter : IGreeter
     {
-        public void SayWelcome(ApplicationExecutionResponse response)
+        public void Greet(WebCliResponse response)
         {
             Assembly assembly = GetType().GetTypeInfo().Assembly;
             AssemblyName name = assembly.GetName();

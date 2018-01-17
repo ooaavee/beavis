@@ -2,15 +2,14 @@
 
 namespace BeavisCli
 {
-    public class ApplicationExecutionContext
+    public class WebCliContext
     {
-        public ApplicationExecutionContext(ApplicationExecutionRequest request, ApplicationExecutionResponse response, HttpContext httpContext, ICommandLineApplication host, ApplicationInfo info)
+        internal WebCliContext(WebCliRequest request, WebCliResponse response, HttpContext httpContext, ICommandLineApplication host)
         {
             Request = request;
             Response = response;
             HttpContext = httpContext;
             Host = host;
-            Info = info;
         }
 
         /// <summary>
@@ -21,16 +20,16 @@ namespace BeavisCli
         /// <summary>
         /// Request
         /// </summary>
-        public ApplicationExecutionRequest Request { get; }
+        public WebCliRequest Request { get; }
 
         /// <summary>
         /// Response
         /// </summary>
-        public ApplicationExecutionResponse Response { get; }
+        public WebCliResponse Response { get; }
 
+        /// <summary>
+        /// Underlying cli application
+        /// </summary>
         public ICommandLineApplication Host { get; }
-
-        public ApplicationInfo Info { get; }
-
     }
 }

@@ -6,7 +6,7 @@
 
 //namespace Jemma.Terminal.Applications.Search
 //{
-//    internal class Search : AbstractApplication
+//    internal class Search : WebCliApplication
 //    {
 //        public static readonly ApplicationInfo Definition = new ApplicationInfo
 //        {
@@ -16,7 +16,7 @@
 //            AllowAnonymous = true
 //        };
 
-//        protected override async Task ExecuteInternalAsync(ApplicationExecutionContext context)
+//        protected override async Task ExecuteInternalAsync(WebCliContext context)
 //        {
 //            var app = CreateApplication(Definition, context);
 
@@ -173,7 +173,7 @@
 //            }
 //        }
 
-//        private static void WriteDateTimeOptionError(string option, string optionValue, ApplicationExecutionContext context)
+//        private static void WriteDateTimeOptionError(string option, string optionValue, WebCliContext context)
 //        {
 //            using (context.Response.BeginInteraction())
 //            {
@@ -198,7 +198,7 @@
 //            }
 //        }
 
-//        private static void WriteLevelOptionError(string option, string optionValue, ApplicationExecutionContext context)
+//        private static void WriteLevelOptionError(string option, string optionValue, WebCliContext context)
 //        {
 //            using (context.Response.BeginInteraction())
 //            {

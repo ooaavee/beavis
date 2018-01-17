@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace BeavisCli
 {
-    public class ApplicationExecutionResponse
+    public class WebCliResponse
     {
         [JsonProperty("messages")]
         public List<ResponseMessage> Messages { get; set; } = new List<ResponseMessage>();
@@ -75,22 +75,6 @@ namespace BeavisCli
 
             Messages.Add(new ErrorMessage { Text = text });
         }
-
-        ///////// <summary>
-        ///////// Returns green text.
-        ///////// </summary>
-        //////private static string GreenXXXX(string text)
-        //////{
-        //////    if (text == null)
-        //////    {
-        //////        throw new ArgumentNullException(nameof(text));
-        //////    }
-
-        //////    //terminal.echo('[[;#00ff00;]' + text + ']' + "Tämä on normaalia tekstiä normaalillä värillä!!!");
-        //////    return "[[;#00ff00;]" + text + "]";
-            
-        //////    // + '] ]';
-        //////}
 
         /// <summary>
         /// Adds a JavaScript statement.

@@ -20,10 +20,15 @@ namespace Microsoft.AspNetCore.Builder
                 throw new ArgumentNullException(nameof(app));
             }
 
+            if (app.ApplicationServices.GetService(typeof(BeavisCliSandbox)) == null)
+            {
+                throw new InvalidOperationException(
+                    $"Unable to find the required services. Please add all the required services by calling \'IServiceCollection.{nameof(IServiceCollectionExtensions.AddBeavisCli)}\' inside the call to \'ConfigureServices(...)\' in the application startup code.");
+            }
+
             app.UseMiddleware<BeavisCliMiddleware>();
 
             return app;
         }
-
     }
 }

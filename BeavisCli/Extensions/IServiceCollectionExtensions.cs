@@ -6,7 +6,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class IServiceCollectionExtensions
     {
-        public static IServiceCollection AddBeavisCli(this IServiceCollection services, Action<BeavisCliOptions> setupAction = null)
+        public static IServiceCollection AddBeavisCli(this IServiceCollection services, Action<WebCliOptions> setupAction = null)
         {
             if (services == null)
             {
@@ -18,30 +18,24 @@ namespace Microsoft.Extensions.DependencyInjection
                 setupAction = x =>
                 {
                     x.UseDefaultApplications = true;
-                    x.UnauthorizedApplicationExecutionAttemptHandler = new DefaultUnauthorizedApplicationExecutionAttemptHandler();
-                    x.WelcomeHandler = new DefaultWelcomeHandler();
+                    x.UnauthorizedHandler = new DefaultUnauthorizedHandler();
+                    x.Greeter = new DefaultGreeter();
                 };
             }
 
-            var options = new BeavisCliOptions();
+            var options = new WebCliOptions();
             setupAction(options);
-
             services.Configure(setupAction);
 
-            services.AddSingleton<ApplicationProvider>();
-            services.AddSingleton<ApplicationExecutor>();
+            services.AddSingleton<BeavisCliSandbox>();
             services.AddSingleton<WebRenderer>();
 
-
-
-            
-
-
-        
+            if (options.UseDefaultApplications)
+            {
+                // TODO: register default apps here!
+            }
+                   
             return services;
         }
-
-    }
-
-    
+    }    
 }

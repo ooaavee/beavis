@@ -3,17 +3,14 @@ using System.Threading.Tasks;
 
 namespace BeavisCli
 {
-    public class TestiApplikaatio : AbstractApplication
+    public class TestiApplikaatio : WebCliApplication
     {
-        public override ApplicationInfo GetInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public TestiApplikaatio() : base("testi", "description...") { }
 
-        public override async Task ExecuteAsync(ApplicationExecutionContext context)
+        public override async Task ExecuteAsync(WebCliContext context)
         {
             ICommandOption opt1 = context.Host.Option("-opt1", "Description", CommandOptionType.SingleValue);
-          
+
             await base.OnExecuteAsync(() =>
             {
                 string sss = null;

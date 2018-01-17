@@ -11,14 +11,14 @@ namespace BeavisCli.Internal
     internal class BeavisCliMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ApplicationExecutor _executor;
+        private readonly BeavisCliSandbox _sandbox;
         private readonly WebRenderer _renderer;
-        private readonly BeavisCliOptions _options;
+        private readonly WebCliOptions _options;
 
-        public BeavisCliMiddleware(RequestDelegate next, ApplicationExecutor executor, WebRenderer renderer, IOptions<BeavisCliOptions> options)
+        public BeavisCliMiddleware(RequestDelegate next, BeavisCliSandbox sandbox, WebRenderer renderer, IOptions<WebCliOptions> options)
         {
             _next = next;
-            _executor = executor;
+            _sandbox = sandbox;
             _renderer = renderer;
             _options = options.Value;
         }
@@ -43,12 +43,12 @@ namespace BeavisCli.Internal
                 return;
             }
 
-            if (IsPath("/beavis-cli/api/welcome", HttpMethods.Post, httpContext))
+            if (IsPath("/beavis-cli/api/init", HttpMethods.Post, httpContext))
             {
-                var response = new ApplicationExecutionResponse();
-                if (_options.WelcomeHandler != null)
+                var response = new WebCliResponse();
+                if (_options.Greeter != null)
                 {
-                    _options.WelcomeHandler.SayWelcome(response);
+                    _options.Greeter.Greet(response);
                 }
                 await _renderer.RenderResponseAsync(response, httpContext.Response);
                 return;
@@ -57,13 +57,12 @@ namespace BeavisCli.Internal
             if (IsPath("/beavis-cli/api/request", HttpMethods.Post, httpContext))
             {
                 var body = ReadBodyAsText(httpContext.Request);
-                var request = JsonConvert.DeserializeObject<ApplicationExecutionRequest>(body);
-                var response = new ApplicationExecutionResponse();
-                await _executor.HandleAsync(request, response, httpContext);
+                var request = JsonConvert.DeserializeObject<WebCliRequest>(body);
+                var response = new WebCliResponse();
+                await _sandbox.ExecuteAsync(request, response, httpContext);
                 await _renderer.RenderResponseAsync(response, httpContext.Response);
                 return;
             }
-
 
             await _next(httpContext);
         }

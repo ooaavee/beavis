@@ -15,7 +15,7 @@ var BeavisCli;
         }
         CliService.prototype.onMount = function (terminal) {
             var self = this;
-            self.$http.post("/beavis-cli/api/welcome", null, { headers: { 'Content-Type': "application/json" } })
+            self.$http.post("/beavis-cli/api/init", null, { headers: { 'Content-Type': "application/json" } })
                 .success(function (data) {
                 self.handleMessages(data.messages);
                 self.handleStatements(data.statements, terminal);

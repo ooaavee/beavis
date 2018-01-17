@@ -14,7 +14,7 @@
 //            Description = "This utility is used to manage and query data."
 //        };
 
-//        protected override async Task OnRunAsync(ApplicationExecutionContext context)
+//        protected override async Task OnRunAsync(WebCliContext context)
 //        {
 //            CommandLineApplication app = CreateApplication(Definition, context);
 //            app.FullName = "event-lake command line util";
