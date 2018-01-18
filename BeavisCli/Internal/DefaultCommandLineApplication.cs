@@ -14,14 +14,14 @@ namespace BeavisCli.Internal
 
         public CommandLineApplication Cli => _cli;
 
-        public ICommandOption Option(string template, string description, CommandOptionType optionType)
+        public IOption Option(string template, string description, CommandOptionType optionType)
         {
             CommandOption option = _cli.Option(template, description, Map(optionType));
 
             return new DefaultCommandOption(option);
         }
 
-        public ICommandArgument Argument(string name, string description, bool multipleValues = false)
+        public IArgument Argument(string name, string description, bool multipleValues = false)
         {
             var obj = _cli.Argument(name, description, multipleValues);
             return new DefaultCommandArgument(obj);

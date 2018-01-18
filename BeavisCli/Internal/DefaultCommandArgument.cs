@@ -3,7 +3,7 @@ using BeavisCli.Microsoft.Extensions.CommandLineUtils;
 
 namespace BeavisCli.Internal
 {
-    internal class DefaultCommandArgument : ICommandArgument
+    internal class DefaultCommandArgument : IArgument
     {
         private readonly CommandArgument _target;
 

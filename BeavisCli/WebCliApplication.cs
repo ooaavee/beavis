@@ -1,6 +1,4 @@
-﻿using BeavisCli.Internal;
-using BeavisCli.Microsoft.Extensions.CommandLineUtils;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
 using System.Threading.Tasks;
@@ -45,7 +43,7 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(context));
             }
 
-            var cli = FindCli(context.Host);
+            var cli = context.GetHost();
             await cli.OnExecuteAsync(invoke);
             cli.Execute(context.Request.GetArgs());
         }
@@ -57,7 +55,7 @@ namespace BeavisCli
 
         protected Task<int> ExitWithHelp(WebCliContext context)
         {
-            var cli = FindCli(context.Host);
+            var cli = context.GetHost();
             cli.ShowHelp(Name);
             return Task.FromResult(ExitStatusCode);
         }
@@ -67,15 +65,6 @@ namespace BeavisCli
             var options = context.HttpContext.RequestServices.GetRequiredService<IOptions<WebCliOptions>>();
             options.Value.UnauthorizedHandler?.HandleUnauthorizedApplicationExecution(context);
             return Task.FromResult(ExitStatusCode);
-        }
-
-        private CommandLineApplication FindCli(ICommandLineApplication host)
-        {
-            if (!(host is DefaultCommandLineApplication obj))
-            {
-                throw new InvalidOperationException($"Cannot find the {nameof(DefaultCommandLineApplication)} object, operation terminated!");
-            }
-            return obj.Cli;
         }
 
     }

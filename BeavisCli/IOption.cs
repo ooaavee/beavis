@@ -2,7 +2,7 @@
 
 namespace BeavisCli
 {
-    public interface ICommandOption
+    public interface IOption
     {
         List<string> Values { get; }
 

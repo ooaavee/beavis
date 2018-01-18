@@ -9,7 +9,7 @@ namespace BeavisCli
 
         public override async Task ExecuteAsync(WebCliContext context)
         {
-            ICommandOption opt1 = context.Host.Option("-opt1", "Description", CommandOptionType.SingleValue);
+            IOption opt1 = context.Option("-opt1", "Description", CommandOptionType.SingleValue);
 
             await base.OnExecuteAsync(() =>
             {

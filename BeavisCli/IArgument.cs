@@ -2,7 +2,7 @@
 
 namespace BeavisCli
 {
-    public interface ICommandArgument
+    public interface IArgument
     {
         List<string> Values { get; }
 
