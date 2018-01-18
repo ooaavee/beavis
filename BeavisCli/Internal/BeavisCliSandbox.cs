@@ -36,7 +36,7 @@ namespace BeavisCli.Internal
 
                 cli.HelpOption("-?|-h|--help");
 
-                ICommandLineApplication host = new DefaultCommandLineApplication(cli);
+                WebCliApplicationHost host = new WebCliApplicationHost(cli);
 
                 WebCliContext context = new WebCliContext(request, response, httpContext, host);
 

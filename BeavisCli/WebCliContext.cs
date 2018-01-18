@@ -1,20 +1,16 @@
-﻿using System;
-using BeavisCli.Internal;
-using BeavisCli.Microsoft.Extensions.CommandLineUtils;
+﻿using BeavisCli.Internal;
 using Microsoft.AspNetCore.Http;
 
 namespace BeavisCli
 {
     public class WebCliContext
     {
-        private readonly ICommandLineApplication _host;
-
-        internal WebCliContext(WebCliRequest request, WebCliResponse response, HttpContext httpContext, ICommandLineApplication host)
+        internal WebCliContext(WebCliRequest request, WebCliResponse response, HttpContext httpContext, WebCliApplicationHost host)
         {
             Request = request;
             Response = response;
             HttpContext = httpContext;
-            _host = host;
+            Host = host;
         }
 
         /// <summary>
@@ -32,25 +28,17 @@ namespace BeavisCli
         /// </summary>
         public WebCliResponse Response { get; }
 
-
-        internal CommandLineApplication GetHost()
-        {
-            if (!(_host is DefaultCommandLineApplication obj))
-            {
-                throw new InvalidOperationException($"Cannot find the {nameof(DefaultCommandLineApplication)} object, operation terminated!");
-            }
-            return obj.Cli;
-        }
-
         public IOption Option(string template, string description, CommandOptionType optionType)
         {
-            return _host.Option(template, description, optionType);
+            return Host.Option(template, description, optionType);
         }
 
         public IArgument Argument(string name, string description, bool multipleValues = false)
         {
-            return _host.Argument(name, description, multipleValues);
+            return Host.Argument(name, description, multipleValues);
         }
+
+        internal WebCliApplicationHost Host { get; }
 
     }
 }

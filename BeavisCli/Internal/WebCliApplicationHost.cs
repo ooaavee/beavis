@@ -3,11 +3,11 @@ using BeavisCli.Microsoft.Extensions.CommandLineUtils;
 
 namespace BeavisCli.Internal
 {
-    internal class DefaultCommandLineApplication : ICommandLineApplication
+    internal class WebCliApplicationHost
     {
         private readonly CommandLineApplication _cli;
 
-        public DefaultCommandLineApplication(CommandLineApplication cli)
+        public WebCliApplicationHost(CommandLineApplication cli)
         {
             _cli = cli;
         }

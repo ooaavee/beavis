@@ -43,9 +43,8 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(context));
             }
 
-            var cli = context.GetHost();
-            await cli.OnExecuteAsync(invoke);
-            cli.Execute(context.Request.GetArgs());
+            await context.Host.Cli.OnExecuteAsync(invoke);
+            context.Host.Cli.Execute(context.Request.GetArgs());
         }
       
         protected Task<int> Exit(WebCliContext context)
@@ -55,8 +54,7 @@ namespace BeavisCli
 
         protected Task<int> ExitWithHelp(WebCliContext context)
         {
-            var cli = context.GetHost();
-            cli.ShowHelp(Name);
+            context.Host.Cli.ShowHelp(Name);
             return Task.FromResult(ExitStatusCode);
         }
 
