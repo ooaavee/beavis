@@ -40,7 +40,7 @@ namespace BeavisCli.Internal
 
                 WebCliContext context = new WebCliContext(request, response, httpContext, host);
 
-                if (await application.IsAuthorized(context))
+                if (application.IsAuthorized(context))
                 {
                     await application.ExecuteAsync(context);
                 }

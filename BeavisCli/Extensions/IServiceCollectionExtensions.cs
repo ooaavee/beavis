@@ -1,6 +1,7 @@
 ﻿using System;
 using BeavisCli;
 using BeavisCli.Internal;
+using BeavisCli.Internal.Applications;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -8,16 +9,12 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddBeavisCli(this IServiceCollection services, Action<WebCliOptions> setupAction = null)
         {
-            if (services == null)
-            {
-                throw new ArgumentNullException(nameof(services));
-            }
-
             if (setupAction == null)
             {
                 setupAction = x =>
                 {
                     x.UseDefaultApplications = true;
+                    x.AreDefaultApplicationsBrowsable = true;
                     x.UnauthorizedHandler = new DefaultUnauthorizedHandler();
                     x.Greeter = new DefaultGreeter();
                 };
@@ -32,10 +29,27 @@ namespace Microsoft.Extensions.DependencyInjection
 
             if (options.UseDefaultApplications)
             {
-                // TODO: register default apps here!
+                services.AddSingletonWebCliApplication<Help>();
+                services.AddSingletonWebCliApplication<Clear>();
+                services.AddSingletonWebCliApplication<Shortcuts>();
             }
-                   
+
             return services;
         }
-    }    
+
+        public static IServiceCollection AddScopedWebCliApplication<TWebCliApplication>(this IServiceCollection services) where TWebCliApplication : WebCliApplication
+        {
+            return services.AddScoped<WebCliApplication, TWebCliApplication>();
+        }
+
+        public static IServiceCollection AddSingletonWebCliApplication<TWebCliApplication>(this IServiceCollection services) where TWebCliApplication : WebCliApplication
+        {
+            return services.AddSingleton<WebCliApplication, TWebCliApplication>();
+        }
+
+        public static IServiceCollection AddTransientWebCliApplication<TWebCliApplication>(this IServiceCollection services) where TWebCliApplication : WebCliApplication
+        {
+            return services.AddTransient<WebCliApplication, TWebCliApplication>();
+        }
+    }
 }

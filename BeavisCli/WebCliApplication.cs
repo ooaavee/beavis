@@ -19,14 +19,24 @@ namespace BeavisCli
 
         public string Description { get; }
 
-        public virtual Task<bool> IsAuthorized(WebCliContext context)
+        public virtual bool IsAuthorized(WebCliContext context)
         {
             if (context == null)
             {
                 throw new ArgumentNullException(nameof(context));
             }
 
-            return Task.FromResult(true);
+            return true;
+        }
+
+        public virtual bool IsBrowsable(WebCliContext context)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            return true;
         }
 
         public abstract Task ExecuteAsync(WebCliContext context);
