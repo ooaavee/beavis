@@ -15,10 +15,14 @@ var BeavisCli;
         }
         CliService.prototype.onMount = function (terminal) {
             var self = this;
-            self.$http.post("/beavis-cli/api/init", null, { headers: { 'Content-Type': "application/json" } })
+            terminal.completion = function (terminal, command, callback) {
+                if (__terminal_completion) {
+                    callback(__terminal_completion);
+                }
+            };
+            self.$http.post("/beavis-cli/api/initialize", null, { headers: { 'Content-Type': "application/json" } })
                 .success(function (data) {
-                self.handleMessages(data.messages);
-                self.handleStatements(data.statements, terminal);
+                self.handleResponse(data, terminal);
             }).error(function (data, status) {
                 debugger;
             });
@@ -30,18 +34,15 @@ var BeavisCli;
             }
             self.$http.post("/beavis-cli/api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
                 .success(function (data) {
-                self.handleMessages(data.messages);
-                self.handleStatements(data.statements, terminal);
+                self.handleResponse(data, terminal);
             }).error(function (data, status) {
                 debugger;
             });
         };
-        CliService.prototype.handleMessages = function (messages) {
-            this.$rootScope.$emit("terminal.output", messages);
-        };
-        CliService.prototype.handleStatements = function (statements, terminal) {
-            for (var i = 0; i < statements.length; i++) {
-                eval(statements[i]);
+        CliService.prototype.handleResponse = function (response, terminal) {
+            this.$rootScope.$emit("terminal.output", response.messages);
+            for (var i = 0; i < response.statements.length; i++) {
+                eval(response.statements[i]);
             }
         };
         return CliService;
@@ -54,7 +55,14 @@ var BeavisCli;
                 link: function (scope, element, attrs) {
                     var terminal = element.terminal(function (input, terminal) {
                         $rootScope.$emit("terminal.input", input, terminal);
-                    }, { greetings: attrs.greetings || "" });
+                    }, {
+                        greetings: attrs.greetings || "",
+                        completion: function (command, callback) {
+                            if (__terminal_completion) {
+                                callback(__terminal_completion);
+                            }
+                        }
+                    });
                     $rootScope.$emit("terminal.mounted", terminal);
                     $rootScope.$on("terminal.output", function (e, messages) {
                         for (var i = 0; i < messages.length; i++) {

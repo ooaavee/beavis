@@ -3,42 +3,33 @@
 
 namespace BeavisCli {
 
+    const app: ng.IModule = angular.module("BeavisCli", []);
+
+
+    declare var __terminal_completion: any;
+
+
     interface IRequest {
         input: string;
     }
+
 
     interface IResponse {
         messages: IMessage[];
         statements: string[];
     }
 
+
     interface IMessage {
         text: string;
         type: string;
     }
-
-    ////class Terminal {
-    ////    constructor(public handle: any) {
-    ////    }
-
-    ////    /**
-    ////     * Clears terminal history.
-    ////     */
-    ////    public clearHistory() {
-    ////        this.handle.history().clear();
-    ////    }
-    ////}
-
-
-    const app: ng.IModule = angular.module("BeavisCli", []);
 
 
     class CliService {
         static $inject = ["$rootScope", "$http"];
 
         constructor(private $rootScope: ng.IRootScopeService, private $http: ng.IHttpService) {
-            //let self = this;
-
             this.$rootScope.$on("terminal.mounted", (e, terminal) => {
                 this.onMount(terminal);
             });
@@ -46,15 +37,20 @@ namespace BeavisCli {
             this.$rootScope.$on("terminal.input", (e, input, terminal) => {
                 this.handleInput(input, terminal);
             });
-
         }
 
         private onMount(terminal: any) {
             let self = this;
-            self.$http.post<IResponse>("/beavis-cli/api/init", null, { headers: { 'Content-Type': "application/json" } })
+
+            terminal.completion = (terminal, command, callback) => {
+                if (__terminal_completion) {
+                    callback(__terminal_completion);
+                }
+            };
+
+            self.$http.post<IResponse>("/beavis-cli/api/initialize", null, { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
-                    self.handleMessages(data.messages);
-                    self.handleStatements(data.statements, terminal);
+                    self.handleResponse(data, terminal);
                 }).error((data, status) => {
                     debugger;
                 });
@@ -72,45 +68,44 @@ namespace BeavisCli {
 
             self.$http.post<IResponse>("/beavis-cli/api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
-                    self.handleMessages(data.messages);
-                    self.handleStatements(data.statements, terminal);
+                    self.handleResponse(data, terminal);
                 }).error((data, status) => {
                     debugger;
                 });
         }
 
-        private handleMessages(messages: IMessage[]) {
-            this.$rootScope.$emit("terminal.output", messages);
-        }
+        private handleResponse(response: IResponse, terminal: any) {
+            this.$rootScope.$emit("terminal.output", response.messages);
 
-        private handleStatements(statements: string[], terminal: any) {
-            for (let i = 0; i < statements.length; i++) {
-                eval(statements[i]);
-                //                self.evalTerminalStatement(data.statements[i], evt.terminal.handle);
+            for (let i = 0; i < response.statements.length; i++) {
+                eval(response.statements[i]);
             }
         }
-
-
-        //private evalTerminalStatement(statement: string, terminal: any) {
-        //    eval(statement);
-        //}
     }
     app.service("backend", CliService);
+
+
+    declare var __terminal_completion: any;
 
 
     app.directive("angularTerminal", ["$rootScope", function ($rootScope) {
         return {
             restrict: "A",
             link(scope, element, attrs) {
-
-                //const namespace = `terminal.${attrs.angularTerminal || "default"}`;
-
                 /**
                  * Receive terminal input events and notify the CliService about that
                  */
                 const terminal = element.terminal((input, terminal) => {
                     $rootScope.$emit("terminal.input", input, terminal);
-                }, { greetings: attrs.greetings || "" });
+                },
+                    {
+                        greetings: attrs.greetings || "",
+                        completion: function (command, callback) {
+                            if (__terminal_completion) {
+                                callback(__terminal_completion);
+                            }
+                        }
+                    });
 
                 /**
                  * Notify CliService that we are ready to go!
@@ -159,5 +154,6 @@ namespace BeavisCli {
         constructor(private backend: CliService) { }
     }
     app.controller("cli", CliController);
+
 
 }

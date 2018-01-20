@@ -21,29 +21,24 @@ namespace BeavisCli.Internal.Applications
         {
             await OnExecuteAsync(() =>
             {
-                var group1 = new List<WebCliApplication>();
-                var group2 = new List<WebCliApplication>();
+                var defaultApplications = new List<WebCliApplication>();
+                var externalApplications = new List<WebCliApplication>();
 
                 foreach (WebCliApplication app in _sandbox.GetApplications(context.HttpContext))
                 {
-                    bool isOneOfDefaultApps = app.GetType().Assembly.Equals(GetType().Assembly);
-
-                    // if default apps are not visible for help
-                    if (isOneOfDefaultApps)
+                    if (!_options.AreDefaultApplicationsBrowsable)
                     {
-                        if (!_options.AreDefaultApplicationsBrowsable)
+                        if (IsDefault(app))
                         {
                             continue;
                         }
                     }
 
-                    // apps can decide if they are visible for help
                     if (!app.IsBrowsable(context))
                     {
                         continue;
                     }
 
-                    // ignore 'help'
                     if (app.GetType() == GetType())
                     {
                         continue;
@@ -54,21 +49,20 @@ namespace BeavisCli.Internal.Applications
                         continue;
                     }
 
-                    if (isOneOfDefaultApps)
+                    if (IsDefault(app))
                     {
-                        // these are apps from this assembly
-                        group1.Add(app);
+                        defaultApplications.Add(app);
                     }
                     else
                     {
-                        // these are apps from other assemblies
-                        group2.Add(app);
+                        externalApplications.Add(app);
                     }
                 }
-
+             
+                var allApplications = defaultApplications.Concat(externalApplications);
 
                 var lines = new List<Tuple<string, string>>();
-                foreach (WebCliApplication app in group1.Concat(group2))
+                foreach (WebCliApplication app in allApplications)
                 {
                     lines.Add(new Tuple<string, string>(app.Name, app.Description));
                 }
@@ -84,7 +78,12 @@ namespace BeavisCli.Internal.Applications
 
                 return Exit(context);
             }, context);
-
         }
+
+        private bool IsDefault(WebCliApplication app)
+        {
+            return app.GetType().Assembly.Equals(GetType().Assembly);
+        }
+
     }
 }

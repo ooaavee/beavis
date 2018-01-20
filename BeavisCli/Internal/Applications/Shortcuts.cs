@@ -37,7 +37,7 @@ namespace BeavisCli.Internal.Applications
                     new Tuple<string, string>("CTRL+H", "Remove text to the end of the line."),
                     new Tuple<string, string>("ALT+D", "Remove one word after the cursor (don't work in IE)."),
                     new Tuple<string, string>("PAGE UP", "Scroll up (don't work in Chrome)."),
-                    new Tuple<string, string>("PAGE DOWN", "Scroll down (don't work in Chrome)."),
+                    new Tuple<string, string>("PAGE DOWN", "Scroll down (don't work in Chrome).")
                     //new Tuple<string, string>("CTRL+D", "Run previous interpreter from the stack or call logout (if terminal is using authentication and current interpreter is the first one). It also cancel all ajax call, if terminal is paused, and resume it.")
                 };
 

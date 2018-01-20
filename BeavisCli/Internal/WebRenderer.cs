@@ -11,23 +11,23 @@ namespace BeavisCli.Internal
 {
     internal class WebRenderer
     {
-        public async Task RenderHtmlAsync(HttpResponse response)
+        public async Task RenderHtmlAsync(HttpContext httpContext)
         {
             var text = ReadFilesAsText("BeavisCli.Resources.html.index.html");
 
-            await WriteAsync(text, response, "text/html");
+            await WriteAsync(text, httpContext.Response, "text/html");
 
         }
 
-        public async Task RenderCssAsync(HttpResponse response)
+        public async Task RenderCssAsync(HttpContext httpContext)
         {
             var text = ReadFilesAsText("BeavisCli.Resources.css.jquery.terminal.min.css",
                                        "BeavisCli.Resources.css.site.css");
 
-            await WriteAsync(text, response, "text/css");
+            await WriteAsync(text, httpContext.Response, "text/css");
         }
 
-        public async Task RenderJsAsync(HttpResponse response)
+        public async Task RenderJsAsync(HttpContext httpContext)
         {
             var text = ReadFilesAsText("BeavisCli.Resources.js.jquery.min.js",
                                        "BeavisCli.Resources.js.jquery.terminal.min.js",
@@ -35,19 +35,19 @@ namespace BeavisCli.Internal
                                        "BeavisCli.Resources.js.angular.min.js",
                                        "BeavisCli.Resources.js.beavis-cli.js");
 
-            await WriteAsync(text, response, "application/javascript");
+            await WriteAsync(text, httpContext.Response, "application/javascript");
         }
 
-        public async Task RenderResponseAsync(WebCliResponse data, HttpResponse response)
+        public async Task RenderResponseAsync(WebCliResponse response, HttpContext httpContext)
         {
-            if (data.Messages.Any())
+            if (response.Messages.Any())
             {
-                data.WriteEmptyLine();
+                response.WriteEmptyLine();
             }
 
-            var text = JsonConvert.SerializeObject(data);
+            var text = JsonConvert.SerializeObject(response);
 
-            await WriteAsync(text, response, "application/json");
+            await WriteAsync(text, httpContext.Response, "application/json");
         }
 
         private static async Task WriteAsync(string text, HttpResponse response, string contentType)

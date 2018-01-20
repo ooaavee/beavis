@@ -23,68 +23,57 @@ namespace BeavisCli.Internal
             _options = options.Value;
         }
 
-        public async Task InvokeAsync(HttpContext httpContext)
+        public async Task InvokeAsync(HttpContext context)
         {
-            if (IsPath("/beavis-cli", HttpMethods.Get, httpContext))
+            if (IsPath("/beavis-cli", HttpMethods.Get, context))
             {
-                await _renderer.RenderHtmlAsync(httpContext.Response);
+                await _renderer.RenderHtmlAsync(context);
                 return;
             }
 
-            if (IsPath("/beavis-cli/content/css", HttpMethods.Get, httpContext))
+            if (IsPath("/beavis-cli/content/css", HttpMethods.Get, context))
             {
-                await _renderer.RenderCssAsync(httpContext.Response);
+                await _renderer.RenderCssAsync(context);
                 return;
             }
 
-            if (IsPath("/beavis-cli/content/js", HttpMethods.Get, httpContext))
+            if (IsPath("/beavis-cli/content/js", HttpMethods.Get, context))
             {
-                await _renderer.RenderJsAsync(httpContext.Response);
+                await _renderer.RenderJsAsync(context);
                 return;
             }
 
-            if (IsPath("/beavis-cli/api/init", HttpMethods.Post, httpContext))
+            if (IsPath("/beavis-cli/api/initialize", HttpMethods.Post, context))
             {
                 var response = new WebCliResponse();
-                if (_options.Greeter != null)
-                {
-                    _options.Greeter.Greet(response);
-                }
-                await _renderer.RenderResponseAsync(response, httpContext.Response);
+                _options.TerminalInitializer?.Initialize(context, response);
+                await _renderer.RenderResponseAsync(response, context);
                 return;
             }
 
-            if (IsPath("/beavis-cli/api/request", HttpMethods.Post, httpContext))
+            if (IsPath("/beavis-cli/api/request", HttpMethods.Post, context))
             {
-                var body = ReadBodyAsText(httpContext.Request);
+                var body = GetRequestBodyAsText(context);
                 var request = JsonConvert.DeserializeObject<WebCliRequest>(body);
                 var response = new WebCliResponse();
-                await _sandbox.ExecuteAsync(request, response, httpContext);
-                await _renderer.RenderResponseAsync(response, httpContext.Response);
+                await _sandbox.ExecuteAsync(request, response, context);
+                await _renderer.RenderResponseAsync(response, context);
                 return;
             }
 
-            await _next(httpContext);
+            await _next(context);
         }
 
-        private static bool IsPath(string path, string method, HttpContext httpContext)
+        private static bool IsPath(string path, string httpMethod, HttpContext context)
         {
-            if (httpContext.Request.Path.HasValue)
-            {
-                if (httpContext.Request.Path.Equals(path, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    if (httpContext.Request.Method == method)
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
+            return context.Request.Method == httpMethod &&
+                   context.Request.Path.HasValue &&
+                   context.Request.Path.Equals(path, StringComparison.InvariantCultureIgnoreCase);
         }
 
-        private static string ReadBodyAsText(HttpRequest request)
+        private static string GetRequestBodyAsText(HttpContext context)
         {
-            using (var stream = request.Body)
+            using (var stream = context.Request.Body)
             {
                 using (var reader = new StreamReader(stream, Encoding.UTF8))
                 {

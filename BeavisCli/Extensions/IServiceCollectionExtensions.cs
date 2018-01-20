@@ -16,7 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     x.UseDefaultApplications = true;
                     x.AreDefaultApplicationsBrowsable = true;
                     x.UnauthorizedHandler = new DefaultUnauthorizedHandler();
-                    x.Greeter = new DefaultGreeter();
+                    x.TerminalInitializer = new DefaultTerminalInitializer();
                 };
             }
 

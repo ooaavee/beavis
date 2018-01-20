@@ -8,6 +8,6 @@
 
         public IUnauthorizedHandler UnauthorizedHandler { get; set; }
 
-        public IGreeter Greeter { get; set; }
+        public ITerminalInitializer TerminalInitializer { get; set; }
     }
 }
