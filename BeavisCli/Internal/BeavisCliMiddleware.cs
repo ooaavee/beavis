@@ -11,15 +11,17 @@ namespace BeavisCli.Internal
     internal class BeavisCliMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly BeavisCliSandbox _sandbox;
+        private readonly WebCliSandbox _sandbox;
         private readonly WebRenderer _renderer;
+        private readonly JobManager _jobManager;
         private readonly WebCliOptions _options;
 
-        public BeavisCliMiddleware(RequestDelegate next, BeavisCliSandbox sandbox, WebRenderer renderer, IOptions<WebCliOptions> options)
+        public BeavisCliMiddleware(RequestDelegate next, WebCliSandbox sandbox, WebRenderer renderer, JobManager jobManager, IOptions<WebCliOptions> options)
         {
             _next = next;
             _sandbox = sandbox;
             _renderer = renderer;
+            _jobManager = jobManager;
             _options = options.Value;
         }
 
@@ -45,8 +47,17 @@ namespace BeavisCli.Internal
 
             if (IsPath("/beavis-cli/api/initialize", HttpMethods.Post, context))
             {
-                var response = new WebCliResponse();
+                var response = new WebCliResponse(context);
                 _options.TerminalInitializer?.Initialize(context, response);
+                await _renderer.RenderResponseAsync(response, context);
+                return;
+            }
+
+            if (IsPath("/beavis-cli/api/job", HttpMethods.Post, context))
+            {
+                var key = context.Request.Query["key"];
+                var response = new WebCliResponse(context);
+                await _jobManager.ExecuteAsync(key, context, response);
                 await _renderer.RenderResponseAsync(response, context);
                 return;
             }
@@ -55,7 +66,7 @@ namespace BeavisCli.Internal
             {
                 var body = GetRequestBodyAsText(context);
                 var request = JsonConvert.DeserializeObject<WebCliRequest>(body);
-                var response = new WebCliResponse();
+                var response = new WebCliResponse(context);
                 await _sandbox.ExecuteAsync(request, response, context);
                 await _renderer.RenderResponseAsync(response, context);
                 return;

@@ -24,15 +24,23 @@ namespace Microsoft.Extensions.DependencyInjection
             setupAction(options);
             services.Configure(setupAction);
 
-            services.AddSingleton<BeavisCliSandbox>();
+            services.AddSingleton<WebCliSandbox>();
             services.AddSingleton<WebRenderer>();
+            services.AddSingleton<IJobPool, JobManager>();
+            services.AddSingleton<JobManager>();
 
             if (options.UseDefaultApplications)
             {
                 services.AddSingletonWebCliApplication<Help>();
                 services.AddSingletonWebCliApplication<Clear>();
+                services.AddSingletonWebCliApplication<Reset>();
                 services.AddSingletonWebCliApplication<Shortcuts>();
             }
+
+
+            services.AddMemoryCache();
+
+           
 
             return services;
         }

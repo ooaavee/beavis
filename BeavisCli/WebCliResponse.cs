@@ -1,13 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using BeavisCli.Internal;
+﻿using BeavisCli.Internal.Jobs;
+using BeavisCli.JavaScriptStatements;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 
 namespace BeavisCli
 {
     public class WebCliResponse
     {
+        private readonly HttpContext _context;
+
+        internal WebCliResponse(HttpContext context)
+        {
+            _context = context;
+        }
+
+        /// <summary>
+        /// Occurs just before sending the response.
+        /// </summary>
+        public event EventHandler Sending;
+
         [JsonProperty("messages")]
         public List<ResponseMessage> Messages { get; } = new List<ResponseMessage>();
 
@@ -90,6 +104,57 @@ namespace BeavisCli
 
             Statements.Add(js);
         }
+
+        public void WriteFile(byte[] data, string fileName, string mimeType)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            if (fileName == null)
+            {
+                throw  new ArgumentNullException(nameof(fileName));
+            }
+
+            if (mimeType == null)
+            {
+                throw new ArgumentNullException(nameof(mimeType));
+            }
+
+            AddJob(new WriteFileJob(data, fileName, mimeType));
+        }
+
+        public void AddJob(IJob job)
+        {
+            if (job == null)
+            {
+                throw new ArgumentNullException(nameof(job));
+            }
+
+            Sending += (sender, args) =>
+            {
+                var pool = _context.RequestServices.GetRequiredService<IJobPool>();
+                var key = pool.Push(job);
+                AddStatement(new BeginJob(key));
+            };
+        }
+
+        /// <summary>
+        /// Raises the <see cref="Sending"/> event.
+        /// </summary>
+        internal void OnSending()
+        {
+            var evt = Sending;
+            if (evt != null)
+            {
+                lock (evt)
+                {
+                    evt(this, EventArgs.Empty);
+                }
+            }
+        }
+
 
         /////// <summary>
         /////// Creates a TextWriter for information messages.

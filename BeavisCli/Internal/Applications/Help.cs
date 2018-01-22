@@ -8,10 +8,10 @@ namespace BeavisCli.Internal.Applications
 {
     internal class Help : WebCliApplication
     {
-        private readonly BeavisCliSandbox _sandbox;
+        private readonly WebCliSandbox _sandbox;
         private readonly WebCliOptions _options;
 
-        public Help(BeavisCliSandbox sandbox, IOptions<WebCliOptions> options) : base("help", "Displays help")
+        public Help(WebCliSandbox sandbox, IOptions<WebCliOptions> options) : base("help", "Displays help")
         {
             _sandbox = sandbox;
             _options = options.Value;

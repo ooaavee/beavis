@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Internal
 {
-    internal class BeavisCliSandbox
+    internal class WebCliSandbox
     {
         private readonly WebCliOptions _options;
 
-        public BeavisCliSandbox(IOptions<WebCliOptions> options)
+        public WebCliSandbox(IOptions<WebCliOptions> options)
         {
             _options = options.Value;
         }

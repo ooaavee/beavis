@@ -18,6 +18,7 @@
     <None Remove="Resources\html\index.html" />
     <None Remove="Resources\js\angular.min.js" />
     <None Remove="Resources\js\beavis-cli.js" />
+    <None Remove="Resources\js\download.js" />
     <None Remove="Resources\js\jquery.min.js" />
     <None Remove="Resources\js\jquery.mousewheel-min.js" />
     <None Remove="Resources\js\jquery.terminal.min.js" />
@@ -29,6 +30,7 @@
     <EmbeddedResource Include="Resources\html\index.html" />
     <EmbeddedResource Include="Resources\js\angular.min.js" />
     <EmbeddedResource Include="Resources\js\beavis-cli.js" />
+    <EmbeddedResource Include="Resources\js\download.js" />
     <EmbeddedResource Include="Resources\js\jquery.min.js" />
     <EmbeddedResource Include="Resources\js\jquery.mousewheel-min.js" />
     <EmbeddedResource Include="Resources\js\jquery.terminal.min.js" />
@@ -36,6 +38,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />

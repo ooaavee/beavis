@@ -50,7 +50,7 @@ namespace BeavisCli {
 
             self.$http.post<IResponse>("/beavis-cli/api/initialize", null, { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
-                    self.handleResponse(data, terminal);
+                    self.handleResponse(data, terminal, self);
                 }).error((data, status) => {
                     debugger;
                 });
@@ -68,15 +68,28 @@ namespace BeavisCli {
 
             self.$http.post<IResponse>("/beavis-cli/api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
-                    self.handleResponse(data, terminal);
+                    self.handleResponse(data, terminal, self);
                 }).error((data, status) => {
                     debugger;
                 });
         }
 
-        private handleResponse(response: IResponse, terminal: any) {
+        private beginJob(key: string, terminal: any) {
+            let self = this;
+
+            self.$http.post<IResponse>("/beavis-cli/api/job?key=" + encodeURIComponent(key), null, { headers: { 'Content-Type': "application/json" } })
+                .success((data: IResponse) => {
+                    self.handleResponse(data, terminal, self);
+                }).error((data, status) => {
+                    debugger;
+                });
+        }
+
+        private handleResponse(response: IResponse, terminal: any, service: CliService) {
+            // 1. Write terminal output messages.
             this.$rootScope.$emit("terminal.output", response.messages);
 
+            // 2. Eval JavaScript statements.
             for (let i = 0; i < response.statements.length; i++) {
                 eval(response.statements[i]);
             }

@@ -22,7 +22,7 @@ var BeavisCli;
             };
             self.$http.post("/beavis-cli/api/initialize", null, { headers: { 'Content-Type': "application/json" } })
                 .success(function (data) {
-                self.handleResponse(data, terminal);
+                self.handleResponse(data, terminal, self);
             }).error(function (data, status) {
                 debugger;
             });
@@ -34,12 +34,21 @@ var BeavisCli;
             }
             self.$http.post("/beavis-cli/api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
                 .success(function (data) {
-                self.handleResponse(data, terminal);
+                self.handleResponse(data, terminal, self);
             }).error(function (data, status) {
                 debugger;
             });
         };
-        CliService.prototype.handleResponse = function (response, terminal) {
+        CliService.prototype.beginJob = function (key, terminal) {
+            var self = this;
+            self.$http.post("/beavis-cli/api/job?key=" + encodeURIComponent(key), null, { headers: { 'Content-Type': "application/json" } })
+                .success(function (data) {
+                self.handleResponse(data, terminal, self);
+            }).error(function (data, status) {
+                debugger;
+            });
+        };
+        CliService.prototype.handleResponse = function (response, terminal, service) {
             this.$rootScope.$emit("terminal.output", response.messages);
             for (var i = 0; i < response.statements.length; i++) {
                 eval(response.statements[i]);

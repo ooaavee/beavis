@@ -16,7 +16,6 @@ namespace BeavisCli.Internal
             var text = ReadFilesAsText("BeavisCli.Resources.html.index.html");
 
             await WriteAsync(text, httpContext.Response, "text/html");
-
         }
 
         public async Task RenderCssAsync(HttpContext httpContext)
@@ -33,6 +32,7 @@ namespace BeavisCli.Internal
                                        "BeavisCli.Resources.js.jquery.terminal.min.js",
                                        "BeavisCli.Resources.js.jquery.mousewheel-min.js",
                                        "BeavisCli.Resources.js.angular.min.js",
+                                       "BeavisCli.Resources.js.download.js",
                                        "BeavisCli.Resources.js.beavis-cli.js");
 
             await WriteAsync(text, httpContext.Response, "application/javascript");
@@ -44,6 +44,8 @@ namespace BeavisCli.Internal
             {
                 response.WriteEmptyLine();
             }
+
+            response.OnSending();
 
             var text = JsonConvert.SerializeObject(response);
 

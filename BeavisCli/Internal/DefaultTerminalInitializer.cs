@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using BeavisCli.JavaScriptStatements;
 using Microsoft.AspNetCore.Http;
@@ -23,7 +24,7 @@ namespace BeavisCli.Internal
 
             // Tabcompletion
             //
-            var sandbox = context.RequestServices.GetRequiredService<BeavisCliSandbox>();
+            var sandbox = context.RequestServices.GetRequiredService<WebCliSandbox>();
             var applications = new List<string>();
             foreach (var application in sandbox.GetApplications(context))
             {
