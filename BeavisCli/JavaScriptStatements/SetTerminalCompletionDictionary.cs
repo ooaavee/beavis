@@ -35,7 +35,8 @@ namespace BeavisCli.JavaScriptStatements
 
             buf.Append("]");
 
-            var js = $"__terminal_completion = {buf};";
+            var js = $"window[\"__terminal_completion\"] = {buf};";
+
             return js;
         }
     }

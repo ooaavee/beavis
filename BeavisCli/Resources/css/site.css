@@ -16,3 +16,9 @@ body {
     min-height: calc(100vh);
     max-height: calc(100vh);
 }
+
+#uploader {
+    position: absolute;
+    top: -1000px;
+    left: -1000px;
+}

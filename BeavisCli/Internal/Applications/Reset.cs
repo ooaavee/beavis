@@ -26,9 +26,11 @@ namespace BeavisCli.Internal.Applications
                 var data = File.ReadAllBytes(path);
 
 
-                context.Response.WriteFile(data, "beavis.png", "image/png");
+                 context.Response.WriteFile(data, "beavis.png", "image/png");
 
+                //string js = $"service.upload(terminal);";
 
+                //context.Response.Statements.Add(js);
 
 
 
