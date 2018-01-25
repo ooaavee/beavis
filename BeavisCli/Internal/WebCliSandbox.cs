@@ -11,10 +11,12 @@ namespace BeavisCli.Internal
 {
     internal class WebCliSandbox
     {
+        private readonly IUnauthorizedHandler _unauthorized;
         private readonly WebCliOptions _options;
 
-        public WebCliSandbox(IOptions<WebCliOptions> options)
+        public WebCliSandbox(IUnauthorizedHandler unauthorized, IOptions<WebCliOptions> options)
         {
+            _unauthorized = unauthorized;
             _options = options.Value;
         }
 
@@ -47,10 +49,7 @@ namespace BeavisCli.Internal
                 }
                 else
                 {
-                    if (_options.UnauthorizedHandler != null)
-                    {
-                        _options.UnauthorizedHandler.HandleUnauthorizedApplicationExecution(context);
-                    }
+                    _unauthorized.OnUnauthorized(context);
                 }
             }
             catch (BeavisCliSandboxException ex)

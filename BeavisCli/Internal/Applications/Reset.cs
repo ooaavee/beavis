@@ -4,12 +4,18 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using BeavisCli.JavaScriptStatements;
+using Microsoft.AspNetCore.Hosting;
 
 namespace BeavisCli.Internal.Applications
 {
     internal class Reset : WebCliApplication
     {
-        public Reset() : base("reset", "Resets the terminal.") { }
+        private readonly IHostingEnvironment _env;
+
+        public Reset(IHostingEnvironment env) : base("reset", "Resets the terminal.")
+        {
+            _env = env;
+        }
 
 
         public override async Task ExecuteAsync(WebCliContext context)
@@ -21,7 +27,8 @@ namespace BeavisCli.Internal.Applications
                 //context.Response.AddStatement(new ClearTerminalHistory());
 
 
-                var path = @"C:\Projects\beavis-cli\WebSite\wwwroot\images\beavis.png";
+                var path = _env.WebRootPath + "/images/beavis.png";
+
 
                 var data = File.ReadAllBytes(path);
 

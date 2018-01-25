@@ -1,18 +1,22 @@
-﻿namespace BeavisCli
+﻿using System;
+using BeavisCli.Internal;
+
+namespace BeavisCli
 {
     public class WebCliOptions
     {
-        public bool EnableDefaultApplications { get; set; }
+        public bool EnableDefaultApplications { get; set; } = true;
 
-        public bool EnableDefaultApplicationsBrowsing { get; set; }
+        public bool EnableDefaultApplicationsBrowsing { get; set; } = true;
 
-        public IUnauthorizedHandler UnauthorizedHandler { get; set; }
+        public bool EnableFileUpload { get; set; } = true;
 
-        public ITerminalInitializer TerminalInitializer { get; set; }
+        public Type UnauthorizedHandlerType { get; set; } = typeof(UnauthorizedHandler);
 
-        public IFileUploadStorage FileUploadStorage { get; set; }
+        public Type TerminalInitializerType { get; set; } = typeof(TerminalInitializer);
 
-        public bool EnableFileUpload { get; set; }
+        public Type FileUploadStorageType { get; set; } = typeof(FileUploadStorage);
+
 
     }
 }

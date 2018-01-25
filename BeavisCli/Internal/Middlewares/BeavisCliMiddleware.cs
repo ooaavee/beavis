@@ -3,7 +3,6 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace BeavisCli.Internal.Middlewares
@@ -17,20 +16,14 @@ namespace BeavisCli.Internal.Middlewares
         private readonly ITerminalInitializer _initializer;
         private readonly IFileUploadStorage _fileUploadStorage;
 
-        public BeavisCliMiddleware(RequestDelegate next, WebCliSandbox sandbox, WebRenderer renderer, JobManager jobManager, IOptions<WebCliOptions> options)
+        public BeavisCliMiddleware(RequestDelegate next, WebCliSandbox sandbox, WebRenderer renderer, JobManager jobManager, ITerminalInitializer initializer, IFileUploadStorage fileUploadStorage)
         {
             _next = next;
             _sandbox = sandbox;
             _renderer = renderer;
             _jobManager = jobManager;
-
-            _initializer = options.Value.TerminalInitializer;
-
-            if (options.Value.EnableFileUpload)
-            {
-                _fileUploadStorage = options.Value.FileUploadStorage;
-            }
-
+            _initializer = initializer;
+            _fileUploadStorage = fileUploadStorage;
         }
 
         public async Task InvokeAsync(HttpContext context)

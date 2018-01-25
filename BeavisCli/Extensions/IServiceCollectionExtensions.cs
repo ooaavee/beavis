@@ -9,27 +9,33 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddBeavisCli(this IServiceCollection services, Action<WebCliOptions> setupAction = null)
         {
+            var options = new WebCliOptions();
+
             if (setupAction == null)
             {
-                setupAction = o =>
-                {
-                    o.EnableDefaultApplications = true;
-                    o.EnableDefaultApplicationsBrowsing = true;
-                    o.EnableFileUpload = true;
-                    o.UnauthorizedHandler = new UnauthorizedHandler();
-                    o.TerminalInitializer = new TerminalInitializer();
-                    o.FileUploadStorage = new FileUploadStorage();
-                };
+                setupAction = o => { };
             }
 
-            var options = new WebCliOptions();
             setupAction(options);
+
             services.Configure(setupAction);
 
             services.AddSingleton<WebCliSandbox>();
             services.AddSingleton<WebRenderer>();
             services.AddSingleton<IJobPool, JobManager>();
             services.AddSingleton<JobManager>();
+
+            services.Add(options.UnauthorizedHandlerType == null
+                ? ServiceDescriptor.Singleton(typeof(IUnauthorizedHandler), typeof(NullVoidService))
+                : ServiceDescriptor.Singleton(typeof(IUnauthorizedHandler), options.UnauthorizedHandlerType));
+
+            services.Add(options.TerminalInitializerType == null
+                ? ServiceDescriptor.Singleton(typeof(ITerminalInitializer), typeof(NullVoidService))
+                : ServiceDescriptor.Singleton(typeof(ITerminalInitializer), options.TerminalInitializerType));
+
+            services.Add(options.FileUploadStorageType == null
+                ? ServiceDescriptor.Singleton(typeof(IFileUploadStorage), typeof(NullVoidService))
+                : ServiceDescriptor.Singleton(typeof(IFileUploadStorage), options.FileUploadStorageType));
 
             if (options.EnableDefaultApplications)
             {
@@ -40,14 +46,14 @@ namespace Microsoft.Extensions.DependencyInjection
 
                 if (options.EnableFileUpload)
                 {
-                    if (options.FileUploadStorage == null)
+                    if (options.FileUploadStorageType == null)
                     {
-                        throw new InvalidOperationException("FileUpload is true, but FileUploadStorage has not been set.");
+                        throw new InvalidOperationException($"{nameof(options.EnableFileUpload)} is true, but {nameof(options.FileUploadStorageType)} has not been set.");
                     }
+
                     services.AddSingletonWebCliApplication<Upload>();
                 }
             }
-
 
             services.AddMemoryCache();
 

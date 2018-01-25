@@ -5,7 +5,7 @@
     /// </summary>
     internal class UnauthorizedHandler : IUnauthorizedHandler
     {
-        public void HandleUnauthorizedApplicationExecution(WebCliContext context)
+        public void OnUnauthorized(WebCliContext context)
         {
             context.Response.WriteError("Unauthorized");
         }

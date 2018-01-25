@@ -2,6 +2,6 @@
 {
     public interface IUnauthorizedHandler
     {
-        void HandleUnauthorizedApplicationExecution(WebCliContext context);
+        void OnUnauthorized(WebCliContext context);
     }
 }

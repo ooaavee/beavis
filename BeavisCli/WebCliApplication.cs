@@ -77,8 +77,8 @@ namespace BeavisCli
 
         protected Task<int> Unauthorized(WebCliContext context)
         {
-            var options = context.HttpContext.RequestServices.GetRequiredService<IOptions<WebCliOptions>>();
-            options.Value.UnauthorizedHandler?.HandleUnauthorizedApplicationExecution(context);
+            IUnauthorizedHandler handler = context.HttpContext.RequestServices.GetRequiredService<IUnauthorizedHandler>();
+            handler.OnUnauthorized(context);
             return Task.FromResult(ExitStatusCode);
         }
 
