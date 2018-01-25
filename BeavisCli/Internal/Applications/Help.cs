@@ -26,9 +26,9 @@ namespace BeavisCli.Internal.Applications
 
                 foreach (WebCliApplication app in _sandbox.GetApplications(context.HttpContext))
                 {
-                    if (!_options.AreDefaultApplicationsBrowsable)
+                    if (!_options.EnableDefaultApplicationsBrowsing)
                     {
-                        if (IsDefault(app))
+                        if (_sandbox.IsDefault(app))
                         {
                             continue;
                         }
@@ -49,7 +49,7 @@ namespace BeavisCli.Internal.Applications
                         continue;
                     }
 
-                    if (IsDefault(app))
+                    if (_sandbox.IsDefault(app))
                     {
                         defaultApplications.Add(app);
                     }
@@ -80,10 +80,6 @@ namespace BeavisCli.Internal.Applications
             }, context);
         }
 
-        private bool IsDefault(WebCliApplication app)
-        {
-            return app.GetType().Assembly.Equals(GetType().Assembly);
-        }
 
     }
 }

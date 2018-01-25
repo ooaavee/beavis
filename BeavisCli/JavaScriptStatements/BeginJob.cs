@@ -19,7 +19,7 @@ namespace BeavisCli.JavaScriptStatements
 
         public string GetJavaScript()
         {
-            string js = $"service.beginJob('{JavaScriptEncoder.Default.Encode(_key)}', terminal);";
+            string js = $"$ctrl.beginJob('{JavaScriptEncoder.Default.Encode(_key)}', terminal);";
             return js;
         }
     }

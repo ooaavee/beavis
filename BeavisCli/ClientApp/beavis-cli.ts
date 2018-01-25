@@ -31,11 +31,11 @@ namespace BeavisCli {
     }
 
 
-    class CliService {
-        static $inject = ["$rootScope", "$http"];
-
+    class CliController {
         private uploader: IUploader;
         private terminal: any;
+
+        static $inject = ["$rootScope", "$http"];
 
 
         constructor(private $rootScope: ng.IRootScopeService, private $http: ng.IHttpService) {
@@ -46,10 +46,7 @@ namespace BeavisCli {
             });
 
             this.$rootScope.$on("terminal.input", (e, input, terminal) => {
-                var value = input.trim();
-                if (value.length > 0) {
-                    this.handleInput(value);
-                }
+                this.processInput(input);
             });
         }
 
@@ -58,16 +55,13 @@ namespace BeavisCli {
          * Initializes the file uploader.
          */
         private initUploader() {
-            var self = this;
+            var input = document.querySelector("#uploader");
 
-            self.uploader = {
-                input: document.querySelector("#uploader"),
-                file: null
-            };
-
-            self.uploader.input.addEventListener("change", () => {
-                self.beginUpload();
+            input.addEventListener("change", () => {
+                 this.beginUpload();
             });
+
+            this.uploader = { input: input, file: null };
         }
 
 
@@ -75,19 +69,17 @@ namespace BeavisCli {
          * Occurs when the JQuery Terminal component has been mounted.
          */
         private onMount(terminal: any) {
-            let self = this;
+            this.terminal = terminal;
 
-            self.terminal = terminal;
-
-            self.terminal.completion = (terminal, command, callback) => {
+            this.terminal.completion = (terminal, command, callback) => {
                 if (window["__terminal_completion"]) {
                     callback(window["__terminal_completion"]);
                 }
             };
 
-            self.$http.post<IResponse>("/beavis-cli/api/initialize", null, { headers: { 'Content-Type': "application/json" } })
+            this.$http.post<IResponse>("/beavis-cli/api/initialize", null, { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
-                    self.handleResponse(data, self.terminal, self);
+                    this.handleResponse(data, this.terminal, this);
                 }).error((data, status) => {
                     debugger;
                 });
@@ -95,31 +87,22 @@ namespace BeavisCli {
 
 
         /**
-         * Handles JQuery terminal input events.
+         * Process JQuery terminal input events.
          */
-        private handleInput(input: string) {
-            let self = this;
-
+        private processInput(input: string) {
+            // triggers file uploading process
             if (input === "upload") {
-                self.triggerUpload();
+                this.uploader.input.click();
                 return;
             }
 
-            self.$http.post<IResponse>("/beavis-cli/api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
+            // send server request
+            this.$http.post<IResponse>("/beavis-cli/api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
-                    self.handleResponse(data, self.terminal, self);
+                    this.handleResponse(data, this.terminal, this);
                 }).error((data, status) => {
                     debugger;
                 });
-        }
-
-
-        /**
-         * Triggers file uploading process.
-         */
-        private triggerUpload() {
-            var self = this;
-            self.uploader.input.click();
         }
 
 
@@ -127,25 +110,28 @@ namespace BeavisCli {
          * Begins file uploading.
          */
         private beginUpload() {
-            var self = this;
+            var file = this.uploader.input.files.item(0);
 
-            var file = self.uploader.input.files.item(0);
-
-            self.uploader.file = { name: file.name, type: file.type, dataUrl: null };
+            this.uploader.file = { name: file.name, type: file.type, dataUrl: null };
 
             var reader = new FileReader();
             reader.readAsDataURL(file);
 
             reader.onload = () => {
-                self.uploader.file.dataUrl = reader.result;
+                this.uploader.file.dataUrl = reader.result;
 
-                // TODO: Kutsu omaa palvelua...
+                this.$http.post<IResponse>("/beavis-cli/api/upload", JSON.stringify(this.uploader.file), { headers: { 'Content-Type': "application/json" } })
+                    .success((data: IResponse) => {
+                        this.handleResponse(data, this.terminal, this);
+                    }).error((data, status) => {
+                        debugger;
+                    });
 
-                debugger;
+                this.uploader.file = null;
             };
 
             reader.onerror = error => {
-                self.uploader.file = null;
+                this.uploader.file = null;
                 console.log('Error: ', error);
                 debugger;
             };
@@ -156,11 +142,9 @@ namespace BeavisCli {
          * Begins a new job.
          */
         private beginJob(key: string, terminal: any) {
-            let self = this;
-
-            self.$http.post<IResponse>("/beavis-cli/api/job?key=" + encodeURIComponent(key), null, { headers: { 'Content-Type': "application/json" } })
+            this.$http.post<IResponse>("/beavis-cli/api/job?key=" + encodeURIComponent(key), null, { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
-                    self.handleResponse(data, terminal, self);
+                    this.handleResponse(data, terminal, this);
                 }).error((data, status) => {
                     debugger;
                 });
@@ -170,7 +154,7 @@ namespace BeavisCli {
         /**
          * Handles a response from the server.
          */
-        private handleResponse(response: IResponse, terminal: any, service: CliService) {
+        private handleResponse(response: IResponse, terminal: any, $ctrl: CliController) {
             // 1. Write terminal output messages.
             this.$rootScope.$emit("terminal.output", response.messages);
 
@@ -181,7 +165,8 @@ namespace BeavisCli {
         }
 
     }
-    app.service("backend", CliService);
+    app.controller("cli", CliController);
+
 
 
     app.directive("angularTerminal", ["$rootScope", function ($rootScope) {
@@ -189,10 +174,14 @@ namespace BeavisCli {
             restrict: "A",
             link(scope, element, attrs) {
 
-                // Receive terminal input events and notify the CliService about that
+                // Receive terminal input events and notify the CliController about that
                 const terminal = element.terminal((input, terminal) => {
+                    var value: string = input.trim();
+                    if (value.length > 0) {
                         $rootScope.$emit("terminal.input", input, terminal);
-                    },
+
+                    }
+                },
                     {
                         greetings: attrs.greetings || "",
                         completion(command, callback) {
@@ -202,10 +191,10 @@ namespace BeavisCli {
                         }
                     });
 
-                // Notify CliService that we are ready to go!
+                // Notify CliController that we are ready to go!
                 $rootScope.$emit("terminal.mounted", terminal);
 
-                // Receive terminal output evens from the CliService
+                // Receive terminal output evens from the CliController
                 $rootScope.$on("terminal.output", (e, messages: IMessage[]) => {
                     for (let i = 0; i < messages.length; i++) {
 
@@ -238,13 +227,5 @@ namespace BeavisCli {
             }
         };
     }]);
-
-
-    class CliController {
-        static $inject = ["backend"];
-        constructor(private backend: CliService) { }
-    }
-    app.controller("cli", CliController);
-
 
 }

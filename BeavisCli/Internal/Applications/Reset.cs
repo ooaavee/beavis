@@ -28,7 +28,7 @@ namespace BeavisCli.Internal.Applications
 
                  context.Response.WriteFile(data, "beavis.png", "image/png");
 
-                //string js = $"service.upload(terminal);";
+                //string js = $"$ctrl.upload(terminal);";
 
                 //context.Response.Statements.Add(js);
 

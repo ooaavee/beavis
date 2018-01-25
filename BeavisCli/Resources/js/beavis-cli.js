@@ -1,8 +1,8 @@
 var BeavisCli;
 (function (BeavisCli) {
     var app = angular.module("BeavisCli", []);
-    var CliService = (function () {
-        function CliService($rootScope, $http) {
+    var CliController = (function () {
+        function CliController($rootScope, $http) {
             var _this = this;
             this.$rootScope = $rootScope;
             this.$http = $http;
@@ -11,95 +11,95 @@ var BeavisCli;
                 _this.onMount(terminal);
             });
             this.$rootScope.$on("terminal.input", function (e, input, terminal) {
-                var value = input.trim();
-                if (value.length > 0) {
-                    _this.handleInput(value);
-                }
+                _this.processInput(input);
             });
         }
-        CliService.prototype.initUploader = function () {
-            var self = this;
-            self.uploader = {
-                input: document.querySelector("#uploader"),
-                file: null
-            };
-            self.uploader.input.addEventListener("change", function () {
-                self.beginUpload();
+        CliController.prototype.initUploader = function () {
+            var _this = this;
+            var input = document.querySelector("#uploader");
+            input.addEventListener("change", function () {
+                _this.beginUpload();
             });
+            this.uploader = { input: input, file: null };
         };
-        CliService.prototype.onMount = function (terminal) {
-            var self = this;
-            self.terminal = terminal;
-            self.terminal.completion = function (terminal, command, callback) {
+        CliController.prototype.onMount = function (terminal) {
+            var _this = this;
+            this.terminal = terminal;
+            this.terminal.completion = function (terminal, command, callback) {
                 if (window["__terminal_completion"]) {
                     callback(window["__terminal_completion"]);
                 }
             };
-            self.$http.post("/beavis-cli/api/initialize", null, { headers: { 'Content-Type': "application/json" } })
+            this.$http.post("/beavis-cli/api/initialize", null, { headers: { 'Content-Type': "application/json" } })
                 .success(function (data) {
-                self.handleResponse(data, self.terminal, self);
+                _this.handleResponse(data, _this.terminal, _this);
             }).error(function (data, status) {
                 debugger;
             });
         };
-        CliService.prototype.handleInput = function (input) {
-            var self = this;
+        CliController.prototype.processInput = function (input) {
+            var _this = this;
             if (input === "upload") {
-                self.triggerUpload();
+                this.uploader.input.click();
                 return;
             }
-            self.$http.post("/beavis-cli/api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
+            this.$http.post("/beavis-cli/api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
                 .success(function (data) {
-                self.handleResponse(data, self.terminal, self);
+                _this.handleResponse(data, _this.terminal, _this);
             }).error(function (data, status) {
                 debugger;
             });
         };
-        CliService.prototype.triggerUpload = function () {
-            var self = this;
-            self.uploader.input.click();
-        };
-        CliService.prototype.beginUpload = function () {
-            var self = this;
-            var file = self.uploader.input.files.item(0);
-            self.uploader.file = { name: file.name, type: file.type, dataUrl: null };
+        CliController.prototype.beginUpload = function () {
+            var _this = this;
+            var file = this.uploader.input.files.item(0);
+            this.uploader.file = { name: file.name, type: file.type, dataUrl: null };
             var reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = function () {
-                self.uploader.file.dataUrl = reader.result;
-                debugger;
+                _this.uploader.file.dataUrl = reader.result;
+                _this.$http.post("/beavis-cli/api/upload", JSON.stringify(_this.uploader.file), { headers: { 'Content-Type': "application/json" } })
+                    .success(function (data) {
+                    _this.handleResponse(data, _this.terminal, _this);
+                }).error(function (data, status) {
+                    debugger;
+                });
+                _this.uploader.file = null;
             };
             reader.onerror = function (error) {
-                self.uploader.file = null;
+                _this.uploader.file = null;
                 console.log('Error: ', error);
                 debugger;
             };
         };
-        CliService.prototype.beginJob = function (key, terminal) {
-            var self = this;
-            self.$http.post("/beavis-cli/api/job?key=" + encodeURIComponent(key), null, { headers: { 'Content-Type': "application/json" } })
+        CliController.prototype.beginJob = function (key, terminal) {
+            var _this = this;
+            this.$http.post("/beavis-cli/api/job?key=" + encodeURIComponent(key), null, { headers: { 'Content-Type': "application/json" } })
                 .success(function (data) {
-                self.handleResponse(data, terminal, self);
+                _this.handleResponse(data, terminal, _this);
             }).error(function (data, status) {
                 debugger;
             });
         };
-        CliService.prototype.handleResponse = function (response, terminal, service) {
+        CliController.prototype.handleResponse = function (response, terminal, $ctrl) {
             this.$rootScope.$emit("terminal.output", response.messages);
             for (var i = 0; i < response.statements.length; i++) {
                 eval(response.statements[i]);
             }
         };
-        return CliService;
+        return CliController;
     }());
-    CliService.$inject = ["$rootScope", "$http"];
-    app.service("backend", CliService);
+    CliController.$inject = ["$rootScope", "$http"];
+    app.controller("cli", CliController);
     app.directive("angularTerminal", ["$rootScope", function ($rootScope) {
             return {
                 restrict: "A",
                 link: function (scope, element, attrs) {
                     var terminal = element.terminal(function (input, terminal) {
-                        $rootScope.$emit("terminal.input", input, terminal);
+                        var value = input.trim();
+                        if (value.length > 0) {
+                            $rootScope.$emit("terminal.input", input, terminal);
+                        }
                     }, {
                         greetings: attrs.greetings || "",
                         completion: function (command, callback) {
@@ -135,12 +135,4 @@ var BeavisCli;
                 }
             };
         }]);
-    var CliController = (function () {
-        function CliController(backend) {
-            this.backend = backend;
-        }
-        return CliController;
-    }());
-    CliController.$inject = ["backend"];
-    app.controller("cli", CliController);
 })(BeavisCli || (BeavisCli = {}));

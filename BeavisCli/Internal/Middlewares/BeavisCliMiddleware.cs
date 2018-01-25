@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
-namespace BeavisCli.Internal
+namespace BeavisCli.Internal.Middlewares
 {
     internal class BeavisCliMiddleware
     {
@@ -14,7 +14,8 @@ namespace BeavisCli.Internal
         private readonly WebCliSandbox _sandbox;
         private readonly WebRenderer _renderer;
         private readonly JobManager _jobManager;
-        private readonly WebCliOptions _options;
+        private readonly ITerminalInitializer _initializer;
+        private readonly IFileUploadStorage _fileUploadStorage;
 
         public BeavisCliMiddleware(RequestDelegate next, WebCliSandbox sandbox, WebRenderer renderer, JobManager jobManager, IOptions<WebCliOptions> options)
         {
@@ -22,11 +23,24 @@ namespace BeavisCli.Internal
             _sandbox = sandbox;
             _renderer = renderer;
             _jobManager = jobManager;
-            _options = options.Value;
+
+            _initializer = options.Value.TerminalInitializer;
+
+            if (options.Value.EnableFileUpload)
+            {
+                _fileUploadStorage = options.Value.FileUploadStorage;
+            }
+
         }
 
         public async Task InvokeAsync(HttpContext context)
         {
+            if (!IsValidPathStart(context))
+            {
+                await _next(context);
+                return;
+            }
+
             if (IsPath("/beavis-cli", HttpMethods.Get, context))
             {
                 await _renderer.RenderHtmlAsync(context);
@@ -48,7 +62,7 @@ namespace BeavisCli.Internal
             if (IsPath("/beavis-cli/api/initialize", HttpMethods.Post, context))
             {
                 var response = new WebCliResponse(context);
-                _options.TerminalInitializer?.Initialize(context, response);
+                _initializer?.Initialize(context, response);
                 await _renderer.RenderResponseAsync(response, context);
                 return;
             }
@@ -72,13 +86,31 @@ namespace BeavisCli.Internal
                 return;
             }
 
+            if (IsPath("/beavis-cli/api/upload", HttpMethods.Post, context))
+            {
+                var body = GetRequestBodyAsText(context);
+                var response = new WebCliResponse(context);
+                if (_fileUploadStorage != null)
+                {
+                    var file = JsonConvert.DeserializeObject<UploadedFile>(body);
+                    await _fileUploadStorage.UploadAsync(file, response);
+                }
+                await _renderer.RenderResponseAsync(response, context);
+                return;
+            }
+
             await _next(context);
+        }
+
+        private static bool IsValidPathStart(HttpContext context)
+        {
+            return context.Request.Path.HasValue &&
+                   context.Request.Path.StartsWithSegments("/beavis-cli", StringComparison.InvariantCultureIgnoreCase);
         }
 
         private static bool IsPath(string path, string httpMethod, HttpContext context)
         {
             return context.Request.Method == httpMethod &&
-                   context.Request.Path.HasValue &&
                    context.Request.Path.Equals(path, StringComparison.InvariantCultureIgnoreCase);
         }
 

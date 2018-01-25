@@ -22,9 +22,15 @@ namespace BeavisCli
         /// </summary>
         public event EventHandler Sending;
 
+        /// <summary>
+        /// Response messages
+        /// </summary>
         [JsonProperty("messages")]
         public List<ResponseMessage> Messages { get; } = new List<ResponseMessage>();
 
+        /// <summary>
+        /// JavaScript statements that will be evaluated on the client-side.
+        /// </summary>
         [JsonProperty("statements")]
         public List<string> Statements { get; } = new List<string>();
 
@@ -132,10 +138,16 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(job));
             }
 
+            // This will be invoked just before we are sending the response.
             Sending += (sender, args) =>
             {
+                // 1. Get the IJobPool.
                 var pool = _context.RequestServices.GetRequiredService<IJobPool>();
+
+                // 2. Push job.
                 var key = pool.Push(job);
+
+                // 3. Add a JavaScript statement that begins the job on the client-side.
                 AddStatement(new BeginJob(key));
             };
         }
@@ -154,23 +166,6 @@ namespace BeavisCli
                 }
             }
         }
-
-
-        /////// <summary>
-        /////// Creates a TextWriter for information messages.
-        /////// </summary>
-        ////public TextWriter CreateTextWriterForInformationMessages()
-        ////{
-        ////    return new ResponseMessageTextWriter(WriteInformation);
-        ////}
-
-        /////// <summary>
-        /////// Creates a TextWriter for error messages.
-        /////// </summary>
-        ////public TextWriter CreateTextWriterForErrorMessages()
-        ////{
-        ////    return new ResponseMessageTextWriter(WriteError);
-        ////}
 
     }
 }

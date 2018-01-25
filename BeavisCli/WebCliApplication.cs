@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using System;
 using System.Threading.Tasks;
+using BeavisCli.Internal;
 
 namespace BeavisCli
 {
@@ -53,8 +54,13 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(context));
             }
 
+            var sandbox = context.HttpContext.RequestServices.GetRequiredService<WebCliSandbox>();
+
+            var args = sandbox.ParseApplicationArgs(context.Request);
+
             await context.Host.Cli.OnExecuteAsync(invoke);
-            context.Host.Cli.Execute(context.Request.GetArgs());
+
+            context.Host.Cli.Execute(args);
         }
       
         protected Task<int> Exit(WebCliContext context)
@@ -65,6 +71,7 @@ namespace BeavisCli
         protected Task<int> ExitWithHelp(WebCliContext context)
         {
             context.Host.Cli.ShowHelp(Name);
+
             return Task.FromResult(ExitStatusCode);
         }
 
@@ -77,3 +84,32 @@ namespace BeavisCli
 
     }
 }
+
+
+//using System;
+//using System.Threading.Tasks;
+
+//namespace BeavisCli
+//{
+//    public class TestiApplikaatio : WebCliApplication
+//    {
+//        public TestiApplikaatio() : base("testi", "description...") { }
+
+//        public override async Task ExecuteAsync(WebCliContext context)
+//        {
+//            IOption opt1 = context.Option("-opt1", "Description", CommandOptionType.SingleValue);
+
+//            await base.OnExecuteAsync(() =>
+//            {
+//                string sss = null;
+
+
+
+//                return ExitWithHelp(context);
+//                //return Exit();
+
+//            }, context);
+
+//        }
+//    }
+//}

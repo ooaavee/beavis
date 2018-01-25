@@ -18,13 +18,13 @@ namespace BeavisCli.Internal
         {
             CommandOption option = _cli.Option(template, description, Map(optionType));
 
-            return new DefaultCommandOption(option);
+            return new Option(option);
         }
 
         public IArgument Argument(string name, string description, bool multipleValues = false)
         {
             var obj = _cli.Argument(name, description, multipleValues);
-            return new DefaultCommandArgument(obj);
+            return new CommandArgument(obj);
         }
 
         private static Microsoft.Extensions.CommandLineUtils.CommandOptionType Map(CommandOptionType optionType)

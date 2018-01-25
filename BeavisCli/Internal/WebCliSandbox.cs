@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BeavisCli.Internal
@@ -21,7 +22,7 @@ namespace BeavisCli.Internal
         {
             try
             {
-                string name = request.GetApplicationName();
+                string name = ParseApplicationName(request);
 
                 WebCliApplication application = FindApplicaton(name, httpContext);
 
@@ -88,7 +89,7 @@ namespace BeavisCli.Internal
 
             if (matchCount == 0)
             {
-                if (_options.UseDefaultApplications)
+                if (_options.EnableDefaultApplications)
                 {
                     throw new BeavisCliSandboxException($"{name} is not a valid application.{Environment.NewLine}Usage 'help' to get list of applications.");
                 }
@@ -103,5 +104,53 @@ namespace BeavisCli.Internal
             IEnumerable<WebCliApplication> applications = httpContext.RequestServices.GetServices<WebCliApplication>();
             return applications;
         }
+
+        public bool IsDefault(WebCliApplication app)
+        {
+            return app.GetType().Assembly.Equals(GetType().Assembly);
+        }
+
+        /// <summary>
+        /// Parses the application name from the request.
+        /// </summary>
+        public string ParseApplicationName(WebCliRequest request)
+        {
+            string value = null;
+            if (request.Input != null)
+            {
+                value = request.Input.Trim();
+                var tokens = value.Split(' ');
+                if (tokens.Any())
+                {
+                    value = tokens.First();
+                }
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// Parses application arguments from the request.
+        /// </summary>
+        public string[] ParseApplicationArgs(WebCliRequest request)
+        {
+            var args = new List<string>();
+            if (request.Input != null)
+            {
+                var tokens = request.Input.Trim().Split(' ');
+                if (tokens.Length > 1)
+                {
+                    for (var i = 1; i <= tokens.Length - 1; i++)
+                    {
+                        var arg = tokens[i].Trim();
+                        if (arg.Length > 0)
+                        {
+                            args.Add(arg);
+                        }
+                    }
+                }
+            }
+            return args.ToArray();
+        }
+
     }
 }

@@ -11,12 +11,14 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             if (setupAction == null)
             {
-                setupAction = x =>
+                setupAction = o =>
                 {
-                    x.UseDefaultApplications = true;
-                    x.AreDefaultApplicationsBrowsable = true;
-                    x.UnauthorizedHandler = new DefaultUnauthorizedHandler();
-                    x.TerminalInitializer = new DefaultTerminalInitializer();
+                    o.EnableDefaultApplications = true;
+                    o.EnableDefaultApplicationsBrowsing = true;
+                    o.EnableFileUpload = true;
+                    o.UnauthorizedHandler = new UnauthorizedHandler();
+                    o.TerminalInitializer = new TerminalInitializer();
+                    o.FileUploadStorage = new FileUploadStorage();
                 };
             }
 
@@ -29,12 +31,21 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IJobPool, JobManager>();
             services.AddSingleton<JobManager>();
 
-            if (options.UseDefaultApplications)
+            if (options.EnableDefaultApplications)
             {
                 services.AddSingletonWebCliApplication<Help>();
                 services.AddSingletonWebCliApplication<Clear>();
                 services.AddSingletonWebCliApplication<Reset>();
                 services.AddSingletonWebCliApplication<Shortcuts>();
+
+                if (options.EnableFileUpload)
+                {
+                    if (options.FileUploadStorage == null)
+                    {
+                        throw new InvalidOperationException("FileUpload is true, but FileUploadStorage has not been set.");
+                    }
+                    services.AddSingletonWebCliApplication<Upload>();
+                }
             }
 
 

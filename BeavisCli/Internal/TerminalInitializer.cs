@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BeavisCli.Internal
 {
-    internal class DefaultTerminalInitializer : ITerminalInitializer
+    internal class TerminalInitializer : ITerminalInitializer
     {
         public void Initialize(HttpContext context, WebCliResponse response)
         {

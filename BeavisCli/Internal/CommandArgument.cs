@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
-using BeavisCli.Microsoft.Extensions.CommandLineUtils;
 
 namespace BeavisCli.Internal
 {
-    internal class DefaultCommandArgument : IArgument
+    internal class CommandArgument : IArgument
     {
-        private readonly CommandArgument _target;
+        private readonly Microsoft.Extensions.CommandLineUtils.CommandArgument _target;
 
-        public DefaultCommandArgument(CommandArgument target)
+        public CommandArgument(Microsoft.Extensions.CommandLineUtils.CommandArgument target)
         {
             _target = target;
         }
