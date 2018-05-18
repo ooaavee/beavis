@@ -14,13 +14,12 @@ namespace BeavisCli.JavaScriptStatements
                 throw new ArgumentNullException(nameof(message));
             }
 
-            _message = JavaScriptEncoder.Default.Encode(message); ;
+            _message = JavaScriptEncoder.Default.Encode(message);
         }
 
         public string GetJavaScript()
         {
-            var js = $"alert('{_message}');";
-            return js;
+            return $"alert('{_message}');";
         }
     }
 }

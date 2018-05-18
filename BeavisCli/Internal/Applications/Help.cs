@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace BeavisCli.Internal.Applications
 {
-    [WebCliApplicationDefinition(Name = "help", Description = "Displays help")]
+    [WebCliApplicationDefinition(Name = "help", Description = "Displays help.")]
     internal class Help : WebCliApplication
     {
         private readonly WebCliSandbox _sandbox;
@@ -70,17 +70,13 @@ namespace BeavisCli.Internal.Applications
 
                 context.Response.WriteInformation("List of supported applications:");
 
-                foreach (string text in TerminalUtil.MakeBeautifulLines(lines))
+                foreach (string text in OutputRenderer.FormatLines(lines, true))
                 {
                     context.Response.WriteInformation(text);                    
                 }
 
-                context.Response.WriteEmptyLine();
-
                 return Exit(context);
             }, context);
         }
-
-
     }
 }

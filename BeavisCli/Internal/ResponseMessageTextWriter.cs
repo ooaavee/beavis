@@ -25,14 +25,9 @@ namespace BeavisCli.Internal
 
         public override void Write(char value)
         {
-            throw new WeShouldNeverEverBeHereException();
+            throw new InvalidOperationException("we shoud never be here");
         }
 
         public override Encoding Encoding => Encoding.UTF8;
-
-        private class WeShouldNeverEverBeHereException : Exception
-        {
-            public WeShouldNeverEverBeHereException() : base("fuck") { }
-        }
     }
 }

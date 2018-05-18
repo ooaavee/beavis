@@ -5,25 +5,23 @@ namespace BeavisCli.Internal
 {
     internal class WebCliApplicationHost
     {
-        private readonly CommandLineApplication _cli;
-
         public WebCliApplicationHost(CommandLineApplication cli)
         {
-            _cli = cli;
+            Cli = cli;
         }
 
-        public CommandLineApplication Cli => _cli;
+        public CommandLineApplication Cli { get; }
 
         public IOption Option(string template, string description, CommandOptionType optionType)
         {
-            CommandOption option = _cli.Option(template, description, Map(optionType));
+            CommandOption option = Cli.Option(template, description, Map(optionType));
 
             return new Option(option);
         }
 
         public IArgument Argument(string name, string description, bool multipleValues = false)
         {
-            var obj = _cli.Argument(name, description, multipleValues);
+            var obj = Cli.Argument(name, description, multipleValues);
             return new CommandArgument(obj);
         }
 

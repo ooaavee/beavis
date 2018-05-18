@@ -1,6 +1,6 @@
-﻿using System.Threading.Tasks;
-using BeavisCli.JavaScriptStatements;
+﻿using BeavisCli.JavaScriptStatements;
 using Microsoft.AspNetCore.Hosting;
+using System.Threading.Tasks;
 
 namespace BeavisCli.Internal.Applications
 {

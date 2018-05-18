@@ -166,6 +166,5 @@ namespace BeavisCli
                 }
             }
         }
-
     }
 }

@@ -38,9 +38,9 @@ namespace BeavisCli.Internal.Applications
                     new Tuple<string, string>("PAGE DOWN", "Scroll down (don't work in Chrome).")
                 };
 
-                context.Response.WriteInformation("This is list of keyboard shortcuts:");
+                context.Response.WriteInformation("Keyboard shortcuts:");
 
-                foreach (string text in TerminalUtil.MakeBeautifulLines(shortcuts))
+                foreach (string text in OutputRenderer.FormatLines(shortcuts, true))
                 {
                     context.Response.WriteInformation(text);
                 }

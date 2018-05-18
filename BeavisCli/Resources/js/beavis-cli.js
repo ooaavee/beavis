@@ -39,7 +39,7 @@ var BeavisCli;
         };
         CliController.prototype.processInput = function (input) {
             var _this = this;
-            if (input === "upload") {
+            if (input === "upload" && window["__upload_enabled"]) {
                 this.uploader.input.click();
                 return;
             }
@@ -87,9 +87,9 @@ var BeavisCli;
                 eval(response.statements[i]);
             }
         };
+        CliController.$inject = ["$rootScope", "$http"];
         return CliController;
     }());
-    CliController.$inject = ["$rootScope", "$http"];
     app.controller("cli", CliController);
     app.directive("angularTerminal", ["$rootScope", function ($rootScope) {
             return {

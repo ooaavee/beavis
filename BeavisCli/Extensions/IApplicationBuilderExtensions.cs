@@ -1,7 +1,7 @@
 ﻿using BeavisCli.Internal;
+using BeavisCli.Internal.Middlewares;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using BeavisCli.Internal.Middlewares;
 
 namespace Microsoft.AspNetCore.Builder
 {

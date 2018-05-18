@@ -26,7 +26,7 @@ namespace BeavisCli.Internal
             {
                 string name = ParseApplicationName(request);
 
-                WebCliApplication application = FindApplicaton(name, httpContext);
+                WebCliApplication application = GetApplicaton(name, httpContext);
 
                 CommandLineApplication cli = new CommandLineApplication
                 {
@@ -66,7 +66,7 @@ namespace BeavisCli.Internal
             }
         }
 
-        public WebCliApplication FindApplicaton(string name, HttpContext httpContext)
+        public WebCliApplication GetApplicaton(string name, HttpContext httpContext)
         {
             int matchCount = 0;
 
@@ -92,6 +92,7 @@ namespace BeavisCli.Internal
                 {
                     throw new BeavisCliSandboxException($"{name} is not a valid application.{Environment.NewLine}Usage 'help' to get list of applications.");
                 }
+
                 throw new BeavisCliSandboxException($"{name} is not a valid application.");
             }
 
@@ -102,7 +103,7 @@ namespace BeavisCli.Internal
         {
             foreach (WebCliApplication application in httpContext.RequestServices.GetServices<WebCliApplication>())
             {
-                if (application.Initialize())
+                if (application.TryInitialize())
                 {
                     yield return application;
                 }

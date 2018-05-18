@@ -18,6 +18,7 @@
     "WebSite": {
       "commandName": "Project",
       "launchBrowser": true,
+      "launchUrl": "http://localhost:63489/cli",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

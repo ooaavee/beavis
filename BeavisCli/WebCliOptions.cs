@@ -1,10 +1,11 @@
 ﻿using System;
-using BeavisCli.Internal;
 
 namespace BeavisCli
 {
     public class WebCliOptions
     {
+        public string Path { get; set; } = "/beavis-cli";
+
         public bool EnableDefaultApplications { get; set; } = true;
 
         public bool EnableDefaultApplicationsBrowsing { get; set; } = true;
@@ -16,7 +17,5 @@ namespace BeavisCli
         public Type TerminalInitializerType { get; set; } = typeof(DefaultTerminalInitializer);
 
         public Type FileUploadStorageType { get; set; } = typeof(DefaultFileUploadStorage);
-
-
     }
 }

@@ -57,8 +57,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddMemoryCache();
 
-           
-
             return services;
         }
 

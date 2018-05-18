@@ -3,12 +3,20 @@ using Microsoft.AspNetCore.Http;
 
 namespace BeavisCli.Internal
 {
+    /// <summary>
+    /// An internal backup service that does nothing.
+    /// </summary>
     internal class NullVoidService : IUnauthorizedHandler, ITerminalInitializer, IFileUploadStorage
     {
-        public void OnUnauthorized(WebCliContext context) { }
-        public void Initialize(HttpContext context, WebCliResponse response) { }
+        void IUnauthorizedHandler.OnUnauthorized(WebCliContext context)
+        {
+        }
 
-        public Task UploadAsync(UploadedFile file, WebCliResponse response)
+        void ITerminalInitializer.Initialize(HttpContext context, WebCliResponse response)
+        {
+        }
+
+        Task IFileUploadStorage.UploadAsync(UploadedFile file, WebCliResponse response)
         {
             return Task.CompletedTask;
         }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,31 +8,38 @@ namespace BeavisCli
 {
     public abstract class WebCliApplication
     {
-        private WebCliApplicationDefinitionAttribute _definition;
-
         private const int ExitStatusCode = 2;
 
-        public string Name => _definition?.Name;
+        /// <summary>
+        /// Application name
+        /// </summary>
+        public string Name { get; private set; }
 
-        public string Description => _definition?.Description;
+        /// <summary>
+        /// Application description
+        /// </summary>
+        public string Description { get; private set; }
+
+        internal bool TryInitialize()
+        {
+            if (GetType().GetCustomAttributes(typeof(WebCliApplicationDefinitionAttribute), true) is WebCliApplicationDefinitionAttribute[] attributes && attributes.Any())
+            {
+                WebCliApplicationDefinitionAttribute definition = attributes.First();
+                Name = definition.Name;
+                Description = definition.Description;
+                return true;
+            }
+
+            return false;
+        }
 
         public virtual bool IsAuthorized(WebCliContext context)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
             return true;
         }
 
         public virtual bool IsBrowsable(WebCliContext context)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
             return true;
         }
 
@@ -77,15 +83,6 @@ namespace BeavisCli
             IUnauthorizedHandler handler = context.HttpContext.RequestServices.GetRequiredService<IUnauthorizedHandler>();
             handler.OnUnauthorized(context);
             return Task.FromResult(ExitStatusCode);
-        }
-
-        internal bool Initialize()
-        {
-            if (GetType().GetCustomAttributes(typeof(WebCliApplicationDefinitionAttribute), true) is WebCliApplicationDefinitionAttribute[] attributes && attributes.Any())
-            {
-                _definition = attributes.First();
-            }
-            return _definition != null;
         }
     }
 }

@@ -39,6 +39,5 @@ namespace BeavisCli
         }
 
         internal WebCliApplicationHost Host { get; }
-
     }
 }

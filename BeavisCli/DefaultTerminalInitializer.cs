@@ -3,7 +3,9 @@ using BeavisCli.JavaScriptStatements;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reflection;
+using Microsoft.Extensions.Options;
 
 namespace BeavisCli
 {
@@ -13,6 +15,7 @@ namespace BeavisCli
         {
             DisplayInfoText(context, response);
             PrepareTabCompletion(context, response);
+            SetVariables(context, response);
         }
 
         protected virtual void DisplayInfoText(HttpContext context, WebCliResponse response)
@@ -36,6 +39,13 @@ namespace BeavisCli
                 applications.Add(application.Name);
             }
             response.AddStatement(new SetTerminalCompletionDictionary(applications.ToArray()));
+        }
+
+        protected virtual void SetVariables(HttpContext context, WebCliResponse response)
+        {
+            IOptions<WebCliOptions> options = context.RequestServices.GetRequiredService<IOptions<WebCliOptions>>();
+            bool enabled = options.Value.EnableFileUpload;
+            response.AddStatement(new SetUploadEnabled(enabled));
         }
     }
 }
