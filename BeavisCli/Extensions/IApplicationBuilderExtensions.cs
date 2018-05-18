@@ -9,11 +9,6 @@ namespace Microsoft.AspNetCore.Builder
     {
         public static IApplicationBuilder UseBeavisCli(this IApplicationBuilder app)
         {
-            if (app == null)
-            {
-                throw new ArgumentNullException(nameof(app));
-            }
-
             if (app.ApplicationServices.GetService(typeof(WebCliSandbox)) == null)
             {
                 throw new InvalidOperationException(

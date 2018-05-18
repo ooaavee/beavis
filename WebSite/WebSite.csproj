@@ -9,6 +9,7 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BeavisCli.Debugging\BeavisCli.Debugging.csproj" />
     <ProjectReference Include="..\BeavisCli\BeavisCli.csproj" />
   </ItemGroup>
 </Project>

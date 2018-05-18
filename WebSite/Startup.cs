@@ -23,11 +23,7 @@ namespace WebSite
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddBeavisCli(o =>
-            {
-                o.Path = "/cli";
-                o.EnableFileUpload = false;
-            });          
+            services.AddBeavisCliDebugging();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,7 +39,7 @@ namespace WebSite
                 app.UseExceptionHandler("/Error");
             }
 
-            app.UseBeavisCli();
+            app.UseBeavisCliDebugging();
 
             app.UseStaticFiles();
 

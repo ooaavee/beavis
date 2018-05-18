@@ -18,7 +18,7 @@
     "WebSite": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "http://localhost:63489/cli",
+      "launchUrl": "http://localhost:63489/debug",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

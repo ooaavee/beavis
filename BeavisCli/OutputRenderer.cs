@@ -26,15 +26,17 @@ namespace BeavisCli
 
             var leftPadding = indent ? ParagraphPadding : "";
 
+            List<string> texts = new List<string>();
+
             foreach (Tuple<string, string> item in items)
             {
                 var s = $"{leftPadding}{(item.Item1 + new string(' ', maxLen)).Substring(0, maxLen + 1)}{ParagraphPadding}{item.Item2}";
 
-                yield return s;
+                texts.Add(s);
 
             }
 
-            //return texts;
+            return texts;
         }
 
     }
