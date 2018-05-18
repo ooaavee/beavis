@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace BeavisCli.Internal
+namespace BeavisCli
 {
-    internal static class TerminalUtil
+    public static class TerminalUtil
     {
         public static IEnumerable<string> MakeBeautifulLines(List<Tuple<string, string>> lines)
         {

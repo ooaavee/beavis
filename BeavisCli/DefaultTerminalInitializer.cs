@@ -1,18 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using BeavisCli.Internal;
 using BeavisCli.JavaScriptStatements;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
+using System.Reflection;
 
-namespace BeavisCli.Internal
+namespace BeavisCli
 {
-    internal class TerminalInitializer : ITerminalInitializer
+    public class DefaultTerminalInitializer : ITerminalInitializer
     {
-        public void Initialize(HttpContext context, WebCliResponse response)
+        public virtual void Initialize(HttpContext context, WebCliResponse response)
         {
-            // Display app name and some copyright stuff.  
-            //
+            DisplayInfoText(context, response);
+            PrepareTabCompletion(context, response);
+        }
+
+        protected virtual void DisplayInfoText(HttpContext context, WebCliResponse response)
+        {
             Assembly assembly = GetType().GetTypeInfo().Assembly;
             AssemblyName name = assembly.GetName();
             AssemblyProductAttribute product = assembly.GetCustomAttribute<AssemblyProductAttribute>();
@@ -21,9 +25,10 @@ namespace BeavisCli.Internal
 
             response.WriteSuccess($"{product.Product} {version}");
             response.WriteSuccess($"{copyright.Copyright}. MIT License.");
+        }
 
-            // Tabcompletion
-            //
+        protected virtual void PrepareTabCompletion(HttpContext context, WebCliResponse response)
+        {
             var sandbox = context.RequestServices.GetRequiredService<WebCliSandbox>();
             var applications = new List<string>();
             foreach (var application in sandbox.GetApplications(context))

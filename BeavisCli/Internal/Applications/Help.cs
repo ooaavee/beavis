@@ -6,12 +6,13 @@ using Microsoft.Extensions.Options;
 
 namespace BeavisCli.Internal.Applications
 {
+    [WebCliApplicationDefinition(Name = "help", Description = "Displays help")]
     internal class Help : WebCliApplication
     {
         private readonly WebCliSandbox _sandbox;
         private readonly WebCliOptions _options;
 
-        public Help(WebCliSandbox sandbox, IOptions<WebCliOptions> options) : base("help", "Displays help")
+        public Help(WebCliSandbox sandbox, IOptions<WebCliOptions> options)
         {
             _sandbox = sandbox;
             _options = options.Value;

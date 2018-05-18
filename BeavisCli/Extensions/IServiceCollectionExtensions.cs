@@ -22,8 +22,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddSingleton<WebCliSandbox>();
             services.AddSingleton<WebRenderer>();
-            services.AddSingleton<IJobPool, JobManager>();
-            services.AddSingleton<JobManager>();
+            services.AddSingleton<IJobPool, DefaultJobPool>();
+            services.AddSingleton<DefaultJobPool>();
 
             services.Add(options.UnauthorizedHandlerType == null
                 ? ServiceDescriptor.Singleton(typeof(IUnauthorizedHandler), typeof(NullVoidService))

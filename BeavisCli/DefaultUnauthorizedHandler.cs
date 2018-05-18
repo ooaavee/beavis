@@ -1,9 +1,9 @@
-﻿namespace BeavisCli.Internal
+﻿namespace BeavisCli
 {
     /// <summary>
     /// Handler for unauthorized application execution attempts.
     /// </summary>
-    internal class UnauthorizedHandler : IUnauthorizedHandler
+    public class DefaultUnauthorizedHandler : IUnauthorizedHandler
     {
         public void OnUnauthorized(WebCliContext context)
         {

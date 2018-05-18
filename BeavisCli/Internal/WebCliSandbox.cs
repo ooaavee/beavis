@@ -62,7 +62,7 @@ namespace BeavisCli.Internal
             }
             catch (Exception ex)
             {
-                response.WriteError(ex, returnStackTrace: true);
+                response.WriteError(ex, true);
             }
         }
 
@@ -100,8 +100,13 @@ namespace BeavisCli.Internal
 
         public IEnumerable<WebCliApplication> GetApplications(HttpContext httpContext)
         {
-            IEnumerable<WebCliApplication> applications = httpContext.RequestServices.GetServices<WebCliApplication>();
-            return applications;
+            foreach (WebCliApplication application in httpContext.RequestServices.GetServices<WebCliApplication>())
+            {
+                if (application.Initialize())
+                {
+                    yield return application;
+                }
+            }
         }
 
         public bool IsDefault(WebCliApplication app)
@@ -150,6 +155,5 @@ namespace BeavisCli.Internal
             }
             return args.ToArray();
         }
-
     }
 }

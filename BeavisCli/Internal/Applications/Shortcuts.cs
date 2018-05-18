@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace BeavisCli.Internal.Applications
-{  
+{
+    [WebCliApplicationDefinition(Name = "shortcuts", Description = "Displays a list of keyboard shortcuts.")]
     internal class Shortcuts : WebCliApplication
     {
-        public Shortcuts() : base("shortcuts", "Displays a list of keyboard shortcuts.") { }
-
         public override async Task ExecuteAsync(WebCliContext context)
         {
             await OnExecuteAsync(() =>
@@ -24,7 +23,6 @@ namespace BeavisCli.Internal.Applications
                     new Tuple<string, string>("CTRL+Y", "Paste text from kill area."),
                     new Tuple<string, string>("Delete/backspace", "Remove one character from right/left to the cursor."),
                     new Tuple<string, string>("Left Arrow/CTRL+B", "Move left."),
-                    //new Tuple<string, string>("CTRL+TAB", "Switch to next terminal (use scrolling with animation) (don't work in Chrome)."),
                     new Tuple<string, string>("Right Arrow/CTRL+F", "Move right."),
                     new Tuple<string, string>("CTRL+Left Arrow", "Move one word to the left."),
                     new Tuple<string, string>("CTRL+Right Arrow", "Move one word to the right."),
@@ -38,7 +36,6 @@ namespace BeavisCli.Internal.Applications
                     new Tuple<string, string>("ALT+D", "Remove one word after the cursor (don't work in IE)."),
                     new Tuple<string, string>("PAGE UP", "Scroll up (don't work in Chrome)."),
                     new Tuple<string, string>("PAGE DOWN", "Scroll down (don't work in Chrome).")
-                    //new Tuple<string, string>("CTRL+D", "Run previous interpreter from the stack or call logout (if terminal is using authentication and current interpreter is the first one). It also cancel all ajax call, if terminal is paused, and resume it.")
                 };
 
                 context.Response.WriteInformation("This is list of keyboard shortcuts:");
@@ -50,8 +47,6 @@ namespace BeavisCli.Internal.Applications
 
                 return Exit(context);
             }, context);
-
         }
-
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using BeavisCli.Internal;
 
@@ -8,17 +9,13 @@ namespace BeavisCli
 {
     public abstract class WebCliApplication
     {
+        private WebCliApplicationDefinitionAttribute _definition;
+
         private const int ExitStatusCode = 2;
 
-        protected WebCliApplication(string name, string description)
-        {
-            Name = name;
-            Description = description;
-        }
+        public string Name => _definition?.Name;
 
-        public string Name { get; }
-
-        public string Description { get; }
+        public string Description => _definition?.Description;
 
         public virtual bool IsAuthorized(WebCliContext context)
         {
@@ -82,6 +79,14 @@ namespace BeavisCli
             return Task.FromResult(ExitStatusCode);
         }
 
+        internal bool Initialize()
+        {
+            if (GetType().GetCustomAttributes(typeof(WebCliApplicationDefinitionAttribute), true) is WebCliApplicationDefinitionAttribute[] attributes && attributes.Any())
+            {
+                _definition = attributes.First();
+            }
+            return _definition != null;
+        }
     }
 }
 

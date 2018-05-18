@@ -1,8 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace BeavisCli.Internal
+namespace BeavisCli
 {
-    internal class FileUploadStorage : IFileUploadStorage
+    public class DefaultFileUploadStorage : IFileUploadStorage
     {
         public Task UploadAsync(UploadedFile file, WebCliResponse response)
         {

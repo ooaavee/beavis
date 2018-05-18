@@ -23,9 +23,7 @@ namespace WebSite
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddBeavisCli();
-
-          
+            services.AddBeavisCli();          
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,13 +49,6 @@ namespace WebSite
                     name: "default",
                     template: "{controller}/{action=Index}/{id?}");
             });
-
-
         }
-
     }
-
-
-   
-
 }

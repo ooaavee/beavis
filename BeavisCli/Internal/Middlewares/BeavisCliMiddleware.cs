@@ -12,16 +12,16 @@ namespace BeavisCli.Internal.Middlewares
         private readonly RequestDelegate _next;
         private readonly WebCliSandbox _sandbox;
         private readonly WebRenderer _renderer;
-        private readonly JobManager _jobManager;
+        private readonly IJobPool _jobPool;
         private readonly ITerminalInitializer _initializer;
         private readonly IFileUploadStorage _fileUploadStorage;
 
-        public BeavisCliMiddleware(RequestDelegate next, WebCliSandbox sandbox, WebRenderer renderer, JobManager jobManager, ITerminalInitializer initializer, IFileUploadStorage fileUploadStorage)
+        public BeavisCliMiddleware(RequestDelegate next, WebCliSandbox sandbox, WebRenderer renderer, IJobPool jobPool, ITerminalInitializer initializer, IFileUploadStorage fileUploadStorage)
         {
             _next = next;
             _sandbox = sandbox;
             _renderer = renderer;
-            _jobManager = jobManager;
+            _jobPool = jobPool;
             _initializer = initializer;
             _fileUploadStorage = fileUploadStorage;
         }
@@ -64,7 +64,7 @@ namespace BeavisCli.Internal.Middlewares
             {
                 var key = context.Request.Query["key"];
                 var response = new WebCliResponse(context);
-                await _jobManager.ExecuteAsync(key, context, response);
+                await _jobPool.ExecuteAsync(key, context, response);
                 await _renderer.RenderResponseAsync(response, context);
                 return;
             }

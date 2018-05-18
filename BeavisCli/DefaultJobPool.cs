@@ -5,18 +5,18 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace BeavisCli.Internal
+namespace BeavisCli
 {
-    internal class JobManager :  IJobPool
+    public class DefaultJobPool : IJobPool
     {
         private readonly IMemoryCache _cache;
 
-        public JobManager(IMemoryCache cache)
+        public DefaultJobPool(IMemoryCache cache)
         {
             _cache = cache;
         }
 
-        public async Task ExecuteAsync(string key, HttpContext context,  WebCliResponse response)
+        public async Task ExecuteAsync(string key, HttpContext context, WebCliResponse response)
         {
             IJob job;
 
@@ -45,7 +45,5 @@ namespace BeavisCli.Internal
 
             return key;
         }
-
-
     }
 }
