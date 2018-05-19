@@ -30,7 +30,8 @@ namespace BeavisCli
 
             foreach (Tuple<string, string> item in items)
             {
-                var s = $"{leftPadding}{(item.Item1 + new string(' ', maxLen)).Substring(0, maxLen + 1)}{ParagraphPadding}{item.Item2}";
+//                var s = $"{leftPadding}{(item.Item1 + new string(' ', maxLen)).Substring(0, maxLen + 1)}{ParagraphPadding}{item.Item2}";
+                var s = $"{leftPadding}{(item.Item1 + new string(' ', maxLen)).Substring(0, maxLen )}{ParagraphPadding}{item.Item2}";
 
                 texts.Add(s);
 

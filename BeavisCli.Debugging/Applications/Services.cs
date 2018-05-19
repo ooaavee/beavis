@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using BeavisCli.Debugging.Utils;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -10,40 +10,87 @@ namespace BeavisCli.Debugging.Applications
 {
     [WebCliApplicationDefinition(Name = "services", Description = "Lists all services available.")]
     public class Services : WebCliApplication
-    { 
+    {
         public override async Task ExecuteAsync(WebCliContext context)
         {
+            IOption full = context.Option("-f", "Display fully type names.", CommandOptionType.NoValue);
+
             await OnExecuteAsync(() =>
             {
                 // get all services
                 IServiceProvider serviceProvider = context.HttpContext.RequestServices;
                 Type type = serviceProvider.GetType();
                 PropertyInfo property = type.GetProperty("RealizedServices", BindingFlags.Instance | BindingFlags.NonPublic);
-                var value = property.GetValue(serviceProvider);
-                ConcurrentDictionary<Type, Func<ServiceProvider, object>> services = (ConcurrentDictionary<Type, Func<ServiceProvider, object>>)value;
+                object value = property.GetValue(serviceProvider);
+                ConcurrentDictionary<Type, Func<ServiceProvider, object>> items = (ConcurrentDictionary<Type, Func<ServiceProvider, object>>)value;
 
-                // resolve service and implementation names
+                var services = new List<KeyValuePair<Type, Func<ServiceProvider, object>>>();
+                foreach (KeyValuePair<Type, Func<ServiceProvider, object>> item in items)
+                {
+                    services.Add(item);
+                }
+
+                // sort stuff
+                services.Sort(delegate (KeyValuePair<Type, Func<ServiceProvider, object>> pair1, KeyValuePair<Type, Func<ServiceProvider, object>> pair2)
+                {
+                    Type serviceType1 = pair1.Key;
+                    Type serviceType2 = pair2.Key;
+                    string serviceType1Name = TypeUtil.GetFriendlyName(serviceType1, full.HasValue());
+                    string serviceType2Name = TypeUtil.GetFriendlyName(serviceType2, full.HasValue());
+                    return String.Compare(serviceType1Name, serviceType2Name, StringComparison.Ordinal);
+                });
+
+
                 var values = new List<Tuple<string, string>>();
-                foreach (var service in services)
+
+                foreach (KeyValuePair<Type, Func<ServiceProvider, object>> service in services)
                 {
                     Type serviceType = service.Key;
-                    string serviceTypeName = GetFriendlyName(serviceType);
+                    string serviceTypeName = TypeUtil.GetFriendlyName(serviceType, full.HasValue());
 
-                    object serviceInstance = service.Value((ServiceProvider)serviceProvider); 
+                    object serviceInstance = service.Value((ServiceProvider)serviceProvider);
 
-                    // TODO: Jos serviceInstance on array, niin iteroi taulukon jäsenet lävitse ja tulosta niiden tyypit!
+                    bool isArray = false;
 
                     string serviceInstanceName = string.Empty;
                     if (serviceInstance != null)
                     {
-                        serviceInstanceName = GetFriendlyName(serviceInstance.GetType());
+                        isArray = serviceInstance.GetType().IsArray;
+
+                        if (isArray)
+                        {
+                            Array arr = (Array)serviceInstance;
+                            for (int i = 0; i < arr.Length; i++)
+                            {
+                                var arrItem = arr.GetValue(i);
+
+                                if (arrItem != null)
+                                {
+                                    var tmp = TypeUtil.GetFriendlyName(arrItem.GetType(), full.HasValue());
+
+                                    if (i == 0)
+                                    {
+                                        values.Add(new Tuple<string, string>(serviceTypeName, tmp));
+                                    }
+                                    else
+                                    {
+                                        values.Add(new Tuple<string, string>(" ...", tmp));
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!isArray)
+                        {
+                            serviceInstanceName = TypeUtil.GetFriendlyName(serviceInstance.GetType(), full.HasValue());
+                        }
                     }
 
-                    values.Add(new Tuple<string, string>(serviceTypeName, serviceInstanceName));
+                    if (!isArray)
+                    {
+                        values.Add(new Tuple<string, string>(serviceTypeName, serviceInstanceName));
+                    }
                 }
-
-                // sort stuff
-                values.Sort((tuple1, tuple2) => String.Compare(tuple1.Item1, tuple2.Item1, StringComparison.Ordinal));
 
                 // write output
                 context.Response.WriteInformation("List of all services available (type/implementation):");
@@ -54,56 +101,6 @@ namespace BeavisCli.Debugging.Applications
 
                 return Exit(context);
             }, context);
-        }
-
-        private static readonly Dictionary<Type, string> TypeNames = new Dictionary<Type, string>
-        {
-            {typeof(int), "int"},
-            {typeof(uint), "uint"},
-            {typeof(long), "long"},
-            {typeof(ulong), "ulong"},
-            {typeof(short), "short"},
-            {typeof(ushort), "ushort"},
-            {typeof(byte), "byte"},
-            {typeof(sbyte), "sbyte"},
-            {typeof(bool), "bool"},
-            {typeof(float), "float"},
-            {typeof(double), "double"},
-            {typeof(decimal), "decimal"},
-            {typeof(char), "char"},
-            {typeof(string), "string"},
-            {typeof(object), "object"},
-            {typeof(void), "void"}
-        };
-
-        private static string GetFriendlyName(Type type, Dictionary<Type, string> translations)
-        {
-            if (translations.ContainsKey(type))
-            {
-                return translations[type];
-            }
-
-            if (type.IsArray)
-            {
-                return GetFriendlyName(type.GetElementType(), translations) + "[]";
-            }
-
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                return GetFriendlyName(type.GetGenericArguments()[0]) + "?";
-            }
-
-            if (type.IsGenericType)
-            {
-                return type.Name.Split('`')[0] + "<" + string.Join(", ", type.GetGenericArguments().Select(GetFriendlyName).ToArray()) + ">";
-            }
-
-            return type.Name;
-        }
-
-        private static string GetFriendlyName(Type type)
-        {
-            return GetFriendlyName(type, TypeNames);
-        }
+        }        
     }
 }
