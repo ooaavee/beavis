@@ -41,7 +41,7 @@ namespace BeavisCli
         {
             Messages.Add(new InformationMessage(string.Empty));
         }
-
+              
         /// <summary>
         /// Writes an information message.
         /// </summary>
@@ -94,6 +94,19 @@ namespace BeavisCli
             }
 
             Messages.Add(new ErrorMessage(text));
+        }
+
+        public void WriteInformations(IEnumerable<string> texts)
+        {
+            if (texts == null)
+            {
+                throw new ArgumentNullException(nameof(texts));
+            }
+
+            foreach (string text in texts)
+            {
+                WriteInformation(text);
+            }
         }
 
         /// <summary>

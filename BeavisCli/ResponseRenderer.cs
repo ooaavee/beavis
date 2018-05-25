@@ -4,13 +4,12 @@ using System.Linq;
 
 namespace BeavisCli
 {
-    public static class OutputRenderer
+    public static class ResponseRenderer
     {
         private const string ParagraphPadding = "   ";
 
         public static IEnumerable<string> FormatLines(IEnumerable<Tuple<string, string>> lines, bool indent = false)
         {
-
             var items = lines.ToArray();
 
             int maxLen = 0;
@@ -26,18 +25,24 @@ namespace BeavisCli
 
             var leftPadding = indent ? ParagraphPadding : "";
 
-            List<string> texts = new List<string>();
-
             foreach (Tuple<string, string> item in items)
             {
-//                var s = $"{leftPadding}{(item.Item1 + new string(' ', maxLen)).Substring(0, maxLen + 1)}{ParagraphPadding}{item.Item2}";
-                var s = $"{leftPadding}{(item.Item1 + new string(' ', maxLen)).Substring(0, maxLen )}{ParagraphPadding}{item.Item2}";
-
-                texts.Add(s);
-
+                var s = $"{leftPadding}{(item.Item1 + new string(' ', maxLen)).Substring(0, maxLen)}{ParagraphPadding}{item.Item2}";
+                yield return s;
             }
+        }
 
-            return texts;
+
+        public static IEnumerable<string> FormatLines(IEnumerable<string> lines, bool indent = false)
+        {    
+            var leftPadding = indent ? ParagraphPadding : "";
+
+            foreach (string item in lines)
+            {
+                var s = $"{leftPadding}{item}";
+                yield return s;
+                
+            }        
         }
 
     }

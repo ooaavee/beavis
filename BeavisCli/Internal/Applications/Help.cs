@@ -63,6 +63,7 @@ namespace BeavisCli.Internal.Applications
                 var allApplications = defaultApplications.Concat(externalApplications);
 
                 var lines = new List<Tuple<string, string>>();
+
                 foreach (WebCliApplication app in allApplications)
                 {
                     lines.Add(new Tuple<string, string>(app.Name, app.Description));
@@ -70,11 +71,8 @@ namespace BeavisCli.Internal.Applications
 
                 context.Response.WriteInformation("List of supported applications:");
 
-                foreach (string text in OutputRenderer.FormatLines(lines, true))
-                {
-                    context.Response.WriteInformation(text);                    
-                }
-
+                context.Response.WriteInformations(ResponseRenderer.FormatLines(lines, true));
+ 
                 return Exit(context);
             }, context);
         }

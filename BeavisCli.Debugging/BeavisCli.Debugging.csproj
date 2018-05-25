@@ -16,4 +16,10 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Remotion.Linq">
+      <HintPath>..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\remotion.linq\2.1.1\lib\netstandard1.0\Remotion.Linq.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

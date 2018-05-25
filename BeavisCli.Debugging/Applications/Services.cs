@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Debugging.Applications
 {
-    [WebCliApplicationDefinition(Name = "services", Description = "Lists all services available.")]
+    [WebCliApplicationDefinition(Name = "services", Description = "Finds services (DI) available.")]
     public class Services : WebCliApplication
     {
         public override async Task ExecuteAsync(WebCliContext context)
         {
-            IOption full = context.Option("-f", "Display fully type names.", CommandOptionType.NoValue);
+            IOption full = context.Option("-fn", "Display full type name.", CommandOptionType.NoValue);
 
             await OnExecuteAsync(() =>
             {
@@ -93,11 +93,8 @@ namespace BeavisCli.Debugging.Applications
                 }
 
                 // write output
-                context.Response.WriteInformation("List of all services available (type/implementation):");
-                foreach (string text in OutputRenderer.FormatLines(values, true))
-                {
-                    context.Response.WriteInformation(text);
-                }
+                context.Response.WriteInformation("Services (TService and TImplementation):");
+                context.Response.WriteInformations(ResponseRenderer.FormatLines(values, true));
 
                 return Exit(context);
             }, context);

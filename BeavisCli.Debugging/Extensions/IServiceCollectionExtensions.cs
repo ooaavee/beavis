@@ -17,6 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection
             });
 
             services.AddSingletonWebCliApplication<Services>();
+            services.AddSingletonWebCliApplication<Types>();
 
             return services;
         }       
