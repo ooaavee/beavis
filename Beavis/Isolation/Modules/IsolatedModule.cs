@@ -1,4 +1,5 @@
 ﻿using System;
+using Beavis.Http;
 using Beavis.Isolation.Contracts;
 using Microsoft.AspNetCore.Http;
 
@@ -6,12 +7,12 @@ namespace Beavis.Isolation.Modules
 {
     public class IsolatedModule : IIsolatedModule
     {
-        private readonly IServiceProvider _services;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ModuleRequestHandlerProvider _handlers;
 
-        public IsolatedModule(IServiceProvider services, ModuleRequestHandlerProvider handlers)
+        public IsolatedModule(IServiceProvider serviceProvider, ModuleRequestHandlerProvider handlers)
         {
-            _services = services;
+            _serviceProvider = serviceProvider;
             _handlers = handlers;
         }
 
@@ -22,23 +23,27 @@ namespace Beavis.Isolation.Modules
 
         public ModuleResponse HandleRequest(ModuleRequest request)
         {
-            HttpContext context = HttpContextUtil.CreateHttpContext(request.HttpRequest, _services);
-
-            ModuleRequestHandler handler = _handlers.GetHandler(context.Request.Path, context.Request.Method);
-
-            if (handler == null)
+            using (ModuleHttpContext context = ModuleHttpContext.Create(request.Content, _serviceProvider))
             {
-                // TODO: not found, return 404
+
+
+                ModuleRequestHandler handler = _handlers.GetHandler(context.Request.Path, context.Request.Method);
+
+                if (handler == null)
+                {
+                    // TODO: not found, return 404
+                }
+
+
+
+                var response = new ModuleResponse();
+
+                response.Data = "REPLY: " + request.Data + " from pipe " + " jokupipe " + " " + DateTime.Now.ToString();
+                return response;
             }
-
-
-
-            var response = new ModuleResponse();
-            response.Data = "REPLY: " + request.Data + " from pipe " + " jokupipe " + " " + DateTime.Now.ToString();
-            return response;
         }
 
-        
+
 
 
 

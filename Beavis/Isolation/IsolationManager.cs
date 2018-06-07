@@ -30,6 +30,14 @@ namespace Beavis.Isolation
             return handle;           
         }
 
+
+        public IsolatedModuleClient GetClient(IsolatedModuleHandle handle)
+        {
+            // TODO: Muista pitää clientit jemmassa, jotta niitä voidaan uudelleenkäyttää.
+
+            throw new NotImplementedException();
+        }
+
         private static IsolatedModuleHandle CreateHandle(ModuleInfo module)
         {
             var handle = new IsolatedModuleHandle();
@@ -48,12 +56,17 @@ namespace Beavis.Isolation
 
         private void StartProcess(IsolatedModuleHandle handle)
         {
-            var contract = new ModuleStartupContract
+            var contract = new ModuleRuntimeContract
             {
                 ModuleKey = handle.Module.Key,
                 PipeName = handle.PipeName,
                 ThreadCount = 4
             };
+
+            contract.Configuration["connectionString"] = "sdsad";
+            contract.Configuration["connectionString2"] = "asdasd";
+
+            var c = contract.GetConfiguration();
 
             var process = new Process
             {

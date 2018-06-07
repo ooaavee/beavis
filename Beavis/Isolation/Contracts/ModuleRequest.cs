@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Beavis.Http;
+using Microsoft.AspNetCore.Http;
 
 namespace Beavis.Isolation.Contracts
 {
     public class ModuleRequest
     {
-        public HttpRequestEnvelope HttpRequest { get; set; }
+        public HttpRequestEnvelope Content { get; set; }
 
         /// <summary>
         /// TÄMÄ LÄHTEE POIS!!!
@@ -17,7 +18,7 @@ namespace Beavis.Isolation.Contracts
 
         public ModuleRequest(HttpContext context)
         {
-            HttpRequest = HttpContextUtil.ParseHttpRequest(context);
+            Content = ModuleHttpContext.ParseRequest(context);
         }
 
         public static ModuleRequest Empty()

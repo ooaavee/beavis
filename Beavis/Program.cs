@@ -1,8 +1,8 @@
 ﻿using Beavis.Isolation.Contracts;
+using Beavis.Isolation.Modules;
 using JKang.IpcServiceFramework;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Beavis
 {
@@ -10,21 +10,16 @@ namespace Beavis
     {
         public static void Main(string[] args)
         {
-            if (ModuleStartupContract.TryParse(args, out ModuleStartupContract contract))
+            if (ModuleRuntimeContract.TryParse(args, out var contract))
             {
-                Startup startup = new Startup(contract);
-                IServiceCollection services = new ServiceCollection();
-                startup.ConfigureServices(services);
-                ServiceProvider serviceProvider = services.BuildServiceProvider();
-
                 IpcServiceHostBuilder
-                    .Buid(contract.PipeName, serviceProvider)
+                    .Buid(contract.PipeName, ModuleInitializer.Initialize(contract))
                     .Run();
             }
             else
             {
                 WebHost.CreateDefaultBuilder()
-                    .UseStartup<Startup> ()
+                    .UseStartup<Startup>()
                     .Build()
                     .Run();
             }

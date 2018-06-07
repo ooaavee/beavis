@@ -3,29 +3,29 @@ using Beavis.Isolation.Contracts;
 using Beavis.Modules;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
+using Beavis.Http;
 
 namespace Beavis.Middlewares
 {
-    public class HttpRequestDispatcher
+    public class ModuleRequestProxy
     {
         private readonly RequestDelegate _next;
 
         private readonly ModuleManager _modules;
         private readonly IsolationManager _isolation;
-        private readonly IsolatedModuleProxy _proxy;
+        private readonly IsolatedModuleClient _client;
 
-        public HttpRequestDispatcher(RequestDelegate next, ModuleManager modules, IsolationManager isolation, IsolatedModuleProxy proxy)
+        public ModuleRequestProxy(RequestDelegate next, ModuleManager modules, IsolationManager isolation, IsolatedModuleClient client)
         {
             _next = next;
             _modules = modules;
             _isolation = isolation;
-            _proxy = proxy;
+            _client = client;
         }
 
         public async Task InvokeAsync(HttpContext context)
         {
-            string path = HttpContextUtil.GetMainPath(context);
-
+            string path = ModuleHttpContext.GetMainPath(context);
 
             if (path == null)
             {
@@ -50,9 +50,17 @@ namespace Beavis.Middlewares
                 return;
             }
 
-            ResponseEnvolope envolope = await _proxy.HandleRequestAsync(handle, context);
+            ResponseEnvolope envolope = await _client.HandleRequest(handle, context);
 
-
+            if (envolope.Succeed)
+            {
+                ModuleHttpContext.WriteResponse(envolope.Content.Content, context);
+                // TODO: Kirjoita Http response sillä datalla, joka on vastauksessa
+            }
+            else
+            {
+                // TODO: Kirjoitaa Internal Server Error jollakin custom viestillä, josta pystytään päättelemään, että meni vituiksi tässä päässä
+            }
 
 
 

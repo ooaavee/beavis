@@ -7,6 +7,6 @@
         /// </summary>
         public string Data { get; set; }
 
-        public HttpResponseEnvelope HttpResponse { get; set; } = new HttpResponseEnvelope();
+        public HttpResponseEnvelope Content { get; set; } = new HttpResponseEnvelope();
     }
 }
