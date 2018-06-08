@@ -13,20 +13,17 @@ namespace Beavis.Middlewares
 
         private readonly ModuleManager _modules;
         private readonly IsolationManager _isolation;
-        private readonly IsolatedModuleClient _client;
 
-        public ModuleRequestProxy(RequestDelegate next, ModuleManager modules, IsolationManager isolation, IsolatedModuleClient client)
+        public ModuleRequestProxy(RequestDelegate next, ModuleManager modules, IsolationManager isolation)
         {
             _next = next;
             _modules = modules;
             _isolation = isolation;
-            _client = client;
         }
 
         public async Task InvokeAsync(HttpContext context)
         {
             string path = ModuleHttpContext.GetMainPath(context);
-
             if (path == null)
             {
                 await _next(context);
@@ -34,7 +31,6 @@ namespace Beavis.Middlewares
             }
 
             ModuleInfo module = _modules.GetModuleByPath(path);
-
             if (module == null)
             {
                 await _next(context);
@@ -43,19 +39,20 @@ namespace Beavis.Middlewares
 
 
             IsolatedModuleHandle handle = _isolation.GetIsolatedModuleHandle(module);
-
             if (handle == null)
             {
                 await _next(context);
                 return;
             }
 
-            ResponseEnvolope envolope = await _client.HandleRequest(handle, context);
+            IsolatedModuleClient client = _isolation.GetClient(handle);
+
+            ResponseEnvolope envolope = await client.HandleRequest(context);
 
             if (envolope.Succeed)
             {
-                ModuleHttpContext.WriteResponse(envolope.Content.Content, context);
-                // TODO: Kirjoita Http response sillä datalla, joka on vastauksessa
+                await ModuleHttpContext.WriteResponseAsync(envolope.Content.Content, context);
+                return;
             }
             else
             {

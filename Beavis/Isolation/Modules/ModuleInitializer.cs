@@ -11,30 +11,37 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Beavis.Isolation.Modules
 {
     public class ModuleInitializer
     {
-        private readonly ModuleRuntimeContract _contract;
+        private ModuleRuntimeContract Contract { get; set; }
 
-        private ModuleInitializer(ModuleRuntimeContract contract)
+        private ModuleInitializer() { }
+
+        public static IServiceProvider Initialize(ModuleRuntimeContract contract)
         {
-            _contract = contract;
-
-          //  IConfiguration configuration
-
-     
+            var services = new ServiceCollection();
+            var initializer = new ModuleInitializer { Contract = contract };
+            initializer.LoadAssemblies();
+            initializer.ConfigureServices(services);
+            return services.BuildServiceProvider();
         }
 
-
-        public static ServiceProvider Initialize(ModuleRuntimeContract contract)
+        private void LoadAssemblies()
         {
-            IServiceCollection services = new ServiceCollection();
-            ModuleInitializer initializer = new ModuleInitializer(contract);
-            initializer.ConfigureServices(services);
-            ServiceProvider serviceProvider = services.BuildServiceProvider();
-            return serviceProvider;
+            // TODO: Lataa tässä muistiin kaikki assemblyt jotka kuuluvat moduuliin
+
+            // TODO: Etsi sielä Startup-luokka
+
+            // TODO: Passaa tämä sielle startup luokalle costructorissaa!
+            IConfiguration configuration = Contract.GetConfiguration();
+
+            
+           
+
         }
 
         /// <summary>
@@ -42,14 +49,32 @@ namespace Beavis.Isolation.Modules
         /// </summary>
         private void ConfigureServices(IServiceCollection services)
         {
-            services.AddIpc(options => { options.ThreadCount = _contract.ThreadCount; });
+            services
+                .AddLogging(builder =>
+                {
+                    builder.AddConsole();
 
-            // must be transient!
+                    // TODO: register a customer azure table storage logger here
+
+                    // TODO: read this from "app settings etc"
+                    builder.SetMinimumLevel(LogLevel.Debug);
+                });
+
+
+            services.AddIpc(options => { options.ThreadCount = Contract.ThreadCount; });
+
+            // TRANSIENT SERVICES
             services.AddTransient<IIsolatedModule, IsolatedModule>();
 
-            // must be singleton!
+            // SINGLETON SERVICES
             var provider = new ModuleRequestHandlerProvider();
-            services.AddSingleton<ModuleRequestHandlerProvider>(sp => provider);
+            services.AddSingleton<ModuleRequestHandlerProvider>(x => provider);
+
+
+            // TODO: setup logging for this module
+
+            // TODO: setup custom services for this module
+
         }
 
     }

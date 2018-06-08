@@ -1,4 +1,5 @@
-﻿using Beavis.Isolation.Contracts;
+﻿using System;
+using Beavis.Isolation.Contracts;
 using Beavis.Isolation.Modules;
 using JKang.IpcServiceFramework;
 using Microsoft.AspNetCore;
@@ -10,19 +11,43 @@ namespace Beavis
     {
         public static void Main(string[] args)
         {
-            if (ModuleRuntimeContract.TryParse(args, out var contract))
+            if (ModuleRuntimeContract.TryParse(args, out ModuleRuntimeContract contract))
             {
-                IpcServiceHostBuilder
-                    .Buid(contract.PipeName, ModuleInitializer.Initialize(contract))
-                    .Run();
+                StartModule(contract);
             }
             else
             {
-                WebHost.CreateDefaultBuilder()
-                    .UseStartup<Startup>()
-                    .Build()
-                    .Run();
+                StartHost();
             }
         }
+
+        private static void StartHost()
+        {
+            WebHost.CreateDefaultBuilder()
+                .UseStartup<Startup>()
+                .Build()
+                .Run();
+        }
+
+        private static void StartModule(ModuleRuntimeContract contract)
+        {
+            IServiceProvider serviceProvider;
+
+            try
+            {
+                serviceProvider = ModuleInitializer.Initialize(contract);
+            }
+            catch (ModuleInitializerException exception)
+            {
+                return;
+            }
+
+
+            IpcServiceHostBuilder
+                .Buid(contract.PipeName, serviceProvider)
+                .Run();
+        }
     }
+
+
 }

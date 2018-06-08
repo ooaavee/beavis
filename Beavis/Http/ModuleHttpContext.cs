@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
 using Beavis.Isolation.Contracts;
 using Microsoft.AspNetCore.Http;
 
@@ -104,8 +107,14 @@ namespace Beavis.Http
             return content;
         }
 
-        public static void WriteResponse(HttpResponseEnvelope content, HttpContext context)
+        public static async Task WriteResponseAsync(HttpResponseEnvelope content, HttpContext context)
         {
+            context.Response.StatusCode = (int)HttpStatusCode.OK;
+            context.Response.ContentType = "text/plain";
+
+            string text = "Hello World " + DateTime.Now.ToString();
+            byte[] bytes = Encoding.UTF8.GetBytes(text);
+            await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
 
         }
 

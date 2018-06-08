@@ -3,6 +3,8 @@ using Beavis.Modules;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using Beavis.Configuration;
+using Microsoft.Extensions.Configuration;
 
 namespace Beavis.Isolation
 {
@@ -11,11 +13,17 @@ namespace Beavis.Isolation
         private const string FileName = "Beavis.dll";
 
         private readonly ConcurrentDictionary<string, IsolatedModuleHandle> _handles = new ConcurrentDictionary<string, IsolatedModuleHandle>();
-        private readonly IServiceProvider _serviceProvider;
 
-        public IsolationManager(IServiceProvider serviceProvider)
+        private readonly ConcurrentDictionary<string, IsolatedModuleClient> _clients = new ConcurrentDictionary<string, IsolatedModuleClient>();
+
+
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ConfigurationAccessor _configurationAccessor;
+
+        public IsolationManager(IServiceProvider serviceProvider, ConfigurationAccessor configurationAccessor)
         {
             _serviceProvider = serviceProvider;
+            _configurationAccessor = configurationAccessor;
         }
 
         public IsolatedModuleHandle GetIsolatedModuleHandle(ModuleInfo module)
@@ -23,19 +31,22 @@ namespace Beavis.Isolation
             if (!_handles.TryGetValue(module.Key, out IsolatedModuleHandle handle))
             {
                 handle = CreateHandle(module);
-                StartProcess(handle);
+                ModuleRuntimeContract contract = CreateContract(handle);
+                StartModule(contract);
                 _handles.TryAdd(module.Key, handle);
             }
-
-            return handle;           
+            return handle;
         }
 
 
         public IsolatedModuleClient GetClient(IsolatedModuleHandle handle)
         {
-            // TODO: Muista pitää clientit jemmassa, jotta niitä voidaan uudelleenkäyttää.
-
-            throw new NotImplementedException();
+            if (!_clients.TryGetValue(handle.Module.Key, out IsolatedModuleClient client))
+            {
+                client = new IsolatedModuleClient(handle);
+                _clients.TryAdd(handle.Module.Key, client);
+            }
+            return client;
         }
 
         private static IsolatedModuleHandle CreateHandle(ModuleInfo module)
@@ -54,20 +65,20 @@ namespace Beavis.Isolation
             return v;
         }
 
-        private void StartProcess(IsolatedModuleHandle handle)
+        private ModuleRuntimeContract CreateContract(IsolatedModuleHandle handle)
         {
             var contract = new ModuleRuntimeContract
             {
                 ModuleKey = handle.Module.Key,
                 PipeName = handle.PipeName,
-                ThreadCount = 4
+                ThreadCount = 4,
+                Configuration = _configurationAccessor.GetData()
             };
+            return contract;
+        }
 
-            contract.Configuration["connectionString"] = "sdsad";
-            contract.Configuration["connectionString2"] = "asdasd";
-
-            var c = contract.GetConfiguration();
-
+        private void StartModule(ModuleRuntimeContract contract)
+        {                  
             var process = new Process
             {
                 EnableRaisingEvents = true,

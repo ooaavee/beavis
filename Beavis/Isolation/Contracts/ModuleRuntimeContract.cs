@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Beavis.Configuration;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 
 namespace Beavis.Isolation.Contracts
 {
@@ -31,14 +32,18 @@ namespace Beavis.Isolation.Contracts
 
         public static bool TryParse(string[] args, out ModuleRuntimeContract contract)
         {
-            contract = Decode(args);
+            contract = null;
+            if (args != null && args.Any())
+            {
+                contract = Decode(args);
+            }
             return contract != null;
         }
 
         public IConfiguration GetConfiguration()
         {
             var builder = new ConfigurationBuilder();
-            builder.Sources.Add(new MyConfigurationSource(Configuration));
+            builder.Sources.Add(new DictionaryConfigurationSource(Configuration));
             return builder.Build();
         }
 
@@ -56,8 +61,9 @@ namespace Beavis.Isolation.Contracts
                 var json = Encoding.UTF8.GetString(base64EncodedBytes);
                 return JsonConvert.DeserializeObject<ModuleRuntimeContract>(json);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.Error.WriteLine(ex.ToString());
                 return null;
             }
         }
@@ -68,36 +74,5 @@ namespace Beavis.Isolation.Contracts
             var bytes = Encoding.UTF8.GetBytes(json);
             return Convert.ToBase64String(bytes);
         }
-
-        public sealed class MyConfigurationSource : IConfigurationSource
-        {
-            private readonly IDictionary<string, string> _data;
-
-            public MyConfigurationSource(IDictionary<string, string> data)
-            {
-                _data = data;
-            }
-
-            public IConfigurationProvider Build(IConfigurationBuilder builder)
-            {
-                return new MyConfigurationProvider(_data);
-            }
-        }
-
-        private sealed class MyConfigurationProvider : ConfigurationProvider
-        {
-            private readonly IDictionary<string, string> _data;
-
-            public MyConfigurationProvider(IDictionary<string, string> data)
-            {
-                _data = data;
-            }
-
-            public override void Load()
-            {
-                Data = _data;
-            }
-        }
-
     }
 }
