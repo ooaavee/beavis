@@ -1,4 +1,5 @@
-﻿using Beavis.Isolation;
+﻿using System.Diagnostics;
+using Beavis.Isolation;
 using Beavis.Isolation.Contracts;
 using Beavis.Modules;
 using Microsoft.AspNetCore.Http;
@@ -56,6 +57,7 @@ namespace Beavis.Middlewares
             }
             else
             {
+                Debugger.Break();
                 // TODO: Kirjoitaa Internal Server Error jollakin custom viestillä, josta pystytään päättelemään, että meni vituiksi tässä päässä
             }
 

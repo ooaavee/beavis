@@ -97,16 +97,19 @@ namespace Beavis.Isolation
 
             process.Exited += delegate (object sender, EventArgs args)
             {
+                Debugger.Break();
                 // TODO: logging
             };
 
             process.ErrorDataReceived += delegate (object sender, DataReceivedEventArgs args)
             {
+                Debugger.Break();
                 // TODO: logging
             };
 
             process.OutputDataReceived += delegate (object sender, DataReceivedEventArgs args)
             {
+                Debugger.Break();
                 // TODO: logging
             };
 

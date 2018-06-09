@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Isolation\Ipc\" />
     <Folder Include="Logging\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
