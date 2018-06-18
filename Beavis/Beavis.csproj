@@ -5,16 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Isolation\Ipc\" />
-    <Folder Include="Logging\" />
+    <Folder Include="Common\Logging\" />
+    <Folder Include="Modules\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="JKang.IpcServiceFramework.Core" Version="1.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.0" />
-    <PackageReference Include="JKang.IpcServiceFramework.Client" Version="1.0.2" />
-    <PackageReference Include="JKang.IpcServiceFramework.Server" Version="1.0.2" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 

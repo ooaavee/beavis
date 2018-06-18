@@ -8,8 +8,8 @@ using System.Text;
 
 namespace Beavis.Isolation.Contracts
 {
-    public class ModuleRuntimeContract
-    {
+    public class ModuleStartupOptions
+    {      
         /// <summary>
         /// Module key
         /// </summary>
@@ -21,16 +21,11 @@ namespace Beavis.Isolation.Contracts
         public string PipeName { get; set; }
 
         /// <summary>
-        /// Number of threads for this module
-        /// </summary>
-        public int ThreadCount { get; set; }
-
-        /// <summary>
         /// Module configuration properties
         /// </summary>
         public Dictionary<string, string> Configuration { get; set; } = new Dictionary<string, string>();
 
-        public static bool TryParse(string[] args, out ModuleRuntimeContract contract)
+        public static bool TryParse(string[] args, out ModuleStartupOptions contract)
         {
             contract = null;
             if (args != null && args.Any())
@@ -52,14 +47,14 @@ namespace Beavis.Isolation.Contracts
             return Encode(this);
         }
 
-        private static ModuleRuntimeContract Decode(string[] args)
+        private static ModuleStartupOptions Decode(string[] args)
         {
             try
             {
                 var base64EncodedData = args.First();
                 var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
                 var json = Encoding.UTF8.GetString(base64EncodedBytes);
-                return JsonConvert.DeserializeObject<ModuleRuntimeContract>(json);
+                return JsonConvert.DeserializeObject<ModuleStartupOptions>(json);
             }
             catch (Exception ex)
             {
@@ -68,7 +63,7 @@ namespace Beavis.Isolation.Contracts
             }
         }
 
-        private static string Encode(ModuleRuntimeContract contract)
+        private static string Encode(ModuleStartupOptions contract)
         {
             var json = JsonConvert.SerializeObject(contract);
             var bytes = Encoding.UTF8.GetBytes(json);

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Configuration;
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -20,14 +19,14 @@ namespace Beavis.Configuration
         /// <summary>
         /// The configuration key value pairs for the application
         /// </summary>
-        public Dictionary<string, string> GetData()
+        public Dictionary<string, string> GetConfiguration()
         {
             var data = new Dictionary<string, string>();
 
             IDictionary<string, string> GetData(object provider)
             {
-                Type type = provider.GetType();
-                PropertyInfo property = type.GetProperty("Data", BindingFlags.Instance | BindingFlags.NonPublic);
+                var type = provider.GetType();
+                var property = type.GetProperty("Data", BindingFlags.Instance | BindingFlags.NonPublic);
                 if (property != null)
                 {
                     return property.GetValue(provider) as IDictionary<string, string>;
@@ -36,16 +35,16 @@ namespace Beavis.Configuration
                 return null;
             }
 
-            ConfigurationRoot root = (ConfigurationRoot)_configuration;
+            var root = (ConfigurationRoot)_configuration;
 
-            foreach (IConfigurationProvider provider in root.Providers)
+            foreach (var provider in root.Providers)
             {
-                IDictionary<string, string> subData = GetData(provider);
-                if (subData != null)
+                var d = GetData(provider);
+                if (d != null)
                 {
-                    foreach (string key in subData.Keys)
+                    foreach (var key in d.Keys)
                     {
-                        data[key] = subData[key];
+                        data[key] = d[key];
                     }
                 }
             }

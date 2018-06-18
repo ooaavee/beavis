@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics;
 using Beavis.Isolation;
 using Beavis.Isolation.Contracts;
-using Beavis.Modules;
 using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
+using Beavis.Host.Modules;
 using Beavis.Http;
 
 namespace Beavis.Middlewares
@@ -12,14 +12,12 @@ namespace Beavis.Middlewares
     {
         private readonly RequestDelegate _next;
 
-        private readonly ModuleManager _modules;
-        private readonly IsolationManager _isolation;
+        private readonly ModuleManager _moduleManager;
 
-        public ModuleRequestProxy(RequestDelegate next, ModuleManager modules, IsolationManager isolation)
+        public ModuleRequestProxy(RequestDelegate next, ModuleManager moduleManager)
         {
             _next = next;
-            _modules = modules;
-            _isolation = isolation;
+            _moduleManager = moduleManager;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -31,7 +29,7 @@ namespace Beavis.Middlewares
                 return;
             }
 
-            ModuleInfo module = _modules.GetModuleByPath(path);
+            ModuleInfo module = _moduleManager.GetModuleByPath(path);
             if (module == null)
             {
                 await _next(context);
@@ -39,31 +37,30 @@ namespace Beavis.Middlewares
             }
 
 
-            IsolatedModuleHandle handle = _isolation.GetIsolatedModuleHandle(module);
+            ModuleHandle handle = _moduleManager.GetHandle(module);
             if (handle == null)
             {
                 await _next(context);
                 return;
             }
 
-            IsolatedModuleClient client = _isolation.GetClient(handle);
+            ModuleClient client = _moduleManager.GetClient(handle);
 
             ResponseEnvolope envolope = await client.HandleRequest(context);
 
             if (envolope.Succeed)
             {
-                await ModuleHttpContext.WriteResponseAsync(envolope.Content.Content, context);
-                return;
+                await ModuleHttpContext.WriteResponseAsync(envolope.Content.Data, context);
             }
             else
             {
-                Debugger.Break();
+                await ModuleHttpContext.WriteResponseAsync(envolope.Exception.ToString(), context);
                 // TODO: Kirjoitaa Internal Server Error jollakin custom viestillä, josta pystytään päättelemään, että meni vituiksi tässä päässä
             }
 
 
 
-            await _next(context);
+//            await _next(context);
         }
     }
 }

@@ -1,33 +1,80 @@
-﻿using Beavis.Configuration;
+﻿using Beavis.Common.Ipc;
+using Beavis.Configuration;
+using Beavis.Host.Modules;
+using Beavis.Ipc;
 using Beavis.Isolation;
+using Beavis.Isolation.Contracts;
 using Beavis.Middlewares;
-using Beavis.Modules;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Beavis
 {
     public class Startup
     {
-        private readonly IConfiguration _configuration;
-
-        public Startup(IConfiguration configuration)
+        public class ForHost
         {
-            _configuration = configuration;
+            private IConfiguration Configuration { get; }
+
+            public ForHost(IConfiguration configuration)
+            {
+                Configuration = configuration;
+            }
+
+
+            public void ConfigureServices(IServiceCollection services)
+            {
+                
+                services.AddSingleton<ModuleManager>();
+                services.AddSingleton<ModuleDeployer>();
+                services.AddSingleton<ModuleRunner>();
+                services.AddSingleton(new ConfigurationAccessor(Configuration));
+            }
+
+            public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+            {
+
+                //var sss = app.ApplicationServices.GetService<IOptions<NamedPipeServerOptions>>();
+
+                app.UseMiddleware<ModuleRequestProxy>();
+            }
         }
 
-        public void ConfigureServices(IServiceCollection services)
+
+
+        public class ForModule
         {
-            services.AddSingleton<ModuleManager, ModuleManager>();
-            services.AddSingleton<IsolationManager, IsolationManager>();
-            services.AddSingleton<ConfigurationAccessor>(x => new ConfigurationAccessor(_configuration));
+            public static ModuleStartupOptions Options { get; set; }
+
+            private IConfiguration Configuration { get; }
+
+            public ForModule(IConfiguration configuration)
+            {
+                Configuration = Options.GetConfiguration();
+            }
+
+
+            public void ConfigureServices(IServiceCollection services)
+            {
+                services.Configure<NamedPipeServerOptions>(opt =>
+                {
+                    opt.PipeName = Options.PipeName;
+                });
+
+                services.AddSingleton<IServer, IpcServer>();
+                services.AddSingleton<NamedPipeServer, NamedPipeServer>();
+            }
+
+            public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+            {
+            }
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-        {
-            app.UseMiddleware<ModuleRequestProxy>();           
-        }
+
+
     }
 }

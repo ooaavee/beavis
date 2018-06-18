@@ -24,12 +24,9 @@ namespace Beavis.Http
 
         public override HttpResponse Response => _response;
 
-
         public void Dispose()
         {
         }
-
-
 
         public static ModuleHttpContext Create(HttpRequestEnvelope envelope, IServiceProvider serviceProvider)
         {
@@ -107,6 +104,15 @@ namespace Beavis.Http
             return content;
         }
 
+        public static async Task WriteResponseAsync(string data, HttpContext context)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.OK;
+            context.Response.ContentType = "text/plain";
+
+            byte[] bytes = Encoding.UTF8.GetBytes(data);
+            await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
+
+        }
         public static async Task WriteResponseAsync(HttpResponseEnvelope content, HttpContext context)
         {
             context.Response.StatusCode = (int)HttpStatusCode.OK;
