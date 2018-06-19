@@ -28,11 +28,11 @@ namespace Beavis
 
             public void ConfigureServices(IServiceCollection services)
             {
-                
+                services.AddSingleton(new ConfigurationAccessor(Configuration));
+                services.AddSingleton<ModuleHostingEnvironment>();
                 services.AddSingleton<ModuleManager>();
                 services.AddSingleton<ModuleDeployer>();
                 services.AddSingleton<ModuleRunner>();
-                services.AddSingleton(new ConfigurationAccessor(Configuration));
             }
 
             public void Configure(IApplicationBuilder app, IHostingEnvironment env)
@@ -60,6 +60,8 @@ namespace Beavis
 
             public void ConfigureServices(IServiceCollection services)
             {
+                services.AddSingleton(new ConfigurationAccessor(Configuration));
+
                 services.Configure<NamedPipeServerOptions>(opt =>
                 {
                     opt.PipeName = Options.PipeName;
@@ -67,6 +69,7 @@ namespace Beavis
 
                 services.AddSingleton<IServer, IpcServer>();
                 services.AddSingleton<NamedPipeServer, NamedPipeServer>();
+
             }
 
             public void Configure(IApplicationBuilder app, IHostingEnvironment env)

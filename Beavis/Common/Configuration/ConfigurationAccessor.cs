@@ -16,10 +16,15 @@ namespace Beavis.Configuration
             _configuration = configuration;
         }
 
+        public IConfiguration GetConfiguration()
+        {
+            return _configuration;
+        }
+
         /// <summary>
         /// The configuration key value pairs for the application
         /// </summary>
-        public Dictionary<string, string> GetConfiguration()
+        public Dictionary<string, string> GetData()
         {
             var data = new Dictionary<string, string>();
 

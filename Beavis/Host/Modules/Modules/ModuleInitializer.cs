@@ -37,7 +37,7 @@
 //            // TODO: Etsi sielä Startup-luokka
 
 //            // TODO: Passaa tämä sielle startup luokalle costructorissaa!
-//            IConfiguration configuration = ModuleStartupOptions.GetConfiguration();
+//            IConfiguration configuration = ModuleStartupOptions.GetData();
 
             
            

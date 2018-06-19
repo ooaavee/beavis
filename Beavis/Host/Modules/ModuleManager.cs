@@ -36,7 +36,11 @@ namespace Beavis.Host.Modules
                 return _modules[path];
             }
 
-            _modules[path] = new ModuleInfo() { Key = path };
+            _modules[path] = new ModuleInfo()
+            {
+                Key = path,
+                Path = path
+            };
             return _modules[path];
         }
 

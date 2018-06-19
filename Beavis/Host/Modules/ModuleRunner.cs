@@ -32,7 +32,7 @@ namespace Beavis.Host.Modules
             {
                 ModuleKey = handle.Module.Key,
                 PipeName = handle.PipeName,
-                Configuration = _configuration.GetConfiguration()
+                Configuration = _configuration.GetData()
             };
             return options;
         }
