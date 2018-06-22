@@ -1,30 +1,27 @@
-﻿using Beavis.Common.Ipc;
+﻿using System;
 using Beavis.Configuration;
-using Beavis.Host.Modules;
 using Beavis.Ipc;
-using Beavis.Isolation;
-using Beavis.Isolation.Contracts;
 using Beavis.Middlewares;
+using Beavis.Modules;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Beavis
 {
     public class Startup
     {
-        public class ForHost
+        public class Host
         {
             private IConfiguration Configuration { get; }
 
-            public ForHost(IConfiguration configuration)
+            public Host(IConfiguration configuration)
             {
                 Configuration = configuration;
             }
-
 
             public void ConfigureServices(IServiceCollection services)
             {
@@ -37,22 +34,19 @@ namespace Beavis
 
             public void Configure(IApplicationBuilder app, IHostingEnvironment env)
             {
-
-                //var sss = app.ApplicationServices.GetService<IOptions<NamedPipeServerOptions>>();
-
-                app.UseMiddleware<ModuleRequestProxy>();
+                app.UseMiddleware<RequestProxyMiddleware>();
             }
         }
 
 
 
-        public class ForModule
+        public class Module
         {
             public static ModuleStartupOptions Options { get; set; }
 
             private IConfiguration Configuration { get; }
 
-            public ForModule(IConfiguration configuration)
+            public Module(IConfiguration configuration)
             {
                 Configuration = Options.GetConfiguration();
             }
@@ -61,23 +55,29 @@ namespace Beavis
             public void ConfigureServices(IServiceCollection services)
             {
                 services.AddSingleton(new ConfigurationAccessor(Configuration));
-
-                services.Configure<NamedPipeServerOptions>(opt =>
-                {
-                    opt.PipeName = Options.PipeName;
-                });
-
-                services.AddSingleton<IServer, IpcServer>();
-                services.AddSingleton<NamedPipeServer, NamedPipeServer>();
+                services.AddSingleton<Laskuri>();
 
             }
 
             public void Configure(IApplicationBuilder app, IHostingEnvironment env)
             {
+
+                app.Run(async context =>
+                {
+                    Laskuri laskuri = context.RequestServices.GetRequiredService<Laskuri>();
+
+                   //throw new NotImplementedException("huuhaa!!!!");
+
+                    await context.Response.WriteAsync("Hello, World! " + laskuri.Value++);
+                });
             }
         }
 
 
+        public class Laskuri
+        {
+            public int Value { get; set; }
+        }
 
     }
 }

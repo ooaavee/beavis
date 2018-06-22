@@ -1,5 +1,4 @@
-﻿using System;
-using Beavis.Isolation.Contracts;
+﻿using Beavis.Modules;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
@@ -11,53 +10,32 @@ namespace Beavis
         {
             if (ModuleStartupOptions.TryParse(args, out var options))
             {
-                //AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
-
-                Startup.ForModule.Options = options;
-
-                new WebHostBuilder()
-                    .UseStartup<Startup.ForModule>()
-                    .Build()
-                    .Run();
+                RunModule(options);
             }
             else
             {
-                WebHost.CreateDefaultBuilder()
-                    .UseStartup<Startup.ForHost>()
-                    .Build()
-                    .Run();
+                RunHost();
             }
         }
 
-        //private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        //{
-        //    string path = @"d:\home\starttivirhe.txt";
-        //    string text = e.ExceptionObject.ToString();
-        //   System.IO.File.WriteAllText(path, text);
+        private static void RunHost()
+        {
+            WebHost.CreateDefaultBuilder()
+                .UseStartup<Startup.Host>()
+                .Build()
+                .Run();
+        }
 
-        //}
+        private static void RunModule(ModuleStartupOptions options)
+        {
+            Startup.Module.Options = options;
 
-        //private static void StartModule(ModuleStartupOptions contract)
-        //{
-        //    IServiceProvider serviceProvider;
-        //    try
-        //    {
-        //        serviceProvider = ModuleInitializer.Initialize(contract);
-        //    }
-        //    catch (ModuleInitializerException exception)
-        //    {
-        //        return;
-        //    }
+            new WebHostBuilder()
+                .UseStartup<Startup.Module>()
+                .UseBeavisServer(o => { o.PipeName = options.PipeName; })
+                .Build()
+                .Run();
+        }
 
-
-        //    IpcServiceHostBuilder
-        //        .Buid(contract.PipeName, serviceProvider)
-        //        .Run();
-        //}
     }
-
-
-
-
-
 }
