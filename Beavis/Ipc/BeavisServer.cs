@@ -15,26 +15,33 @@ namespace Beavis.Ipc
     public class BeavisServer : IServer
     {
         private readonly NamedPipeServer _server;
+        private readonly BeavisServerOptions _options;
 
-        public BeavisServer(NamedPipeServer server, IOptions<NamedPipeServerOptions> options)
+        public IFeatureCollection Features { get; } = new FeatureCollection();
+
+        public BeavisServer(NamedPipeServer server, IOptions<BeavisServerOptions> options)
         {
             _server = server;
-            
+            _options = options.Value;
+
+            SetupFeatures();
+        }
+
+        private void SetupFeatures()
+        {
             var serverAddressesFeature = new ServerAddressesFeature();
-            serverAddressesFeature.Addresses.Add(options.Value.PipeName);
+            serverAddressesFeature.Addresses.Add(_options.PipeName);
 
             Features.Set<IHttpRequestFeature>(new HttpRequestFeature());
             Features.Set<IHttpResponseFeature>(new HttpResponseFeature());
             Features.Set<IServerAddressesFeature>(serverAddressesFeature);
         }
-       
-        public IFeatureCollection Features { get; } = new FeatureCollection();
 
         public Task StartAsync<TContext>(IHttpApplication<TContext> application, CancellationToken cancellationToken)
         {
             _server.OnRequest += async delegate (object sender, PipeMessageEventArgs e)
             {
-                e.ResponseMessage = await HandleRequestAsync(application, e.RequestMessage);
+                e.Response = await HandleRequestAsync(application, e.Request);
             };
             return Task.CompletedTask;
         }
@@ -49,62 +56,53 @@ namespace Beavis.Ipc
             _server.Dispose();
         }
 
-        private async Task<string> HandleRequestAsync<TContext>(IHttpApplication<TContext> application, string requestMessage)
+        private async Task<string> HandleRequestAsync<TContext>(IHttpApplication<TContext> application, string request)
         {
-            HostingApplication.Context context;
-            BeavisHttpContext httpContext;
-         
+            BeavisHttpContext httpContext = null;
+
+            bool processingStarted = false;
+           
             try
             {
-                context = (HostingApplication.Context)(object)application.CreateContext(Features);
+                HostingApplication.Context context = (HostingApplication.Context)(object)application.CreateContext(Features);
 
-                httpContext = CreateHttpContext(requestMessage);
+                httpContext = CreateHttpContext(BeavisProtocol.CreateRequestModel(request));
                 context.HttpContext = httpContext;
-            }
-            catch (Exception ex)
-            {
-                // TODO: Logging
 
-                
+                processingStarted = true;
 
-                throw new NotImplementedException();
-            }
-
-            try
-            {
                 await application.ProcessRequestAsync((TContext)(object)context);
             }
             catch (Exception e)
             {
-                // TODO: Lokita                
-                // TODO: Palauta internal server error
-                System.IO.File.WriteAllText(@"C:\work\virhe.txt", e.ToString());
+                // TODO: Logging
 
-                httpContext.BeavisResponse.OnErrr(e);
+                if (processingStarted)
+                {
+                    await httpContext.BeavisResponse.OnPipelineExceptionAsync(e, _options.ReturnStackTrace);
+                }
             }
 
-            string responseMessage = BeavisProtocol.CreateResponseMessage(httpContext.BeavisResponse);
+            string response;
 
-            return responseMessage;
+            if (processingStarted)
+            {
+                response = BeavisProtocol.CreateResponseMessage(httpContext.BeavisResponse, BeavisProtocolResponseStatus.Succeed);
+            }
+            else
+            {
+                response = BeavisProtocol.CreateResponseMessage(null, BeavisProtocolResponseStatus.Failed);
+            }
+
+            return response;
         }
 
-
-
-        private BeavisHttpContext CreateHttpContext(string requestMessage)
-        {
+        private BeavisHttpContext CreateHttpContext(HttpRequestModel request)
+        {          
             BeavisHttpContext httpContext = new BeavisHttpContext();
-            httpContext.BeavisRequest = new BeavisHttpRequest(httpContext);
+            httpContext.BeavisRequest = new BeavisHttpRequest(httpContext, request);
             httpContext.BeavisResponse = new BeavisHttpResponse(httpContext);
-
             return httpContext;
         }
-
-     
-
-
-
-       
-
-
     }
 }

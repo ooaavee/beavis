@@ -38,13 +38,6 @@ namespace Beavis.Middlewares
                 return;
             }
 
-            //ModuleHandle handle = _modules.GetHandle(module);
-            //if (handle == null)
-            //{
-            //    await _next(context);
-            //    return;
-            //}
-
             BeavisClient client = _modules.GetClient(module);
             if (client == null)
             {
@@ -54,53 +47,45 @@ namespace Beavis.Middlewares
 
             ModuleResponse response = await client.ProcessRequestAsync(context.Request);
 
+            await WriteResponseAsync(response, context);
+        }
+
+        private static async Task WriteResponseAsync(ModuleResponse response, HttpContext context)
+        {
             if (response.Succeed)
             {
-                await WriteResponseAsync(response.Content, context);
+                context.Response.StatusCode = response.Content.StatusCode;
+                context.Response.ContentType = response.Content.ContentType;
+
+                using (var stream = new MemoryStream(response.Content.Body))
+                {
+                    stream.Position = 0;
+
+                    byte[] data = stream.ToArray();
+                    await context.Response.Body.WriteAsync(data, 0, data.Length);
+                }
+
+                // TODO: Sovita myös loput responseen!!!
+
+
             }
             else
             {
-                await WriteResponseAsync(response.Exception, context);
-            }
-        }
+
+                // TODO: Palauta tässä exception, jos olemassa. Jos ei ole, niin palauta internal server error ->
 
 
-        public static async Task WriteResponseAsync(HttpResponseModel response, HttpContext context)
-        {
-            context.Response.StatusCode = response.StatusCode;
-            context.Response.ContentType = response.ContentType;
+                context.Response.StatusCode = (int)HttpStatusCode.OK;
+                context.Response.ContentType = "text/plain";
 
-            using (MemoryStream stream = new MemoryStream(response.Body))
-            {
-                stream.Position = 0;
-
-                using (StreamReader reader = new StreamReader(stream))
-                {
-
-                    var s = reader.ReadToEnd();
-
-                    var data = s;
-
-                    byte[] bytes = Encoding.UTF8.GetBytes(data);
-                    await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
-                }
-
+                string text = "Hello World " + DateTime.Now.ToString();
+                byte[] bytes = Encoding.UTF8.GetBytes(text);
+                await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
             }
 
-           
-
         }
 
-        public static async Task WriteResponseAsync(Exception ex, HttpContext context)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.OK;
-            context.Response.ContentType = "text/plain";
-
-            string text = "Hello World " + DateTime.Now.ToString();
-            byte[] bytes = Encoding.UTF8.GetBytes(text);
-            await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
-
-        }
+     
 
        
     }

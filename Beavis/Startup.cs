@@ -66,7 +66,7 @@ namespace Beavis
                 {
                     Laskuri laskuri = context.RequestServices.GetRequiredService<Laskuri>();
 
-                   //throw new NotImplementedException("huuhaa!!!!");
+                    //throw new NotImplementedException("huuhaa!!!! testaan virheitä");
 
                     await context.Response.WriteAsync("Hello, World! " + laskuri.Value++);
                 });

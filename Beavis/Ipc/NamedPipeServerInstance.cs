@@ -16,15 +16,15 @@ namespace Beavis.Ipc
         public event EventHandler OnConnected;
         public event EventHandler<PipeMessageEventArgs> OnRequest;
 
-        public NamedPipeServerInstance(string pipeName, int maxNumberOfServerInstances)
+        public NamedPipeServerInstance(NamedPipeServerOptions options)
         {
-            _server = new NamedPipeServerStream(pipeName,
+            _server = new NamedPipeServerStream(options.PipeName,
                                                 PipeDirection.InOut,
-                                                maxNumberOfServerInstances,
+                                                options.MaxNumberOfServerInstances,
                                                 PipeTransmissionMode.Message,
                                                 PipeOptions.Asynchronous);
 
-            var asyncResult = _server.BeginWaitForConnection(ConnectionWaiter, null);
+            IAsyncResult _ = _server.BeginWaitForConnection(ConnectionWaiter, null);
         }
 
         public void Dispose()
@@ -52,14 +52,15 @@ namespace Beavis.Ipc
                 while (!reader.EndOfStream)
                 {
                     // read request message
-                    string requestMessage = reader.ReadLine();
+                    string request = reader.ReadLine();
 
                     // broadcast request message
-                    PipeMessageEventArgs e = new PipeMessageEventArgs(requestMessage);
+                    PipeMessageEventArgs e = new PipeMessageEventArgs(request);
                     OnRequest?.Invoke(this, e);
 
                     // write response message
-                    byte[] bytes = Encoding.UTF8.GetBytes(e.ResponseMessage + Environment.NewLine);
+                    string response = e.Response + Environment.NewLine;
+                    byte[] bytes = Encoding.UTF8.GetBytes(response);
                     _server.Write(bytes, 0, bytes.Length);
                 }
             }

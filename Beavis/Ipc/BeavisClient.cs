@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using ModuleHandle = Beavis.Modules.ModuleHandle;
 
@@ -19,24 +20,33 @@ namespace Beavis.Ipc
             return new BeavisClient(handle);
         }
 
-        public async Task<ModuleResponse> ProcessRequestAsync(HttpRequest request)
+        public async Task<ModuleResponse> ProcessRequestAsync(HttpRequest httpRequest)
         {
-            string requestMesssage = BeavisProtocol.CreateRequestMessage(request);
-            string responseMessage;
+            string request = BeavisProtocol.CreateRequestMessage(httpRequest);
+            string response;
          
             try
             {
                 using (var client = new NamedPipeClient(_handle.PipeName))
                 {
-                    responseMessage = await client.SendRequestAsync(requestMesssage);
+                    response = await client.SendRequestAsync(request);
                 }
             }
             catch (Exception e)
             {
-                return new ModuleResponse(e);
+                // TODO: Logging
+
+                return ModuleResponse.CreateFailed(e);
             }
 
-            return new ModuleResponse(BeavisProtocol.CreateResponseModel(responseMessage)); 
+            HttpResponseModel responseModel = BeavisProtocol.CreateResponseModel(response, out BeavisProtocolResponseStatus status);
+
+            if (status == BeavisProtocolResponseStatus.Failed)
+            {
+                return ModuleResponse.CreateFailed();
+            }
+
+            return ModuleResponse.CreateSucceed(responseModel);
         }
     }
 }

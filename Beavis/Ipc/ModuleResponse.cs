@@ -4,22 +4,33 @@ namespace Beavis.Ipc
 {
     public class ModuleResponse
     {
-        public bool Succeed { get;  }
+        public bool Succeed { get; private set; }
 
-        public Exception Exception { get; }
+        public Exception Exception { get; private set; }
 
-        public HttpResponseModel Content { get;  }
+        public HttpResponseModel Content { get; private set; }
 
-        public ModuleResponse(HttpResponseModel content)
+        private ModuleResponse() { }
+
+        public static ModuleResponse CreateSucceed(HttpResponseModel content)
         {
-            Succeed = true;
-            Content = content;
+            var response = new ModuleResponse
+            {
+                Succeed = true,
+                Content = content
+            };
+            return response;
         }
 
-        public ModuleResponse(Exception exception)
+        public static ModuleResponse CreateFailed(Exception exception = null)
         {
-            Succeed = false;
-            Exception = exception;
+            var response = new ModuleResponse
+            {
+                Succeed = false,
+                Exception = exception
+            };
+            return response;
         }
+
     }
 }

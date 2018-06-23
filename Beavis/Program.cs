@@ -1,4 +1,6 @@
-﻿using Beavis.Modules;
+﻿using System;
+using Beavis.Ipc;
+using Beavis.Modules;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
@@ -10,32 +12,25 @@ namespace Beavis
         {
             if (ModuleStartupOptions.TryParse(args, out var options))
             {
-                RunModule(options);
+                Startup.Module.Options = options;
+
+                new WebHostBuilder()
+                    .UseStartup<Startup.Module>()
+                    .UseBeavisServer(o =>
+                    {                       
+                        o.PipeName = options.PipeName;
+                        o.ReturnStackTrace = true;
+                    })
+                    .Build()
+                    .Run();
             }
             else
             {
-                RunHost();
+                WebHost.CreateDefaultBuilder()
+                    .UseStartup<Startup.Host>()
+                    .Build()
+                    .Run();
             }
         }
-
-        private static void RunHost()
-        {
-            WebHost.CreateDefaultBuilder()
-                .UseStartup<Startup.Host>()
-                .Build()
-                .Run();
-        }
-
-        private static void RunModule(ModuleStartupOptions options)
-        {
-            Startup.Module.Options = options;
-
-            new WebHostBuilder()
-                .UseStartup<Startup.Module>()
-                .UseBeavisServer(o => { o.PipeName = options.PipeName; })
-                .Build()
-                .Run();
-        }
-
     }
 }

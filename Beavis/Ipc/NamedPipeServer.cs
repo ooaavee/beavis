@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -12,9 +11,9 @@ namespace Beavis.Ipc
 
         public event EventHandler<PipeMessageEventArgs> OnRequest;
 
-        public NamedPipeServer(IOptions<NamedPipeServerOptions> options)
+        public NamedPipeServer(NamedPipeServerOptions options)
         {
-            _options = options.Value;
+            _options = options;
 
             for (int i = 0; i < _options.InitialNumberOfServerInstances; i++)
             {
@@ -32,7 +31,7 @@ namespace Beavis.Ipc
             // Start a new server instance only when the number of server instances is smaller than MaxNumberOfServerInstances
             if (_servers.Count < _options.MaxNumberOfServerInstances)
             {
-                var server = new NamedPipeServerInstance(_options.PipeName, _options.MaxNumberOfServerInstances);
+                var server = new NamedPipeServerInstance(_options);
 
                 server.OnConnected += (sender, e) =>
                 {

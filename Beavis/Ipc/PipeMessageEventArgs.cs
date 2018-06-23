@@ -4,12 +4,19 @@ namespace Beavis.Ipc
 {
     public class PipeMessageEventArgs : EventArgs
     {
-        public string RequestMessage { get; set; }
-        public string ResponseMessage { get; set; }
-
-        public PipeMessageEventArgs(string requestMessage)
+        public PipeMessageEventArgs(string request)
         {
-            RequestMessage = requestMessage;
+            Request = request;
         }
+
+        /// <summary>
+        /// Request message
+        /// </summary>
+        public string Request { get; }
+
+        /// <summary>
+        /// Response message
+        /// </summary>
+        public string Response { get; set; }
     }
 }

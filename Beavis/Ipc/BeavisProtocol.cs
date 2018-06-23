@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 
@@ -9,21 +10,31 @@ namespace Beavis.Ipc
 {
     public static class BeavisProtocol
     {
-
         public static string CreateRequestMessage(HttpRequest request)
         {
-            HttpRequestModel model = CreateRequestModel(request);
-            string json = JsonConvert.SerializeObject(model, Formatting.None);
-            string base64 = Base64Encode(json);
+            var model = CreateRequestModel(request);
+            var json = JsonConvert.SerializeObject(model, Formatting.None);
+            var base64 = Base64Encode(json);
             return base64;
         }
 
-        public static string CreateResponseMessage(BeavisHttpResponse response)
+        public static string CreateResponseMessage(BeavisHttpResponse response, BeavisProtocolResponseStatus status)
         {
-            HttpResponseModel model = CreateResponseModel(response);
-            string json = JsonConvert.SerializeObject(model, Formatting.None);
-            string base64 = Base64Encode(json);
-            return base64;
+            string responseMessage;
+
+            if (status == BeavisProtocolResponseStatus.Failed)
+            {
+                responseMessage = ((int)status).ToString(CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                var model = CreateResponseModel(response);
+                var json = JsonConvert.SerializeObject(model, Formatting.None);
+                var base64 = Base64Encode(json);
+                responseMessage = $"{((int)status).ToString(CultureInfo.InvariantCulture)}{base64}";
+            }
+
+            return responseMessage;
         }
 
         public static HttpRequestModel CreateRequestModel(string requestMessage)
@@ -33,27 +44,50 @@ namespace Beavis.Ipc
             return model;
         }
 
-        public static HttpResponseModel CreateResponseModel(string responseMessage)
+        public static HttpResponseModel CreateResponseModel(string responseMessage, out BeavisProtocolResponseStatus status)
         {
-            string json = Base64Decode(responseMessage);
-            HttpResponseModel model = JsonConvert.DeserializeObject<HttpResponseModel>(json);
+            HttpResponseModel model = null;
+
+            status = GetResponseStatus(responseMessage);
+
+            if (status == BeavisProtocolResponseStatus.Succeed)
+            {
+                var payload = GetResponsePayload(responseMessage);
+                var json = Base64Decode(payload);
+                model = JsonConvert.DeserializeObject<HttpResponseModel>(json);
+            }
+
             return model;
+        }
+
+        private static BeavisProtocolResponseStatus GetResponseStatus(string responseMessage)
+        {
+            var s = responseMessage.Substring(0, 1);
+            var i = Int32.Parse(s);
+            var v = (BeavisProtocolResponseStatus) i;
+            return v;
+        }
+
+        private static string GetResponsePayload(string responseMessage)
+        {
+            var payload = responseMessage.Substring(1);
+            return payload;
         }
 
         private static string Base64Encode(string plainText)
         {
-            byte[] plainTextBytes = Encoding.UTF8.GetBytes(plainText);
-            return Convert.ToBase64String(plainTextBytes);
+            var bytes = Encoding.UTF8.GetBytes(plainText);
+            return Convert.ToBase64String(bytes);
         }
 
-        private static string Base64Decode(string base64EncodedData)
+        private static string Base64Decode(string encoded)
         {
-            byte[] base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
-            return Encoding.UTF8.GetString(base64EncodedBytes);
+            var bytes = Convert.FromBase64String(encoded);
+            return Encoding.UTF8.GetString(bytes);
         }
- 
+
         private static HttpRequestModel CreateRequestModel(HttpRequest request)
-        {   
+        {
             var model = new HttpRequestModel();
 
             model.Method = request.Method;
@@ -116,18 +150,18 @@ namespace Beavis.Ipc
                 model.Headers[item.Key] = item.Value.ToArray();
             }
 
-            var stream = (MemoryStream) response.Body;
+            var stream = (MemoryStream)response.Body;
             model.Body = stream.ToArray();
             stream.Dispose();
 
             model.ContentLength = response.ContentLength;
             model.ContentType = response.ContentType;
-            model.Cookies = (BeavisResponseCookies) response.Cookies;          
+            model.Cookies = (BeavisResponseCookies)response.Cookies;
             model.HasRedirect = response.HasRedirect;
             model.RedirectLocation = response.RedirectLocation;
             model.IsRedirectPermanent = response.IsRedirectPermanent;
 
             return model;
-        }      
+        }
     }
 }

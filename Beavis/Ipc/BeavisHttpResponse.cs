@@ -1,8 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
+using System;
+using System.IO;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Beavis.Ipc
 {
@@ -34,10 +36,23 @@ namespace Beavis.Ipc
         public string RedirectLocation { get; private set; }
         public bool? IsRedirectPermanent { get; private set; }
 
-        public void OnErrr(Exception e)
+        public async Task OnPipelineExceptionAsync(Exception e, bool returnStackTrace)
         {
+            string text;
 
+            if (returnStackTrace)
+            {
+                text = e.ToString();
+            }
+            else
+            {
+                text = "An error has occurred on the server.";
+            }
+            
+            ContentType = "text/plain";
+            StatusCode = (int)HttpStatusCode.InternalServerError;
+
+            await this.WriteAsync(text, Encoding.UTF8);
         }
-
     }
 }

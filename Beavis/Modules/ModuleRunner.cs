@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using Beavis.Configuration;
 
 namespace Beavis.Modules
@@ -57,6 +58,9 @@ namespace Beavis.Modules
             };
 
             process.Start();
+
+            Thread.Sleep(1000);
+
         }
 
         private ModuleStartupOptions GetOptions(ModuleHandle handle)
