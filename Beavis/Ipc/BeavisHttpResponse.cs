@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Beavis.Ipc
 {
-    public sealed class BeavisHttpResponse : DefaultHttpResponse
+    public sealed class BeavisHttpResponse : DefaultHttpResponse, IDisposable
     {
         private readonly BeavisResponseCookies _cookies = new BeavisResponseCookies();
 
@@ -53,6 +53,10 @@ namespace Beavis.Ipc
             StatusCode = (int)HttpStatusCode.InternalServerError;
 
             await this.WriteAsync(text, Encoding.UTF8);
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

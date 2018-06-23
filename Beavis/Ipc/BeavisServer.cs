@@ -47,7 +47,7 @@ namespace Beavis.Ipc
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
-        {           
+        {
             return Task.CompletedTask;
         }
 
@@ -61,48 +61,52 @@ namespace Beavis.Ipc
             BeavisHttpContext httpContext = null;
 
             bool processingStarted = false;
-           
+
             try
             {
-                HostingApplication.Context context = (HostingApplication.Context)(object)application.CreateContext(Features);
+                try
+                {
+                    HostingApplication.Context context =
+                        (HostingApplication.Context) (object) application.CreateContext(Features);
 
-                httpContext = CreateHttpContext(BeavisProtocol.CreateRequestModel(request));
-                context.HttpContext = httpContext;
+                    httpContext = new BeavisHttpContext(BeavisProtocol.CreateRequestModel(request));
+                    context.HttpContext = httpContext;
 
-                processingStarted = true;
+                    processingStarted = true;
 
-                await application.ProcessRequestAsync((TContext)(object)context);
-            }
-            catch (Exception e)
-            {
-                // TODO: Logging
+                    await application.ProcessRequestAsync((TContext)(object)context);
+                }
+                catch (Exception e)
+                {
+                    // TODO: Logging
+
+                    if (processingStarted)
+                    {
+                        await httpContext.BeavisResponse.OnPipelineExceptionAsync(e, _options.ReturnStackTrace);
+                    }
+                }
+
+                string response;
 
                 if (processingStarted)
                 {
-                    await httpContext.BeavisResponse.OnPipelineExceptionAsync(e, _options.ReturnStackTrace);
+                    response = BeavisProtocol.CreateResponseMessage(
+                        httpContext.BeavisResponse,
+                        BeavisProtocolResponseStatus.Succeed);
                 }
+                else
+                {
+                    response = BeavisProtocol.CreateResponseMessage(
+                        null,
+                        BeavisProtocolResponseStatus.Failed);
+                }
+
+                return response;
             }
-
-            string response;
-
-            if (processingStarted)
+            finally
             {
-                response = BeavisProtocol.CreateResponseMessage(httpContext.BeavisResponse, BeavisProtocolResponseStatus.Succeed);
+                httpContext?.Dispose();
             }
-            else
-            {
-                response = BeavisProtocol.CreateResponseMessage(null, BeavisProtocolResponseStatus.Failed);
-            }
-
-            return response;
-        }
-
-        private BeavisHttpContext CreateHttpContext(HttpRequestModel request)
-        {          
-            BeavisHttpContext httpContext = new BeavisHttpContext();
-            httpContext.BeavisRequest = new BeavisHttpRequest(httpContext, request);
-            httpContext.BeavisResponse = new BeavisHttpResponse(httpContext);
-            return httpContext;
         }
     }
 }
