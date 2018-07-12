@@ -47,6 +47,10 @@ namespace Beavis.Ipc
             //
             // Please note, form content type has not been implemented!
             //
+            if (model.HasFormContentType)
+            {
+                throw new NotImplementedException("HasFormContentType cannot be true!");
+            }
             HasFormContentType = model.HasFormContentType;
             Form = new FormCollection(new Dictionary<string, StringValues>());
         }

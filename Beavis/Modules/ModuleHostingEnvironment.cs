@@ -45,7 +45,7 @@ namespace Beavis.Modules
             return dir;
         }
 
-        public DirectoryInfo NewModuleBaseDirectory(ModuleInfo module)
+        public DirectoryInfo GetDeployBaseDirectory(ModuleInfo module)
         {
             var path = Path.Combine(GetRootDirectory().FullName, "modules");
             path = Path.Combine(path, module.Key);

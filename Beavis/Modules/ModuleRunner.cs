@@ -63,12 +63,14 @@ namespace Beavis.Modules
 
         }
 
-        private ModuleStartupOptions GetOptions(ModuleHandle handle)
+        private ModuleRuntimeOptions GetOptions(ModuleHandle handle)
         {
-            var options = new ModuleStartupOptions
+            var options = new ModuleRuntimeOptions
             {
                 ModuleKey = handle.Module.Key,
                 PipeName = handle.PipeName,
+                BaseDirectory = handle.BaseDirectory.ToString(),
+                AssemblyFileName = "TODO: set module assembly.dll here",
                 Configuration = _configuration.GetConfiguration()
             };
             return options;

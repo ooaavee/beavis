@@ -65,6 +65,8 @@ namespace Beavis.Middlewares
                     await context.Response.Body.WriteAsync(data, 0, data.Length);
                 }
 
+               
+
                 //
                 //
                 // TODO: Sovita myös loput responseen!!!
@@ -75,16 +77,20 @@ namespace Beavis.Middlewares
             }
             else
             {
+                string text;
 
-                // TODO: Palauta tässä exception, jos olemassa. Jos ei ole, niin palauta internal server error ->
+                if (response.Exception != null)
+                {
+                    text = response.Exception.ToString();
+                }
+                else
+                {
+                    text = "An error has occurred on the server.";
+                }
 
-
-                context.Response.StatusCode = (int)HttpStatusCode.OK;
+                await context.Response.WriteAsync(text, Encoding.UTF8);
+                context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
                 context.Response.ContentType = "text/plain";
-
-                string text = "Hello World " + DateTime.Now.ToString();
-                byte[] bytes = Encoding.UTF8.GetBytes(text);
-                await context.Response.Body.WriteAsync(bytes, 0, bytes.Length);
             }
 
         }

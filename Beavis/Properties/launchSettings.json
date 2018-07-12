@@ -17,6 +17,7 @@
     },
     "Beavis": {
       "commandName": "Project",
+      "commandLineArgs": "-moduledev",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

@@ -10,23 +10,31 @@ namespace Beavis.Modules
             "Beavis.runtimeconfig.dev.json"
         };
 
-        private readonly ModuleHostingEnvironment _hostingEnvironment;
+        private readonly ModuleHostingEnvironment _env;
 
-        public ModuleDeployer(ModuleHostingEnvironment hostingEnvironment)
+        public ModuleDeployer(ModuleHostingEnvironment env)
         {
-            _hostingEnvironment = hostingEnvironment;
+            _env = env;
         }
 
         public ModuleHandle Deploy(ModuleInfo module)
         {            
-            string appBaseDirectory = AppContext.BaseDirectory;
+            DirectoryInfo baseDirectory = _env.GetDeployBaseDirectory(module);
 
-            DirectoryInfo moduleBaseDirectory = _hostingEnvironment.NewModuleBaseDirectory(module);
+            DeployBeavis(baseDirectory);
+            DeployModule(baseDirectory);
 
-            DirectoryCopy(appBaseDirectory, moduleBaseDirectory.FullName, true);
+            return new ModuleHandle(module, baseDirectory);
+        }
 
-            var handle = new ModuleHandle(module, moduleBaseDirectory);
-            return handle;
+        private void DeployBeavis(DirectoryInfo baseDirectory)
+        {
+            DirectoryCopy(AppContext.BaseDirectory, baseDirectory.FullName, true);
+        }
+
+        private void DeployModule(DirectoryInfo baseDirectory)
+        {
+            // TODO: Kopioi moduulin filet baseDirectory/app hakemistoon!
         }
 
         private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)

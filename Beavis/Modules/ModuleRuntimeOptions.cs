@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Beavis.Modules
 {
-    public class ModuleStartupOptions
+    public class ModuleRuntimeOptions
     {      
         /// <summary>
         /// Module key
@@ -21,18 +21,28 @@ namespace Beavis.Modules
         public string PipeName { get; set; }
 
         /// <summary>
+        /// Module base directory
+        /// </summary>
+        public string BaseDirectory { get; set; }
+
+        /// <summary>
+        /// Module assembly file name, like Contoso.Plugin.dll
+        /// </summary>
+        public string AssemblyFileName { get; set; }
+
+        /// <summary>
         /// Module configuration properties
         /// </summary>
         public Dictionary<string, string> Configuration { get; set; } = new Dictionary<string, string>();
 
-        public static bool TryParse(string[] args, out ModuleStartupOptions contract)
+        public static bool TryParse(string[] args, out ModuleRuntimeOptions options)
         {
-            contract = null;
+            options = null;
             if (args != null && args.Any())
             {
-                contract = Decode(args);
+                options = Decode(args);
             }
-            return contract != null;
+            return options != null;
         }
 
         public IConfiguration GetConfiguration()
@@ -44,30 +54,30 @@ namespace Beavis.Modules
 
         public string ToCommandLineArgs()
         {
-            return Encode(this);
+            var bytes = Encoding.UTF8.GetBytes(AsSerialized());
+            return Convert.ToBase64String(bytes);
         }
 
-        private static ModuleStartupOptions Decode(string[] args)
+        public string AsSerialized()
+        {
+            var json = JsonConvert.SerializeObject(this);
+            return json;
+        }
+
+        private static ModuleRuntimeOptions Decode(string[] args)
         {
             try
             {
                 var base64EncodedData = args.First();
                 var base64EncodedBytes = Convert.FromBase64String(base64EncodedData);
                 var json = Encoding.UTF8.GetString(base64EncodedBytes);
-                return JsonConvert.DeserializeObject<ModuleStartupOptions>(json);
+                return JsonConvert.DeserializeObject<ModuleRuntimeOptions>(json);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.Error.WriteLine(ex.ToString());
+                Console.Error.WriteLine(e.ToString());
                 return null;
             }
-        }
-
-        private static string Encode(ModuleStartupOptions contract)
-        {
-            var json = JsonConvert.SerializeObject(contract);
-            var bytes = Encoding.UTF8.GetBytes(json);
-            return Convert.ToBase64String(bytes);
         }
     }
 }
