@@ -33,6 +33,10 @@ namespace Microsoft.Extensions.DependencyInjection
                 ? ServiceDescriptor.Singleton(typeof(ITerminalInitializer), typeof(NullVoidService))
                 : ServiceDescriptor.Singleton(typeof(ITerminalInitializer), options.TerminalInitializerType));
 
+            services.Add(options.TerminalGreeterType == null
+                ? ServiceDescriptor.Singleton(typeof(ITerminalGreeter), typeof(NullVoidService))
+                : ServiceDescriptor.Singleton(typeof(ITerminalGreeter), options.TerminalGreeterType));
+
             services.Add(options.FileUploadStorageType == null
                 ? ServiceDescriptor.Singleton(typeof(IFileUploadStorage), typeof(NullVoidService))
                 : ServiceDescriptor.Singleton(typeof(IFileUploadStorage), options.FileUploadStorageType));

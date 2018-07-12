@@ -2,10 +2,8 @@
 using BeavisCli.JavaScriptStatements;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Reflection;
 using Microsoft.Extensions.Options;
+using System.Collections.Generic;
 
 namespace BeavisCli
 {
@@ -13,21 +11,8 @@ namespace BeavisCli
     {
         public virtual void Initialize(HttpContext context, WebCliResponse response)
         {
-            DisplayInfoText(context, response);
             PrepareTabCompletion(context, response);
             SetVariables(context, response);
-        }
-
-        protected virtual void DisplayInfoText(HttpContext context, WebCliResponse response)
-        {
-            Assembly assembly = GetType().GetTypeInfo().Assembly;
-            AssemblyName name = assembly.GetName();
-            AssemblyProductAttribute product = assembly.GetCustomAttribute<AssemblyProductAttribute>();
-            AssemblyCopyrightAttribute copyright = assembly.GetCustomAttribute<AssemblyCopyrightAttribute>();
-            string version = $"{name.Version.Major}.{name.Version.Minor}.{name.Version.Build}";
-
-            response.WriteSuccess($"{product.Product} {version}");
-            response.WriteSuccess($"{copyright.Copyright}. MIT License.");
         }
 
         protected virtual void PrepareTabCompletion(HttpContext context, WebCliResponse response)

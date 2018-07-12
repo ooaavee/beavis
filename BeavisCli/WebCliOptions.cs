@@ -16,6 +16,8 @@ namespace BeavisCli
 
         public Type TerminalInitializerType { get; set; } = typeof(DefaultTerminalInitializer);
 
-        public Type FileUploadStorageType { get; set; } = typeof(DefaultFileUploadStorage);
+        public Type TerminalGreeterType { get; set; } = typeof(DefaultTerminalGreeter);
+
+        public Type FileUploadStorageType { get; set; }
     }
 }

@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace BeavisCli.Debugging.Utils
+namespace BeavisCli.Demo.Applications.Utils
 {
     public static class TypeUtil
     {

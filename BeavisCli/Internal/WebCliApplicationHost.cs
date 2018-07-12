@@ -31,10 +31,13 @@ namespace BeavisCli.Internal
             {
                 case CommandOptionType.MultipleValue:
                     return Microsoft.Extensions.CommandLineUtils.CommandOptionType.MultipleValue;
+
                 case CommandOptionType.SingleValue:
                     return Microsoft.Extensions.CommandLineUtils.CommandOptionType.SingleValue;
+
                 case CommandOptionType.NoValue:
                     return Microsoft.Extensions.CommandLineUtils.CommandOptionType.NoValue;
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(optionType), optionType, null);
             }

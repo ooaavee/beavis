@@ -33,11 +33,17 @@ namespace BeavisCli
             return false;
         }
 
+        /// <summary>
+        /// Checks if the application execution is authorized.
+        /// </summary>
         public virtual bool IsAuthorized(WebCliContext context)
         {
             return true;
         }
 
+        /// <summary>
+        /// Checks if the application is browsable.
+        /// </summary>
         public virtual bool IsBrowsable(WebCliContext context)
         {
             return true;
@@ -57,9 +63,9 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(context));
             }
 
-            var sandbox = context.HttpContext.RequestServices.GetRequiredService<WebCliSandbox>();
+            WebCliSandbox sandbox = context.HttpContext.RequestServices.GetRequiredService<WebCliSandbox>();
 
-            var args = sandbox.ParseApplicationArgs(context.Request);
+            string[] args = sandbox.ParseApplicationArgs(context.Request);
 
             await context.Host.Cli.OnExecuteAsync(invoke);
 
@@ -86,32 +92,3 @@ namespace BeavisCli
         }
     }
 }
-
-
-//using System;
-//using System.Threading.Tasks;
-
-//namespace BeavisCli
-//{
-//    public class TestiApplikaatio : WebCliApplication
-//    {
-//        public TestiApplikaatio() : base("testi", "description...") { }
-
-//        public override async Task ExecuteAsync(WebCliContext context)
-//        {
-//            IOption opt1 = context.Option("-opt1", "Description", CommandOptionType.SingleValue);
-
-//            await base.OnExecuteAsync(() =>
-//            {
-//                string sss = null;
-
-
-
-//                return ExitWithHelp(context);
-//                //return Exit();
-
-//            }, context);
-
-//        }
-//    }
-//}

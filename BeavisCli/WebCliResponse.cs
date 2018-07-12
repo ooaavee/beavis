@@ -141,7 +141,9 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(mimeType));
             }
 
-            AddJob(new WriteFileJob(data, fileName, mimeType));
+            IJob job = new WriteFileJob(data, fileName, mimeType);
+
+            AddJob(job);
         }
 
         public void AddJob(IJob job)
@@ -155,10 +157,10 @@ namespace BeavisCli
             Sending += (sender, args) =>
             {
                 // 1. Get the IJobPool.
-                var pool = _context.RequestServices.GetRequiredService<IJobPool>();
+                IJobPool pool = _context.RequestServices.GetRequiredService<IJobPool>();
 
                 // 2. Push job.
-                var key = pool.Push(job);
+                string key = pool.Push(job);
 
                 // 3. Add a JavaScript statement that begins the job on the client-side.
                 AddStatement(new BeginJob(key));
@@ -170,7 +172,7 @@ namespace BeavisCli
         /// </summary>
         internal void OnSending()
         {
-            var evt = Sending;
+            EventHandler evt = Sending;
             if (evt != null)
             {
                 lock (evt)

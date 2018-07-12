@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:63488/beavis-cli",
+      "applicationUrl": "http://localhost:60183/",
       "sslPort": 0
     }
   },
@@ -15,14 +15,14 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "WebSite": {
+    "BeavisCli.Demo": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "http://localhost:63489/debug",
+      "launchUrl": "beavis",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:63489/"
+      "applicationUrl": "http://localhost:60184/"
     }
   }
 }

@@ -13,27 +13,35 @@ namespace BeavisCli.Internal
     {
         public async Task RenderHtmlAsync(HttpContext httpContext)
         {
-            var text = ReadFilesAsText("BeavisCli.Resources.html.index.html");
+            string text = Read("BeavisCli.Resources.html.index.html");
 
             await WriteAsync(text, httpContext.Response, "text/html");
         }
 
         public async Task RenderCssAsync(HttpContext httpContext)
         {
-            var text = ReadFilesAsText("BeavisCli.Resources.css.jquery.terminal.min.css",
-                                       "BeavisCli.Resources.css.site.css");
+            string[] files = {
+                "BeavisCli.Resources.css.jquery.terminal.min.css",
+                "BeavisCli.Resources.css.site.css"
+            };
+
+            string text = Read(files);
 
             await WriteAsync(text, httpContext.Response, "text/css");
         }
 
         public async Task RenderJsAsync(HttpContext httpContext)
         {
-            var text = ReadFilesAsText("BeavisCli.Resources.js.jquery.min.js",
-                                       "BeavisCli.Resources.js.jquery.terminal.min.js",
-                                       "BeavisCli.Resources.js.jquery.mousewheel-min.js",
-                                       "BeavisCli.Resources.js.angular.min.js",
-                                       "BeavisCli.Resources.js.download.js",
-                                       "BeavisCli.Resources.js.beavis-cli.js");
+            string[] files = {
+                "BeavisCli.Resources.js.jquery.min.js",
+                "BeavisCli.Resources.js.jquery.terminal.min.js",
+                "BeavisCli.Resources.js.jquery.mousewheel-min.js",
+                "BeavisCli.Resources.js.angular.min.js",
+                "BeavisCli.Resources.js.download.js",
+                "BeavisCli.Resources.js.beavis-cli.js"
+            };
+
+            string text = Read(files);
 
             await WriteAsync(text, httpContext.Response, "application/javascript");
         }
@@ -47,39 +55,34 @@ namespace BeavisCli.Internal
 
             response.OnSending();
 
-            var text = JsonConvert.SerializeObject(response);
+            string text = JsonConvert.SerializeObject(response);
 
             await WriteAsync(text, httpContext.Response, "application/json");
         }
 
         private static async Task WriteAsync(string text, HttpResponse response, string contentType)
         {
-            var content = Encoding.UTF8.GetBytes(text);
+            byte[] content = Encoding.UTF8.GetBytes(text);
             response.ContentType = contentType;
             response.StatusCode = (int)HttpStatusCode.OK;
             await response.Body.WriteAsync(content, 0, content.Length);
         }
 
-        private static string ReadFilesAsText(params string[] files)
+        private static string Read(params string[] files)
         {
-            var assembly = Assembly.GetAssembly(typeof(WebRenderer));
-
-            var buf = new StringBuilder();
-
-            foreach (var file in files)
+            StringBuilder text = new StringBuilder();
+            foreach (string file in files)
             {
-                using (var resourceStream = assembly.GetManifestResourceStream(file))
+                using (Stream stream = Assembly.GetAssembly(typeof(WebRenderer)).GetManifestResourceStream(file))
                 {
-                    using (var streamReader = new StreamReader(resourceStream))
+                    using (StreamReader reader = new StreamReader(stream))
                     {
-                        var text = streamReader.ReadToEnd();
-                        buf.AppendLine(text);
+                        string tmp = reader.ReadToEnd();
+                        text.AppendLine(tmp);
                     }
                 }
             }
-
-            return buf.ToString();
+            return text.ToString();
         }
-
     }
 }

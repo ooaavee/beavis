@@ -9,6 +9,7 @@
         {
             Text = text;
         }
+
         public override string Type => "information";
     }
 }

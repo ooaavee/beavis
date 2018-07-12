@@ -1,15 +1,13 @@
-﻿using BeavisCli.Debugging.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Remotion.Linq.Clauses.ResultOperators;
+using BeavisCli.Demo.Applications.Utils;
 
-namespace BeavisCli.Debugging.Applications
+namespace BeavisCli.Demo.Applications
 {
-    [WebCliApplicationDefinition(Name = "types", Description = "Finds types available in the current AppDomain.")]
+    [WebCliApplicationDefinition(Name = "types", Description = "This sample application finds types available in the current AppDomain.")]
     public class Types : WebCliApplication
     {
         public override async Task ExecuteAsync(WebCliContext context)

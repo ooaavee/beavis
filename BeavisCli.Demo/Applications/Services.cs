@@ -1,14 +1,14 @@
-﻿using BeavisCli.Debugging.Utils;
-using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
+using BeavisCli.Demo.Applications.Utils;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace BeavisCli.Debugging.Applications
+namespace BeavisCli.Demo.Applications
 {
-    [WebCliApplicationDefinition(Name = "services", Description = "Finds services (DI) available.")]
+    [WebCliApplicationDefinition(Name = "services", Description = "This sample application finds DI services available.")]
     public class Services : WebCliApplication
     {
         public override async Task ExecuteAsync(WebCliContext context)
@@ -39,7 +39,6 @@ namespace BeavisCli.Debugging.Applications
                     string serviceType2Name = TypeUtil.GetFriendlyName(serviceType2, full.HasValue());
                     return String.Compare(serviceType1Name, serviceType2Name, StringComparison.Ordinal);
                 });
-
 
                 var values = new List<Tuple<string, string>>();
 

@@ -6,7 +6,7 @@ namespace BeavisCli.Internal
     /// <summary>
     /// An internal backup service that does nothing.
     /// </summary>
-    internal class NullVoidService : IUnauthorizedHandler, ITerminalInitializer, IFileUploadStorage
+    internal class NullVoidService : IUnauthorizedHandler, ITerminalInitializer, IFileUploadStorage, ITerminalGreeter
     {
         void IUnauthorizedHandler.OnUnauthorized(WebCliContext context)
         {
@@ -19,6 +19,10 @@ namespace BeavisCli.Internal
         Task IFileUploadStorage.UploadAsync(UploadedFile file, WebCliResponse response)
         {
             return Task.CompletedTask;
+        }
+
+        void ITerminalGreeter.SayGreetings(HttpContext context, WebCliResponse response)
+        {
         }
     }
 }

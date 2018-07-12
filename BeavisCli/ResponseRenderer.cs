@@ -10,7 +10,12 @@ namespace BeavisCli
 
         public static IEnumerable<string> FormatLines(IEnumerable<Tuple<string, string>> lines, bool indent = false)
         {
-            var items = lines.ToArray();
+            if (lines == null)
+            {
+                throw new ArgumentNullException(nameof(lines));
+            }
+
+            Tuple<string, string>[] items = lines.ToArray();
 
             int maxLen = 0;
 
@@ -23,27 +28,27 @@ namespace BeavisCli
                 }
             }
 
-            var leftPadding = indent ? ParagraphPadding : "";
+            string leftPadding = indent ? ParagraphPadding : "";
 
             foreach (Tuple<string, string> item in items)
             {
-                var s = $"{leftPadding}{(item.Item1 + new string(' ', maxLen)).Substring(0, maxLen)}{ParagraphPadding}{item.Item2}";
-                yield return s;
+                yield return $"{leftPadding}{(item.Item1 + new string(' ', maxLen)).Substring(0, maxLen)}{ParagraphPadding}{item.Item2}";
             }
         }
 
-
         public static IEnumerable<string> FormatLines(IEnumerable<string> lines, bool indent = false)
-        {    
-            var leftPadding = indent ? ParagraphPadding : "";
+        {
+            if (lines == null)
+            {
+                throw new ArgumentNullException(nameof(lines));
+            }
+
+            string leftPadding = indent ? ParagraphPadding : "";
 
             foreach (string item in lines)
             {
-                var s = $"{leftPadding}{item}";
-                yield return s;
-                
+                yield return $"{leftPadding}{item}";                
             }        
         }
-
     }
 }

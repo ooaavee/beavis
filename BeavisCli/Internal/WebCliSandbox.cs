@@ -124,7 +124,7 @@ namespace BeavisCli.Internal
             if (request.Input != null)
             {
                 value = request.Input.Trim();
-                var tokens = value.Split(' ');
+                string[] tokens = value.Split(' ');
                 if (tokens.Any())
                 {
                     value = tokens.First();
