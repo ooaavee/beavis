@@ -19,7 +19,7 @@ namespace BeavisCli.Internal.Jobs
 
         public Task ExecuteAsync(HttpContext context, WebCliResponse response)
         {
-            var stmt = new DownloadJs(_data, _fileName, _mimeType);
+            IJavaScriptStatement stmt = new DownloadJs(_data, _fileName, _mimeType);
             response.AddStatement(stmt);
             return Task.CompletedTask;
         }

@@ -1,21 +1,23 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
 
 namespace BeavisCli.JavaScriptStatements
 {
-    public class SetTerminalCompletionDictionary : IJavaScriptStatement
+    public sealed class SetTerminalCompletionDictionary : IJavaScriptStatement
     {
         private readonly string[] _names;
 
-        public SetTerminalCompletionDictionary(string[] names)
+        public SetTerminalCompletionDictionary(IEnumerable<string> names)
         {
             if (names == null)
             {
                 throw new ArgumentNullException(nameof(names));
             }
-
-            _names = names;
+    
+            _names = names.ToArray();
         }
 
         public string GetJavaScript()

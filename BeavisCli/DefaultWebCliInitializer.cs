@@ -3,14 +3,9 @@ using System.Reflection;
 
 namespace BeavisCli
 {
-    public class DefaultTerminalGreeter : ITerminalGreeter
+    public class DefaultWebCliInitializer : IWebCliInitializer
     {
-        public void SayGreetings(HttpContext context, WebCliResponse response)
-        {
-            DisplayInfoText(context, response);
-        }
-
-        protected virtual void DisplayInfoText(HttpContext context, WebCliResponse response)
+        public virtual void Initialize(HttpContext context, WebCliResponse response)
         {
             Assembly assembly = GetType().GetTypeInfo().Assembly;
             AssemblyName name = assembly.GetName();

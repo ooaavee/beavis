@@ -1,6 +1,6 @@
 ﻿namespace BeavisCli.JavaScriptStatements
 {
-    public class SetUploadEnabled : IJavaScriptStatement
+    public sealed class SetUploadEnabled : IJavaScriptStatement
     {
         private readonly bool _enabled;
 

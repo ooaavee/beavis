@@ -3,7 +3,7 @@ using System.Text.Encodings.Web;
 
 namespace BeavisCli.JavaScriptStatements
 {
-    public class Alert : IJavaScriptStatement
+    public sealed class Alert : IJavaScriptStatement
     {
         private readonly string _message;
 

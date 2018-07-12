@@ -3,7 +3,7 @@ using System.Text.Encodings.Web;
 
 namespace BeavisCli.JavaScriptStatements
 {
-    public class DownloadJs : IJavaScriptStatement
+    public sealed class DownloadJs : IJavaScriptStatement
     {
         private readonly byte[] _data;
         private readonly string _fileName;

@@ -17,7 +17,7 @@ namespace BeavisCli.Demo
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddBeavisCli(options =>
+            services.AddWebCli(options =>
             {
                 options.Path = "/beavis";
                 options.EnableFileUpload = false;
@@ -37,7 +37,7 @@ namespace BeavisCli.Demo
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseBeavisCli();
+            app.UseWebCli();
 
             app.Run(async (context) =>
             {

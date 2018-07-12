@@ -52,7 +52,7 @@ namespace BeavisCli.Internal
                     _unauthorized.OnUnauthorized(context);
                 }
             }
-            catch (BeavisCliSandboxException ex)
+            catch (WebCliSandboxException ex)
             {
                 response.WriteError(ex);
             }
@@ -82,7 +82,7 @@ namespace BeavisCli.Internal
 
                 if (matchCount > 1)
                 {
-                    throw new BeavisCliSandboxException($"Found more than one application with name '{name}'. Application names must me unique.");
+                    throw new WebCliSandboxException($"Found more than one application with name '{name}'. Application names must me unique.");
                 }
             }
 
@@ -90,10 +90,10 @@ namespace BeavisCli.Internal
             {
                 if (_options.EnableDefaultApplications)
                 {
-                    throw new BeavisCliSandboxException($"{name} is not a valid application.{Environment.NewLine}Usage 'help' to get list of applications.");
+                    throw new WebCliSandboxException($"{name} is not a valid application.{Environment.NewLine}Usage 'help' to get list of applications.");
                 }
 
-                throw new BeavisCliSandboxException($"{name} is not a valid application.");
+                throw new WebCliSandboxException($"{name} is not a valid application.");
             }
 
             return result;

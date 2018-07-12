@@ -14,9 +14,7 @@ namespace BeavisCli
 
         public Type UnauthorizedHandlerType { get; set; } = typeof(DefaultUnauthorizedHandler);
 
-        public Type TerminalInitializerType { get; set; } = typeof(DefaultTerminalInitializer);
-
-        public Type TerminalGreeterType { get; set; } = typeof(DefaultTerminalGreeter);
+        public Type TerminalInitializerType { get; set; } = typeof(DefaultWebCliInitializer);
 
         public Type FileUploadStorageType { get; set; }
     }

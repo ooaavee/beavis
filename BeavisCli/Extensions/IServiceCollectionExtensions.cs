@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Threading.Tasks;
 using BeavisCli;
 using BeavisCli.Internal;
 using BeavisCli.Internal.Applications;
+using Microsoft.AspNetCore.Http;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class IServiceCollectionExtensions
     {
-        public static IServiceCollection AddBeavisCli(this IServiceCollection services, Action<WebCliOptions> setupAction = null)
+        public static IServiceCollection AddWebCli(this IServiceCollection services, Action<WebCliOptions> setupAction = null)
         {
             var options = new WebCliOptions();
 
@@ -21,7 +23,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.Configure(setupAction);
 
             services.AddSingleton<WebCliSandbox>();
-            services.AddSingleton<WebRenderer>();
             services.AddSingleton<IJobPool, DefaultJobPool>();
             services.AddSingleton<DefaultJobPool>();
 
@@ -30,12 +31,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 : ServiceDescriptor.Singleton(typeof(IUnauthorizedHandler), options.UnauthorizedHandlerType));
 
             services.Add(options.TerminalInitializerType == null
-                ? ServiceDescriptor.Singleton(typeof(ITerminalInitializer), typeof(NullVoidService))
-                : ServiceDescriptor.Singleton(typeof(ITerminalInitializer), options.TerminalInitializerType));
-
-            services.Add(options.TerminalGreeterType == null
-                ? ServiceDescriptor.Singleton(typeof(ITerminalGreeter), typeof(NullVoidService))
-                : ServiceDescriptor.Singleton(typeof(ITerminalGreeter), options.TerminalGreeterType));
+                ? ServiceDescriptor.Singleton(typeof(IWebCliInitializer), typeof(NullVoidService))
+                : ServiceDescriptor.Singleton(typeof(IWebCliInitializer), options.TerminalInitializerType));
 
             services.Add(options.FileUploadStorageType == null
                 ? ServiceDescriptor.Singleton(typeof(IFileUploadStorage), typeof(NullVoidService))
@@ -77,6 +74,23 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddTransientWebCliApplication<TWebCliApplication>(this IServiceCollection services) where TWebCliApplication : WebCliApplication
         {
             return services.AddTransient<WebCliApplication, TWebCliApplication>();
+        }
+
+
+        private class NullVoidService : IUnauthorizedHandler, IWebCliInitializer, IFileUploadStorage
+        {
+            void IUnauthorizedHandler.OnUnauthorized(WebCliContext context)
+            {
+            }
+
+            void IWebCliInitializer.Initialize(HttpContext context, WebCliResponse response)
+            {
+            }
+
+            Task IFileUploadStorage.UploadAsync(UploadedFile file, WebCliResponse response)
+            {
+                return Task.CompletedTask;
+            }
         }
     }
 }

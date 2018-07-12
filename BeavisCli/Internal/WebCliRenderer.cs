@@ -9,16 +9,16 @@ using Newtonsoft.Json;
 
 namespace BeavisCli.Internal
 {
-    internal class WebRenderer
+    internal static class WebCliRenderer
     {
-        public async Task RenderHtmlAsync(HttpContext httpContext)
+        public static async Task RenderHtmlAsync(HttpContext httpContext)
         {
             string text = Read("BeavisCli.Resources.html.index.html");
 
             await WriteAsync(text, httpContext.Response, "text/html");
         }
 
-        public async Task RenderCssAsync(HttpContext httpContext)
+        public static async Task RenderCssAsync(HttpContext httpContext)
         {
             string[] files = {
                 "BeavisCli.Resources.css.jquery.terminal.min.css",
@@ -30,7 +30,7 @@ namespace BeavisCli.Internal
             await WriteAsync(text, httpContext.Response, "text/css");
         }
 
-        public async Task RenderJsAsync(HttpContext httpContext)
+        public static async Task RenderJsAsync(HttpContext httpContext)
         {
             string[] files = {
                 "BeavisCli.Resources.js.jquery.min.js",
@@ -46,7 +46,7 @@ namespace BeavisCli.Internal
             await WriteAsync(text, httpContext.Response, "application/javascript");
         }
 
-        public async Task RenderResponseAsync(WebCliResponse response, HttpContext httpContext)
+        public static async Task RenderResponseAsync(WebCliResponse response, HttpContext httpContext)
         {
             if (response.Messages.Any())
             {
@@ -73,7 +73,7 @@ namespace BeavisCli.Internal
             StringBuilder text = new StringBuilder();
             foreach (string file in files)
             {
-                using (Stream stream = Assembly.GetAssembly(typeof(WebRenderer)).GetManifestResourceStream(file))
+                using (Stream stream = Assembly.GetAssembly(typeof(WebCliRenderer)).GetManifestResourceStream(file))
                 {
                     using (StreamReader reader = new StreamReader(stream))
                     {

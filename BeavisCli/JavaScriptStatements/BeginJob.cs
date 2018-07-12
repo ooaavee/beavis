@@ -3,7 +3,7 @@ using System.Text.Encodings.Web;
 
 namespace BeavisCli.JavaScriptStatements
 {
-    public class BeginJob : IJavaScriptStatement
+    public sealed class BeginJob : IJavaScriptStatement
     {
         private readonly string _key;
 
