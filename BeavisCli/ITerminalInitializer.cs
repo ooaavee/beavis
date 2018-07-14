@@ -2,7 +2,7 @@
 
 namespace BeavisCli
 {
-    public interface IWebCliInitializer
+    public interface ITerminalInitializer
     {
         void Initialize(HttpContext context, WebCliResponse response);
     }

@@ -27,10 +27,10 @@ namespace Microsoft.Extensions.DependencyInjection
                 ? ServiceDescriptor.Singleton(typeof(IUnauthorizedHandler), typeof(DefaultUnauthorizedHandler))
                 : ServiceDescriptor.Singleton(typeof(IUnauthorizedHandler), options.UnauthorizedHandlerType));
 
-            // IWebCliInitializer
+            // ITerminalInitializer
             services.Add(options.TerminalInitializerType == null
-                ? ServiceDescriptor.Singleton(typeof(IWebCliInitializer), typeof(DefaultWebCliInitializer))
-                : ServiceDescriptor.Singleton(typeof(IWebCliInitializer), options.TerminalInitializerType));
+                ? ServiceDescriptor.Singleton(typeof(ITerminalInitializer), typeof(DefaultTerminalInitializer))
+                : ServiceDescriptor.Singleton(typeof(ITerminalInitializer), options.TerminalInitializerType));
 
             // IUploadStorage
             services.Add(options.FileUploadStorageType == null

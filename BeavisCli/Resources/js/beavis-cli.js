@@ -62,7 +62,7 @@ var BeavisCli;
                     .success(function (data) {
                     _this.handleResponse(data, _this.terminal, _this);
                 }).error(function (data, status) {
-                    debugger;
+                    _this.handleError(data, _this.terminal);
                 });
                 _this.uploader.file = null;
             };

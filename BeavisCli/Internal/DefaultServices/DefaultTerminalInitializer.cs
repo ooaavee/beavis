@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace BeavisCli.Internal.DefaultServices
 {
-    internal class DefaultWebCliInitializer : IWebCliInitializer
+    internal class DefaultTerminalInitializer : ITerminalInitializer
     {
         public void Initialize(HttpContext context, WebCliResponse response)
         {

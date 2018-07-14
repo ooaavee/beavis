@@ -3,7 +3,7 @@
 namespace BeavisCli
 {
     /// <summary>
-    /// This is the base class for all response messages.
+    /// Base class for all response messages
     /// </summary>
     public abstract class ResponseMessage
     {
@@ -38,5 +38,18 @@ namespace BeavisCli
         }
 
         public override string Type => "information";
+    }
+
+    /// <summary>
+    /// Success message
+    /// </summary>
+    public sealed class SuccessMessage : ResponseMessage
+    {
+        public SuccessMessage(string text)
+        {
+            Text = text;
+        }
+
+        public override string Type => "success";
     }
 }

@@ -30,7 +30,7 @@ namespace BeavisCli.Internal.Applications
                 {
                     bool isDefault = _sandbox.IsDefault(application);
 
-                    if (!_options.EnableDefaultApplicationsBrowsing && isDefault)
+                    if (!_options.AllowDefaultApplicationsBrowsing && isDefault)
                     {
                         // ignore default applications if configured so
                         continue;

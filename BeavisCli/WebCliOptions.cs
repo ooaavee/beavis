@@ -2,17 +2,19 @@
 
 namespace BeavisCli
 {
-    public class WebCliOptions
+    public sealed class WebCliOptions
     {
         public string Path { get; set; } = "/beavis-cli";
 
         public bool EnableDefaultApplications { get; set; } = true;
 
-        public bool EnableDefaultApplicationsBrowsing { get; set; } = true;
+        public bool AllowDefaultApplicationsBrowsing { get; set; } = true;
 
         public bool EnableFileUpload { get; set; }
 
         public bool DisplayExceptions { get; set; }
+
+        public bool UseTerminalInitializer { get; set; } = true;
 
         public Type UnauthorizedHandlerType { get; set; }
 

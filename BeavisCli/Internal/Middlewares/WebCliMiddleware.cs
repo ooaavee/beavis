@@ -20,7 +20,7 @@ namespace BeavisCli.Internal.Middlewares
         private readonly ILogger<WebCliMiddleware> _logger;
         private readonly WebCliSandbox _sandbox;
         private readonly JobPool _jobs;
-        private readonly IWebCliInitializer _initializer;
+        private readonly ITerminalInitializer _initializer;
         private readonly IUploadStorage _uploadStorage;
         private readonly WebCliOptions _options;
 
@@ -28,7 +28,7 @@ namespace BeavisCli.Internal.Middlewares
                                 ILoggerFactory loggerFactory,
                                 WebCliSandbox sandbox, 
                                 JobPool jobs, 
-                                IWebCliInitializer initializer, 
+                                ITerminalInitializer initializer, 
                                 IUploadStorage uploadStorage, 
                                 IOptions<WebCliOptions> options)
         {
@@ -167,7 +167,10 @@ namespace BeavisCli.Internal.Middlewares
                 // set window variables
                 response.AddJavaScript(new SetUploadEnabled(_options.EnableFileUpload));
 
-                _initializer?.Initialize(context, response);
+                if (_options.UseTerminalInitializer)
+                {
+                    _initializer?.Initialize(context, response);
+                }
 
                 await WebCliRenderer.RenderResponseAsync(response, context);
             }

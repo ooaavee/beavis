@@ -2,6 +2,9 @@
 
 namespace BeavisCli
 {
+    /// <summary>
+    /// Represents a file uploaded from the client-side.
+    /// </summary>
     public class UploadedFile
     {
         [JsonProperty("name")]
