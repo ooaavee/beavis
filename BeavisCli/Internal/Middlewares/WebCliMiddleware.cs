@@ -196,8 +196,6 @@ namespace BeavisCli.Internal.Middlewares
         {
             try
             {
-                throw new NotImplementedException("Huuhaaaa!!!");
-
                 string body = GetRequestBodyAsText(context);
                 WebCliRequest request = JsonConvert.DeserializeObject<WebCliRequest>(body);
                 WebCliResponse response = new WebCliResponse(context);
