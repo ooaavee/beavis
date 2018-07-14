@@ -2,7 +2,7 @@
 
 namespace BeavisCli.Internal.DefaultServices
 {
-    internal class DefaultFileUploadStorage : IFileUploadStorage
+    internal class DefaultUploadStorage : IUploadStorage
     {
         public Task OnFileUploadedAsync(UploadedFile file, WebCliResponse response)
         {

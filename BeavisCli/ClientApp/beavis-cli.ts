@@ -77,7 +77,7 @@ namespace BeavisCli {
                 .success((data: IResponse) => {
                     this.handleResponse(data, this.terminal, this);
                 }).error((data, status) => {
-                    debugger;
+                    this.handleError(data, this.terminal);
                 });
         }
 
@@ -96,7 +96,7 @@ namespace BeavisCli {
                 .success((data: IResponse) => {
                     this.handleResponse(data, this.terminal, this);
                 }).error((data, status) => {
-                    debugger;
+                    this.handleError(data, this.terminal);
                 });
         }
 
@@ -126,8 +126,7 @@ namespace BeavisCli {
 
             reader.onerror = error => {
                 this.uploader.file = null;
-                console.log('Error: ', error);
-                debugger;
+                this.handleError(error, this.terminal);
             };
         }
 
@@ -139,7 +138,7 @@ namespace BeavisCli {
                 .success((data: IResponse) => {
                     this.handleResponse(data, terminal, this);
                 }).error((data, status) => {
-                    debugger;
+                    this.handleError(data, terminal);
                 });
         }
 
@@ -154,6 +153,11 @@ namespace BeavisCli {
             for (let i = 0; i < response.statements.length; i++) {
                 eval(response.statements[i]);
             }
+        }
+
+        private handleError(error, terminal: any) {
+            console.log(error);
+            terminal.error(error);
         }
     }
     app.controller("cli", CliController);

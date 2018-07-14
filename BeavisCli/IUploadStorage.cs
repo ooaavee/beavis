@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace BeavisCli
 {
-    public interface IFileUploadStorage
+    public interface IUploadStorage
     {
         Task OnFileUploadedAsync(UploadedFile file, WebCliResponse response);
     }

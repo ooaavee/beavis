@@ -65,7 +65,14 @@ namespace BeavisCli.Internal
             }
             catch (Exception e)
             {
-                response.WriteError(e, true);
+                if (_options.DisplayExceptions)
+                {
+                    response.WriteError(e, true);
+                }
+                else
+                {
+                    response.WriteError("An error occurred.");
+                }
             }
         }
 

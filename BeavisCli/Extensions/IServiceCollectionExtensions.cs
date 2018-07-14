@@ -32,10 +32,10 @@ namespace Microsoft.Extensions.DependencyInjection
                 ? ServiceDescriptor.Singleton(typeof(IWebCliInitializer), typeof(DefaultWebCliInitializer))
                 : ServiceDescriptor.Singleton(typeof(IWebCliInitializer), options.TerminalInitializerType));
 
-            // IFileUploadStorage
+            // IUploadStorage
             services.Add(options.FileUploadStorageType == null
-                ? ServiceDescriptor.Singleton(typeof(IFileUploadStorage), typeof(DefaultFileUploadStorage))
-                : ServiceDescriptor.Singleton(typeof(IFileUploadStorage), options.FileUploadStorageType));
+                ? ServiceDescriptor.Singleton(typeof(IUploadStorage), typeof(DefaultUploadStorage))
+                : ServiceDescriptor.Singleton(typeof(IUploadStorage), options.FileUploadStorageType));
 
             // IAuthorizationHandler
             services.Add(options.AuthorizationHandlerType == null

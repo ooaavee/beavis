@@ -34,7 +34,7 @@ var BeavisCli;
                 .success(function (data) {
                 _this.handleResponse(data, _this.terminal, _this);
             }).error(function (data, status) {
-                debugger;
+                _this.handleError(data, _this.terminal);
             });
         };
         CliController.prototype.processInput = function (input) {
@@ -47,7 +47,7 @@ var BeavisCli;
                 .success(function (data) {
                 _this.handleResponse(data, _this.terminal, _this);
             }).error(function (data, status) {
-                debugger;
+                _this.handleError(data, _this.terminal);
             });
         };
         CliController.prototype.beginUpload = function () {
@@ -68,8 +68,7 @@ var BeavisCli;
             };
             reader.onerror = function (error) {
                 _this.uploader.file = null;
-                console.log('Error: ', error);
-                debugger;
+                _this.handleError(error, _this.terminal);
             };
         };
         CliController.prototype.beginJob = function (key, terminal) {
@@ -78,7 +77,7 @@ var BeavisCli;
                 .success(function (data) {
                 _this.handleResponse(data, terminal, _this);
             }).error(function (data, status) {
-                debugger;
+                _this.handleError(data, terminal);
             });
         };
         CliController.prototype.handleResponse = function (response, terminal, $ctrl) {
@@ -86,6 +85,10 @@ var BeavisCli;
             for (var i = 0; i < response.statements.length; i++) {
                 eval(response.statements[i]);
             }
+        };
+        CliController.prototype.handleError = function (error, terminal) {
+            console.log(error);
+            terminal.error(error);
         };
         CliController.$inject = ["$rootScope", "$http"];
         return CliController;

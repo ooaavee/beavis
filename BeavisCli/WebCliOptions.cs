@@ -10,7 +10,9 @@ namespace BeavisCli
 
         public bool EnableDefaultApplicationsBrowsing { get; set; } = true;
 
-        public bool EnableFileUpload { get; set; } = true;
+        public bool EnableFileUpload { get; set; }
+
+        public bool DisplayExceptions { get; set; }
 
         public Type UnauthorizedHandlerType { get; set; }
 

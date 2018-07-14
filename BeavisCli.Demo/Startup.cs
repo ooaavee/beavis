@@ -21,6 +21,7 @@ namespace BeavisCli.Demo
             {
                 options.Path = "/beavis";
                 options.EnableFileUpload = false;
+                options.DisplayExceptions = true;
             });
 
             services.AddSingletonWebCliApplication<Services>();
