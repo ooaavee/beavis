@@ -40,7 +40,7 @@ namespace BeavisCli.Internal.Applications
 
                 context.Response.WriteInformation("Keyboard shortcuts:");
 
-                context.Response.WriteInformations(ResponseRenderer.FormatLines(shortcuts, true));
+                context.Response.WriteInformation(ResponseRenderer.FormatLines(shortcuts, true));
 
                 return Exit(context);
             }, context);

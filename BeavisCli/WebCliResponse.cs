@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using BeavisCli.Internal;
 
 namespace BeavisCli
 {
@@ -56,6 +57,22 @@ namespace BeavisCli
         }
 
         /// <summary>
+        /// Writes an information message.
+        /// </summary>
+        public void WriteInformation(IEnumerable<string> texts)
+        {
+            if (texts == null)
+            {
+                throw new ArgumentNullException(nameof(texts));
+            }
+
+            foreach (string text in texts)
+            {
+                WriteInformation(text);
+            }
+        }
+
+        /// <summary>
         /// Writes a success/ very positive message.
         /// </summary>
         public void WriteSuccess(string text)
@@ -66,6 +83,22 @@ namespace BeavisCli
             }
 
             Messages.Add(new SuccessMessage(text));
+        }
+
+        /// <summary>
+        /// Writes a success/ very positive message.
+        /// </summary>
+        public void WriteSuccess(IEnumerable<string> texts)
+        {
+            if (texts == null)
+            {
+                throw new ArgumentNullException(nameof(texts));
+            }
+
+            foreach (string text in texts)
+            {
+                WriteSuccess(text);
+            }
         }
 
         /// <summary>
@@ -80,7 +113,7 @@ namespace BeavisCli
 
             string text = returnStackTrace ? e.ToString() : e.Message;
 
-            Messages.Add(new ErrorMessage(text));
+            WriteError(text);
         }
 
         /// <summary>
@@ -96,7 +129,10 @@ namespace BeavisCli
             Messages.Add(new ErrorMessage(text));
         }
 
-        public void WriteInformations(IEnumerable<string> texts)
+        /// <summary>
+        /// Writes an error message.
+        /// </summary>
+        public void WriteError(IEnumerable<string> texts)
         {
             if (texts == null)
             {
@@ -105,23 +141,23 @@ namespace BeavisCli
 
             foreach (string text in texts)
             {
-                WriteInformation(text);
+                WriteError(text);
             }
         }
 
         /// <summary>
-        /// Adds a JavaScript statement.
+        /// Adds a JavaScript statement that will be invoked on the client-side.
         /// </summary>
-        public void AddStatement(IJavaScriptStatement statement)
+        public void AddJavaScript(IJavaScriptStatement js)
         {
-            if (statement == null)
+            if (js == null)
             {
-                throw new ArgumentNullException(nameof(statement));
+                throw new ArgumentNullException(nameof(js));
             }
 
-            string js = statement.GetJavaScript();
+            string code = js.GetJavaScript();
 
-            Statements.Add(js);
+            Statements.Add(code);   
         }
 
         public void WriteFile(byte[] data, string fileName, string mimeType)
@@ -153,17 +189,18 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(job));
             }
 
-            // This will be invoked just before we are sending the response.
+            // this will be invoked just before we are sending the response
             Sending += (sender, args) =>
             {
-                // 1. Get the IJobPool.
-                IJobPool pool = _context.RequestServices.GetRequiredService<IJobPool>();
+                // get the job pool
+                JobPool pool = _context.RequestServices.GetRequiredService<JobPool>();
 
-                // 2. Push job.
+                // push job
                 string key = pool.Push(job);
 
-                // 3. Add a JavaScript statement that begins the job on the client-side.
-                AddStatement(new BeginJob(key));
+                // add a JavaScript statement that begins the job on the client-side
+                IJavaScriptStatement js = new BeginJob(key);
+                AddJavaScript(js);
             };
         }
 
@@ -173,6 +210,7 @@ namespace BeavisCli
         internal void OnSending()
         {
             EventHandler evt = Sending;
+
             if (evt != null)
             {
                 lock (evt)

@@ -93,7 +93,7 @@ namespace BeavisCli.Demo.Applications
 
                 // write output
                 context.Response.WriteInformation("Services (TService and TImplementation):");
-                context.Response.WriteInformations(ResponseRenderer.FormatLines(values, true));
+                context.Response.WriteInformation(ResponseRenderer.FormatLines(values, true));
 
                 return Exit(context);
             }, context);

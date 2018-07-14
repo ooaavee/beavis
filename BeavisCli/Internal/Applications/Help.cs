@@ -22,56 +22,64 @@ namespace BeavisCli.Internal.Applications
         {
             await OnExecuteAsync(() =>
             {
-                var defaultApplications = new List<WebCliApplication>();
-                var externalApplications = new List<WebCliApplication>();
+                var defaultApps = new List<WebCliApplication>();
 
-                foreach (WebCliApplication app in _sandbox.GetApplications(context.HttpContext))
+                var externalApps = new List<WebCliApplication>();
+
+                foreach (WebCliApplication application in _sandbox.GetApplications(context.HttpContext))
                 {
-                    if (!_options.EnableDefaultApplicationsBrowsing)
-                    {
-                        if (_sandbox.IsDefault(app))
-                        {
-                            continue;
-                        }
-                    }
+                    bool isDefault = _sandbox.IsDefault(application);
 
-                    if (!app.IsBrowsable(context))
+                    if (!_options.EnableDefaultApplicationsBrowsing && isDefault)
                     {
+                        // ignore default applications if configured so
                         continue;
                     }
 
-                    if (app.GetType() == GetType())
+                    if (!application.IsBrowsable(context))
                     {
+                        // ignore non-browsable applications
                         continue;
                     }
 
-                    if (string.IsNullOrEmpty(app.Name))
+                    if (application.GetType() == GetType())
                     {
+                        // ignore 'help'
                         continue;
                     }
 
-                    if (_sandbox.IsDefault(app))
+                    if (isDefault)
                     {
-                        defaultApplications.Add(app);
+                        defaultApps.Add(application);
                     }
                     else
                     {
-                        externalApplications.Add(app);
+                        externalApps.Add(application);
                     }
                 }
              
-                var allApplications = defaultApplications.Concat(externalApplications);
-
                 var lines = new List<Tuple<string, string>>();
 
-                foreach (WebCliApplication app in allApplications)
-                {
-                    lines.Add(new Tuple<string, string>(app.Name, app.Description));
+                foreach (WebCliApplication application in defaultApps.Concat(externalApps))
+                {                    
+                    lines.Add(new Tuple<string, string>(application.Meta().Name, application.Meta().Description));
                 }
 
-                context.Response.WriteInformation("List of supported applications:");
+                context.Response.WriteInformation("Default applications:");
 
-                context.Response.WriteInformations(ResponseRenderer.FormatLines(lines, true));
+                int lineCount = 0;
+
+                foreach (string line in ResponseRenderer.FormatLines(lines, true))
+                {
+                    lineCount++;
+                    context.Response.WriteInformation(line);
+
+                    if (externalApps.Any() && lineCount == defaultApps.Count)
+                    {
+                        context.Response.WriteEmptyLine();
+                        context.Response.WriteInformation("Custom applications:");
+                    }
+                }
  
                 return Exit(context);
             }, context);

@@ -16,7 +16,7 @@ namespace BeavisCli.Internal.Middlewares
 
         private readonly RequestDelegate _next;
         private readonly WebCliSandbox _sandbox;
-        private readonly IJobPool _jobs;
+        private readonly JobPool _jobs;
         private readonly IWebCliInitializer _initializer;
         private readonly IFileUploadStorage _fileUploadStorage;
         private readonly WebCliOptions _options;
@@ -24,7 +24,7 @@ namespace BeavisCli.Internal.Middlewares
         public WebCliMiddleware(
             RequestDelegate next,
             WebCliSandbox sandbox,
-            IJobPool jobs,
+            JobPool jobs,
             IWebCliInitializer initializer,
             IFileUploadStorage fileUploadStorage,
             IOptions<WebCliOptions> options)
@@ -114,10 +114,10 @@ namespace BeavisCli.Internal.Middlewares
             var response = new WebCliResponse(context);
 
             // prepare tab completion
-            response.AddStatement(new SetTerminalCompletionDictionary(_sandbox.GetApplications(context).Select(x => x.Name)));
+            response.AddJavaScript(new SetTerminalCompletionDictionary(_sandbox.GetApplications(context).Select(x => x.Meta().Name)));
 
             // set variables
-            response.AddStatement(new SetUploadEnabled(_options.EnableFileUpload));
+            response.AddJavaScript(new SetUploadEnabled(_options.EnableFileUpload));
 
             _initializer?.Initialize(context, response);
 
@@ -148,7 +148,7 @@ namespace BeavisCli.Internal.Middlewares
             if (_fileUploadStorage != null)
             {
                 UploadedFile file = JsonConvert.DeserializeObject<UploadedFile>(body);
-                await _fileUploadStorage.UploadAsync(file, response);
+                await _fileUploadStorage.OnFileUploadedAsync(file, response);
             }
             await WebCliRenderer.RenderResponseAsync(response, context);
         }

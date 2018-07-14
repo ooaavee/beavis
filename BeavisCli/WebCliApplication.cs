@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BeavisCli.Internal;
@@ -7,32 +8,7 @@ using BeavisCli.Internal;
 namespace BeavisCli
 {
     public abstract class WebCliApplication
-    {
-        private const int ExitStatusCode = 2;
-
-        /// <summary>
-        /// Application name
-        /// </summary>
-        public string Name { get; private set; }
-
-        /// <summary>
-        /// Application description
-        /// </summary>
-        public string Description { get; private set; }
-
-        internal bool TryInitialize()
-        {
-            if (GetType().GetCustomAttributes(typeof(WebCliApplicationDefinitionAttribute), true) is WebCliApplicationDefinitionAttribute[] attributes && attributes.Any())
-            {
-                WebCliApplicationDefinitionAttribute definition = attributes.First();
-                Name = definition.Name;
-                Description = definition.Description;
-                return true;
-            }
-
-            return false;
-        }
-
+    {        
         /// <summary>
         /// Checks if the application execution is authorized.
         /// </summary>
@@ -63,9 +39,7 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(context));
             }
 
-            WebCliSandbox sandbox = context.HttpContext.RequestServices.GetRequiredService<WebCliSandbox>();
-
-            string[] args = sandbox.ParseApplicationArgs(context.Request);
+            string[] args = context.Request.GetApplicationArgs();
 
             await context.Host.Cli.OnExecuteAsync(invoke);
 
@@ -74,21 +48,28 @@ namespace BeavisCli
       
         protected Task<int> Exit(WebCliContext context)
         {
-            return Task.FromResult(ExitStatusCode);
+            return Exit();
         }
 
         protected Task<int> ExitWithHelp(WebCliContext context)
         {
-            context.Host.Cli.ShowHelp(Name);
+            context.Host.Cli.ShowHelp(this.Meta().Name);
 
-            return Task.FromResult(ExitStatusCode);
+            return Exit();
         }
 
         protected Task<int> Unauthorized(WebCliContext context)
         {
             IUnauthorizedHandler handler = context.HttpContext.RequestServices.GetRequiredService<IUnauthorizedHandler>();
-            handler.OnUnauthorized(context);
-            return Task.FromResult(ExitStatusCode);
+            handler.OnUnauthorizedAsync(context);
+            return Exit();
         }
+
+        private static Task<int> Exit()
+        {
+            const int exitStatusCode = 2;
+            return Task.FromResult(exitStatusCode);
+        }
+
     }
 }

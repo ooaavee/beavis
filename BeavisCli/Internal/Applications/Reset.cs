@@ -10,8 +10,8 @@ namespace BeavisCli.Internal.Applications
         {
             await OnExecuteAsync(() =>
             {
-                context.Response.AddStatement(new ClearTerminal());
-                context.Response.AddStatement(new ClearTerminalHistory());
+                context.Response.AddJavaScript(new ClearTerminal());
+                context.Response.AddJavaScript(new ClearTerminalHistory());
                 return Exit(context);
             }, context);
 

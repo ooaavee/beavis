@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace BeavisCli
+namespace BeavisCli.Internal
 {
-    public class DefaultJobPool : IJobPool
+    internal class JobPool
     {
         private readonly IMemoryCache _cache;
 
-        public DefaultJobPool(IMemoryCache cache)
+        public JobPool(IMemoryCache cache)
         {
             _cache = cache;
         }
@@ -39,7 +37,7 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(job));
             }
 
-            var key = Guid.NewGuid().ToString();
+            string key = Guid.NewGuid().ToString();
 
             _cache.Set(key, job);
 

@@ -1,9 +1,10 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace BeavisCli
 {
     public interface IFileUploadStorage
     {
-        Task UploadAsync(UploadedFile file, WebCliResponse response);
+        Task OnFileUploadedAsync(UploadedFile file, WebCliResponse response);
     }
 }

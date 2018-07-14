@@ -12,10 +12,12 @@ namespace BeavisCli
 
         public bool EnableFileUpload { get; set; } = true;
 
-        public Type UnauthorizedHandlerType { get; set; } = typeof(DefaultUnauthorizedHandler);
+        public Type UnauthorizedHandlerType { get; set; }
 
-        public Type TerminalInitializerType { get; set; } = typeof(DefaultWebCliInitializer);
+        public Type TerminalInitializerType { get; set; }
 
         public Type FileUploadStorageType { get; set; }
+
+        public Type AuthorizationHandlerType { get; set; }
     }
 }

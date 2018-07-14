@@ -1,7 +1,9 @@
-﻿namespace BeavisCli
+﻿using System.Threading.Tasks;
+
+namespace BeavisCli
 {
     public interface IUnauthorizedHandler
     {
-        void OnUnauthorized(WebCliContext context);
+        Task OnUnauthorizedAsync(WebCliContext context);
     }
 }

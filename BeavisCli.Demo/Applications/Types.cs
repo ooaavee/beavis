@@ -76,7 +76,7 @@ namespace BeavisCli.Demo.Applications
 
                     }
 
-                    context.Response.WriteInformations(results);
+                    context.Response.WriteInformation(results);
                 }
                 else
                 {

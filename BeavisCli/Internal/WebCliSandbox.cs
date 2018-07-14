@@ -5,18 +5,21 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace BeavisCli.Internal
 {
     internal class WebCliSandbox
     {
-        private readonly IUnauthorizedHandler _unauthorized;
+        private readonly IAuthorizationHandler _authorizationHandler;
+        private readonly IUnauthorizedHandler _unauthorizedHandler;
         private readonly WebCliOptions _options;
 
-        public WebCliSandbox(IUnauthorizedHandler unauthorized, IOptions<WebCliOptions> options)
+        public WebCliSandbox(IAuthorizationHandler authorizationHandler, IUnauthorizedHandler unauthorizedHandler, IOptions<WebCliOptions> options)
         {
-            _unauthorized = unauthorized;
+            _authorizationHandler = authorizationHandler;
+            _unauthorizedHandler = unauthorizedHandler;
             _options = options.Value;
         }
 
@@ -24,15 +27,15 @@ namespace BeavisCli.Internal
         {
             try
             {
-                string name = ParseApplicationName(request);
+                string name = request.GetApplicationName();
 
-                WebCliApplication application = GetApplicaton(name, httpContext);
+                WebCliApplication application = GetApplication(name, httpContext);
 
                 CommandLineApplication cli = new CommandLineApplication
                 {
-                    Name = application.Name,
-                    FullName = application.Name,
-                    Description = application.Description,
+                    Name = application.Meta().Name,
+                    FullName = application.Meta().Name,
+                    Description = application.Meta().Description,
                     Out = new ResponseMessageTextWriter(response.WriteInformation),
                     Error = new ResponseMessageTextWriter(response.WriteError)
                 };
@@ -43,30 +46,30 @@ namespace BeavisCli.Internal
 
                 WebCliContext context = new WebCliContext(request, response, httpContext, host);
 
-                if (application.IsAuthorized(context))
+                if (IsAuthorized(application, context))
                 {
-                    await application.ExecuteAsync(context);
+                    await ExecuteApplicationAsync(application, context);
                 }
                 else
                 {
-                    _unauthorized.OnUnauthorized(context);
+                    await HandleUnauthorizedAsync(context);
                 }
             }
-            catch (WebCliSandboxException ex)
+            catch (WebCliSandboxException e)
             {
-                response.WriteError(ex);
+                response.WriteError(e);
             }
-            catch (CommandParsingException ex)
+            catch (CommandParsingException e)
             {
-                response.WriteError(ex);
+                response.WriteError(e);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                response.WriteError(ex, true);
+                response.WriteError(e, true);
             }
         }
 
-        public WebCliApplication GetApplicaton(string name, HttpContext httpContext)
+        public WebCliApplication GetApplication(string name, HttpContext httpContext)
         {
             int matchCount = 0;
 
@@ -74,7 +77,7 @@ namespace BeavisCli.Internal
 
             foreach (WebCliApplication application in GetApplications(httpContext))
             {
-                if (application.Name == name)
+                if (application.Meta().Name == name)
                 {
                     matchCount++;
                     result = application;
@@ -82,7 +85,7 @@ namespace BeavisCli.Internal
 
                 if (matchCount > 1)
                 {
-                    throw new WebCliSandboxException($"Found more than one application with name '{name}'. Application names must me unique.");
+                    throw new WebCliSandboxException($"Found more than one application with name a '{name}'. Application names must me unique.");
                 }
             }
 
@@ -103,58 +106,38 @@ namespace BeavisCli.Internal
         {
             foreach (WebCliApplication application in httpContext.RequestServices.GetServices<WebCliApplication>())
             {
-                if (application.TryInitialize())
+                if (application.Meta() != null)
                 {
                     yield return application;
                 }
             }
         }
 
-        public bool IsDefault(WebCliApplication app)
+        public bool IsDefault(WebCliApplication application)
         {
-            return app.GetType().Assembly.Equals(GetType().Assembly);
+            return application.GetType().Assembly.Equals(GetType().Assembly);
         }
 
-        /// <summary>
-        /// Parses the application name from the request.
-        /// </summary>
-        public string ParseApplicationName(WebCliRequest request)
+        private bool IsAuthorized(WebCliApplication application, WebCliContext context)
         {
-            string value = null;
-            if (request.Input != null)
+            bool authorized = _authorizationHandler.IsAuthorized(application, context);
+
+            if (authorized)
             {
-                value = request.Input.Trim();
-                string[] tokens = value.Split(' ');
-                if (tokens.Any())
-                {
-                    value = tokens.First();
-                }
+                authorized = application.IsAuthorized(context);
             }
-            return value;
+
+            return authorized;
         }
 
-        /// <summary>
-        /// Parses application arguments from the request.
-        /// </summary>
-        public string[] ParseApplicationArgs(WebCliRequest request)
+        private async Task ExecuteApplicationAsync(WebCliApplication application, WebCliContext context)
         {
-            var args = new List<string>();
-            if (request.Input != null)
-            {
-                var tokens = request.Input.Trim().Split(' ');
-                if (tokens.Length > 1)
-                {
-                    for (var i = 1; i <= tokens.Length - 1; i++)
-                    {
-                        var arg = tokens[i].Trim();
-                        if (arg.Length > 0)
-                        {
-                            args.Add(arg);
-                        }
-                    }
-                }
-            }
-            return args.ToArray();
+            await application.ExecuteAsync(context);
+        }
+
+        private async Task HandleUnauthorizedAsync(WebCliContext context)
+        {
+            await _unauthorizedHandler.OnUnauthorizedAsync(context);
         }
     }
 }

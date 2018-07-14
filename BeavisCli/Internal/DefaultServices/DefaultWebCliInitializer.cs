@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
-using System.Reflection;
+﻿using System.Reflection;
+using Microsoft.AspNetCore.Http;
 
-namespace BeavisCli
+namespace BeavisCli.Internal.DefaultServices
 {
-    public class DefaultWebCliInitializer : IWebCliInitializer
+    internal class DefaultWebCliInitializer : IWebCliInitializer
     {
-        public virtual void Initialize(HttpContext context, WebCliResponse response)
+        public void Initialize(HttpContext context, WebCliResponse response)
         {
             Assembly assembly = GetType().GetTypeInfo().Assembly;
             AssemblyName name = assembly.GetName();
