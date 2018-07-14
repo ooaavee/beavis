@@ -2,7 +2,7 @@
 
 namespace BeavisCli.Internal.Applications
 {
-    [WebCliApplicationDefinition(Name = "upload", Description = "Uploads a file.")]
+    [WebCliApplication("upload", "Uploads a file.")]
     internal class Upload : WebCliApplication
     {
         public override async Task ExecuteAsync(WebCliContext context)

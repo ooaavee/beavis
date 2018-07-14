@@ -23,11 +23,12 @@ namespace BeavisCli.Internal
         public static WebCliApplicationMeta Get(Type type)
         {
             WebCliApplicationMeta value = null;
-            if (type.GetCustomAttributes(typeof(WebCliApplicationDefinitionAttribute), true) is WebCliApplicationDefinitionAttribute[] attributes && attributes.Length > 0)
+
+            if (type.GetCustomAttributes(typeof(WebCliApplicationAttribute), true) is WebCliApplicationAttribute[] items && items.Length > 0)
             {
-                WebCliApplicationDefinitionAttribute attribute = attributes[0];
-                value = new WebCliApplicationMeta(attribute.Name, attribute.Description);
+                value = new WebCliApplicationMeta(items[0].Name, items[0].Description);
             }
+
             return value;
         }
     }

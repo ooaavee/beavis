@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Microsoft.Extensions.Options;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 
 namespace BeavisCli.Internal.Applications
 {
-    [WebCliApplicationDefinition(Name = "help", Description = "Displays help.")]
+    [WebCliApplication("help", "Displays help.")]
     internal class Help : WebCliApplication
     {
         private readonly WebCliSandbox _sandbox;
@@ -44,7 +44,7 @@ namespace BeavisCli.Internal.Applications
 
                     if (application.GetType() == GetType())
                     {
-                        // ignore 'help'
+                        // ignore myself 
                         continue;
                     }
 
@@ -61,7 +61,7 @@ namespace BeavisCli.Internal.Applications
                 var lines = new List<Tuple<string, string>>();
 
                 foreach (WebCliApplication application in defaultApps.Concat(externalApps))
-                {                    
+                {
                     lines.Add(new Tuple<string, string>(application.Meta().Name, application.Meta().Description));
                 }
 

@@ -9,12 +9,7 @@ namespace BeavisCli.JavaScriptStatements
 
         public BeginJob(string key)
         {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            _key = key;
+            _key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
         public string GetJavaScript()

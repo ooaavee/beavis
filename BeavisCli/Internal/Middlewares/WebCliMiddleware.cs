@@ -43,16 +43,18 @@ namespace BeavisCli.Internal.Middlewares
 
         public async Task InvokeAsync(HttpContext context)
         {
+            HttpRequest request = context.Request;
+
             bool IsWebCliPath()
             {
-                return context.Request.Path.StartsWithSegments(_options.Path, StringComparison.InvariantCultureIgnoreCase) ||
-                       context.Request.Path.StartsWithSegments(DefaultPath, StringComparison.InvariantCultureIgnoreCase);
+                return request.Path.StartsWithSegments(_options.Path, StringComparison.InvariantCultureIgnoreCase) ||
+                       request.Path.StartsWithSegments(DefaultPath, StringComparison.InvariantCultureIgnoreCase);
             }
 
             bool IsRequest(string path, string method)
             {
-                return context.Request.Method == method &&
-                       context.Request.Path.Equals(path, StringComparison.InvariantCultureIgnoreCase);
+                return request.Method == method &&
+                       request.Path.Equals(path, StringComparison.InvariantCultureIgnoreCase);
             }
 
             if (IsWebCliPath())
@@ -196,7 +198,7 @@ namespace BeavisCli.Internal.Middlewares
         {
             try
             {
-                string body = GetRequestBodyAsText(context);
+                string body = await ReadBodyAsync(context);
                 WebCliRequest request = JsonConvert.DeserializeObject<WebCliRequest>(body);
                 WebCliResponse response = new WebCliResponse(context);
                 await _sandbox.ExecuteAsync(request, response, context);
@@ -213,7 +215,7 @@ namespace BeavisCli.Internal.Middlewares
         {
             try
             {
-                string body = GetRequestBodyAsText(context);
+                string body = await ReadBodyAsync(context);
                 WebCliResponse response = new WebCliResponse(context);
                 if (_uploadStorage != null)
                 {
@@ -231,25 +233,23 @@ namespace BeavisCli.Internal.Middlewares
 
         private async Task WriteErrorResponseAsync(Exception e, HttpContext context)
         {
-            StringBuilder text = new StringBuilder();
+            string text = _options.DisplayExceptions ? 
+                e.ToString() : 
+                "An error occurred. Please check your application logs for more details.";
 
-            if (_options.DisplayExceptions)
-            {
-                text.AppendLine(e.ToString());
-            }
-
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
             context.Response.ContentType = "text/plain";
-            await context.Response.WriteAsync(text.ToString(), Encoding.UTF8);
+            await context.Response.WriteAsync(text, Encoding.UTF8);
         }
 
-        private static string GetRequestBodyAsText(HttpContext context)
+        private static async Task<string> ReadBodyAsync(HttpContext context)
         {
             using (Stream stream = context.Request.Body)
             {
                 using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
                 {
-                    return reader.ReadToEnd();
+                    string body = await reader.ReadToEndAsync();
+                    return body;
                 }
             }
         }

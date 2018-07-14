@@ -7,6 +7,9 @@ namespace BeavisCli.Internal
 {
     internal class JobPool
     {
+        //
+        // TODO: ei käytetä memorycachea vaan ihan staattinen dictionary menee hyvin!
+        //
         private readonly IMemoryCache _cache;
 
         public JobPool(IMemoryCache cache)

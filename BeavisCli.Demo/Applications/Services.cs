@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace BeavisCli.Demo.Applications
 {
-    [WebCliApplicationDefinition(Name = "services", Description = "This sample application finds DI services available.")]
+    [WebCliApplication("services", "This sample application finds DI services available.")]
     public class Services : WebCliApplication
     {
         public override async Task ExecuteAsync(WebCliContext context)

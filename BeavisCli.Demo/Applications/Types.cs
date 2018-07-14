@@ -7,7 +7,7 @@ using BeavisCli.Demo.Applications.Utils;
 
 namespace BeavisCli.Demo.Applications
 {
-    [WebCliApplicationDefinition(Name = "types", Description = "This sample application finds types available in the current AppDomain.")]
+    [WebCliApplication("types", "This sample application finds types available in the current AppDomain.")]
     public class Types : WebCliApplication
     {
         public override async Task ExecuteAsync(WebCliContext context)

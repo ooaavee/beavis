@@ -2,7 +2,7 @@
 
 namespace BeavisCli.Internal.Applications
 {
-    [WebCliApplicationDefinition(Name = "clear", Description = "Clears the terminal.")]
+    [WebCliApplication("clear", "Clears the terminal.")]
     internal class Clear : WebCliApplication
     {
         public override async Task ExecuteAsync(WebCliContext context)

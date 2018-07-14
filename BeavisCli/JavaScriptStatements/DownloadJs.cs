@@ -18,8 +18,8 @@ namespace BeavisCli.JavaScriptStatements
 
         public string GetJavaScript()
         {
-            var base64 = Convert.ToBase64String(_data);
-            var js = $"download(\"data:{JavaScriptEncoder.Default.Encode(_mimeType)};base64,{base64}\", \"{JavaScriptEncoder.Default.Encode(_fileName)}\", \"{JavaScriptEncoder.Default.Encode(_mimeType)}\");";
+            string base64 = Convert.ToBase64String(_data);
+            string js = $"download(\"data:{JavaScriptEncoder.Default.Encode(_mimeType)};base64,{base64}\", \"{JavaScriptEncoder.Default.Encode(_fileName)}\", \"{JavaScriptEncoder.Default.Encode(_mimeType)}\");";
             return js;
         }
     }

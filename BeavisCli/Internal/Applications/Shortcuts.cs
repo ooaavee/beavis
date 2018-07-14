@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Internal.Applications
 {
-    [WebCliApplicationDefinition(Name = "shortcuts", Description = "Displays a list of keyboard shortcuts.")]
+    [WebCliApplication("shortcuts", "Displays a list of keyboard shortcuts.")]
     internal class Shortcuts : WebCliApplication
     {
         public override async Task ExecuteAsync(WebCliContext context)

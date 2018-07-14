@@ -1,11 +1,11 @@
-﻿using System.IO;
+﻿using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
 
 namespace BeavisCli.Internal
 {
@@ -13,7 +13,7 @@ namespace BeavisCli.Internal
     {
         public static async Task RenderHtmlAsync(HttpContext httpContext)
         {
-            string text = Read("BeavisCli.Resources.html.index.html");
+            string text = await ReadAsync("BeavisCli.Resources.html.index.html");
 
             await WriteAsync(text, httpContext.Response, "text/html");
         }
@@ -25,7 +25,7 @@ namespace BeavisCli.Internal
                 "BeavisCli.Resources.css.site.css"
             };
 
-            string text = Read(files);
+            string text = await ReadAsync(files);
 
             await WriteAsync(text, httpContext.Response, "text/css");
         }
@@ -41,7 +41,7 @@ namespace BeavisCli.Internal
                 "BeavisCli.Resources.js.beavis-cli.js"
             };
 
-            string text = Read(files);
+            string text = await ReadAsync(files);
 
             await WriteAsync(text, httpContext.Response, "application/javascript");
         }
@@ -68,20 +68,22 @@ namespace BeavisCli.Internal
             await response.Body.WriteAsync(content, 0, content.Length);
         }
 
-        private static string Read(params string[] files)
+        private static async Task<string> ReadAsync(params string[] files)
         {
             StringBuilder text = new StringBuilder();
+
             foreach (string file in files)
             {
                 using (Stream stream = Assembly.GetAssembly(typeof(WebCliRenderer)).GetManifestResourceStream(file))
                 {
                     using (StreamReader reader = new StreamReader(stream))
-                    {
-                        string tmp = reader.ReadToEnd();
+                    {                     
+                        string tmp = await reader.ReadToEndAsync();
                         text.AppendLine(tmp);
                     }
                 }
             }
+
             return text.ToString();
         }
     }

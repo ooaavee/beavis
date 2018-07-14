@@ -1,9 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using BeavisCli.Internal;
+using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using BeavisCli.Internal;
 
 namespace BeavisCli
 {
@@ -48,18 +46,32 @@ namespace BeavisCli
       
         protected Task<int> Exit(WebCliContext context)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
             return Exit();
         }
 
         protected Task<int> ExitWithHelp(WebCliContext context)
         {
-            context.Host.Cli.ShowHelp(this.Meta().Name);
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
 
+            context.Host.Cli.ShowHelp(this.Meta().Name);
             return Exit();
         }
 
         protected Task<int> Unauthorized(WebCliContext context)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
             IUnauthorizedHandler handler = context.HttpContext.RequestServices.GetRequiredService<IUnauthorizedHandler>();
             handler.OnUnauthorizedAsync(context);
             return Exit();
@@ -70,6 +82,5 @@ namespace BeavisCli
             const int exitStatusCode = 2;
             return Task.FromResult(exitStatusCode);
         }
-
     }
 }

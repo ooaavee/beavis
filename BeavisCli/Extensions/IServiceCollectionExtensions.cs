@@ -49,6 +49,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 services.AddSingletonWebCliApplication<Clear>();
                 services.AddSingletonWebCliApplication<Reset>();
                 services.AddSingletonWebCliApplication<Shortcuts>();
+                services.AddSingletonWebCliApplication<License>();
 
                 if (options.EnableFileUpload)
                 {
@@ -88,7 +89,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             if (WebCliApplicationMeta.Get(typeof(TWebCliApplication)) == null)
             {
-                throw new InvalidOperationException($"{typeof(TWebCliApplication)} is not a valid WebCliApplication, unable to find {nameof(WebCliApplicationDefinitionAttribute)} attribute.");
+                throw new InvalidOperationException($"{typeof(TWebCliApplication)} is not a valid WebCliApplication, unable to find {nameof(WebCliApplicationAttribute)} attribute.");
             }
         }
     }

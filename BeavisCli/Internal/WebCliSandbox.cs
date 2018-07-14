@@ -71,7 +71,7 @@ namespace BeavisCli.Internal
                 }
                 else
                 {
-                    response.WriteError("An error occurred.");
+                    response.WriteError("An error occurred. Please check your application logs for more details.");
                 }
             }
         }

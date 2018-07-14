@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Internal.Applications
 {
-    [WebCliApplicationDefinition(Name = "reset", Description = "Resets the terminal.")]
+    [WebCliApplication("reset", "Resets the terminal.")]
     internal class Reset : WebCliApplication
     {
         public override async Task ExecuteAsync(WebCliContext context)
