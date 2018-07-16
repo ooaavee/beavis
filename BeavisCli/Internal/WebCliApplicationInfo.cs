@@ -2,9 +2,9 @@
 
 namespace BeavisCli.Internal
 {
-    internal class WebCliApplicationMeta
+    internal class WebCliApplicationInfo
     {
-        public WebCliApplicationMeta(string name, string description)
+        public WebCliApplicationInfo(string name, string description)
         {
             Name = name;
             Description = description;
@@ -20,13 +20,13 @@ namespace BeavisCli.Internal
         /// </summary>
         public string Description { get; }
 
-        public static WebCliApplicationMeta Get(Type type)
+        public static WebCliApplicationInfo Parse(Type type)
         {
-            WebCliApplicationMeta value = null;
+            WebCliApplicationInfo value = null;
 
             if (type.GetCustomAttributes(typeof(WebCliApplicationAttribute), true) is WebCliApplicationAttribute[] items && items.Length > 0)
             {
-                value = new WebCliApplicationMeta(items[0].Name, items[0].Description);
+                value = new WebCliApplicationInfo(items[0].Name, items[0].Description);
             }
 
             return value;

@@ -162,7 +162,7 @@ namespace BeavisCli.Internal.Middlewares
                 WebCliResponse response = new WebCliResponse(context);
 
                 // prepare tab completion
-                response.AddJavaScript(new SetTerminalCompletionDictionary(_sandbox.GetApplications(context).Select(x => x.Meta().Name)));
+                response.AddJavaScript(new SetTerminalCompletionDictionary(_sandbox.GetApplications(context).Select(x => x.GetInfo().Name)));
 
                 // set window variables
                 response.AddJavaScript(new SetUploadEnabled(_options.EnableFileUpload));

@@ -11,11 +11,11 @@ namespace BeavisCli
 {
     public class WebCliResponse
     {
-        private readonly HttpContext _context;
+        private readonly HttpContext _httpContext;
 
-        internal WebCliResponse(HttpContext context)
+        internal WebCliResponse(HttpContext httpContext)
         {
-            _context = context;
+            _httpContext = httpContext;
         }
 
         /// <summary>
@@ -192,11 +192,8 @@ namespace BeavisCli
             // this will be invoked just before we are sending the response
             Sending += (sender, args) =>
             {
-                // get the job pool
-                JobPool pool = _context.RequestServices.GetRequiredService<JobPool>();
-
                 // push job
-                string key = pool.Push(job);
+                string key = _httpContext.GetJobPool().Push(job);
 
                 // add a JavaScript statement that begins the job on the client-side
                 IJavaScriptStatement js = new BeginJob(key);

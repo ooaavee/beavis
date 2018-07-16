@@ -62,6 +62,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 }
             }
 
+            //
+            // TODO: tämän voi ottaa pois, kun ei enää tarvita MemoryCachea
             services.AddMemoryCache();
 
             return services;
@@ -87,9 +89,21 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void Validate<TWebCliApplication>()where TWebCliApplication : WebCliApplication
         {
-            if (WebCliApplicationMeta.Get(typeof(TWebCliApplication)) == null)
+            WebCliApplicationInfo info = WebCliApplicationInfo.Parse(typeof(TWebCliApplication));
+
+            if (info == null)
             {
                 throw new InvalidOperationException($"{typeof(TWebCliApplication)} is not a valid WebCliApplication, unable to find {nameof(WebCliApplicationAttribute)} attribute.");
+            }
+
+            if (string.IsNullOrEmpty(info.Name))
+            {
+                throw new InvalidOperationException($"{nameof(WebCliApplicationAttribute)}.{nameof(WebCliApplicationInfo.Name)} is mandatory.");
+            }
+
+            if (string.IsNullOrEmpty(info.Description))
+            {
+                throw new InvalidOperationException($"{nameof(WebCliApplicationAttribute)}.{nameof(WebCliApplicationInfo.Description)} is mandatory.");
             }
         }
     }

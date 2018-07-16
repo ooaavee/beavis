@@ -7,7 +7,13 @@ namespace BeavisCli.Internal.Applications
     {
         public override async Task ExecuteAsync(WebCliContext context)
         {
-            await OnExecuteAsync(() => Exit(context), context);
+            await OnExecuteAsync(() =>
+            {
+
+                return Exit(context);
+
+
+            }, context);
         }
     }
 }

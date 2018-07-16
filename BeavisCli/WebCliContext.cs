@@ -1,17 +1,26 @@
-﻿using BeavisCli.Internal;
+﻿using System;
+using System.IO;
+using BeavisCli.Internal;
+using BeavisCli.Microsoft.Extensions.CommandLineUtils;
 using Microsoft.AspNetCore.Http;
+using CommandArgument = BeavisCli.Microsoft.Extensions.CommandLineUtils.CommandArgument;
 
 namespace BeavisCli
 {
     public class WebCliContext
     {
-        internal WebCliContext(WebCliRequest request, WebCliResponse response, HttpContext httpContext, WebCliApplicationHost host)
+        internal WebCliContext(CommandLineApplication cli,
+                               HttpContext httpContext,
+                               WebCliRequest request, 
+                               WebCliResponse response)
         {
+            Cli = cli;
+            HttpContext = httpContext;
             Request = request;
             Response = response;
-            HttpContext = httpContext;
-            Host = host;
         }
+
+        internal CommandLineApplication Cli { get; }
 
         /// <summary>
         /// HTTP context
@@ -28,16 +37,46 @@ namespace BeavisCli
         /// </summary>
         public WebCliResponse Response { get; }
 
+        /// <summary>
+        /// Writer for out message, like Console.Out
+        /// </summary>
+        public TextWriter OutWriter => Cli.Out;
+
+        /// <summary>
+        /// Writer for error messages, like Console.Error
+        /// </summary>
+        public TextWriter ErrorWriter => Cli.Error;
+
         public IOption Option(string template, string description, CommandOptionType optionType)
         {
-            return Host.Option(template, description, optionType);
+            CommandOption option = Cli.Option(template, description, Map(optionType));
+            return new Option(option);
         }
 
         public IArgument Argument(string name, string description, bool multipleValues = false)
         {
-            return Host.Argument(name, description, multipleValues);
+            CommandArgument argument = Cli.Argument(name, description, multipleValues);
+            return new Internal.CommandArgument(argument);
         }
 
-        internal WebCliApplicationHost Host { get; }
+
+        private static Microsoft.Extensions.CommandLineUtils.CommandOptionType Map(CommandOptionType optionType)
+        {
+            switch (optionType)
+            {
+                case CommandOptionType.MultipleValue:
+                    return Microsoft.Extensions.CommandLineUtils.CommandOptionType.MultipleValue;
+
+                case CommandOptionType.SingleValue:
+                    return Microsoft.Extensions.CommandLineUtils.CommandOptionType.SingleValue;
+
+                case CommandOptionType.NoValue:
+                    return Microsoft.Extensions.CommandLineUtils.CommandOptionType.NoValue;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(optionType), optionType, null);
+            }
+        }
+
     }
 }

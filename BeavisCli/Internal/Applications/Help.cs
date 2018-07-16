@@ -28,9 +28,9 @@ namespace BeavisCli.Internal.Applications
 
                 foreach (WebCliApplication application in _sandbox.GetApplications(context.HttpContext))
                 {
-                    bool isDefault = _sandbox.IsDefault(application);
+                    bool builtIn = application.IsBuiltIn();
 
-                    if (!_options.AllowDefaultApplicationsBrowsing && isDefault)
+                    if (!_options.AllowDefaultApplicationsBrowsing && builtIn)
                     {
                         // ignore default applications if configured so
                         continue;
@@ -48,7 +48,7 @@ namespace BeavisCli.Internal.Applications
                         continue;
                     }
 
-                    if (isDefault)
+                    if (builtIn)
                     {
                         defaultApps.Add(application);
                     }
@@ -62,7 +62,8 @@ namespace BeavisCli.Internal.Applications
 
                 foreach (WebCliApplication application in defaultApps.Concat(externalApps))
                 {
-                    lines.Add(new Tuple<string, string>(application.Meta().Name, application.Meta().Description));
+                    WebCliApplicationInfo info = application.GetInfo();
+                    lines.Add(new Tuple<string, string>(info.Name, info.Description));
                 }
 
                 context.Response.WriteInformation("Default applications:");

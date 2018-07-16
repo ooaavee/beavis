@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace BeavisCli
 {
@@ -25,6 +26,8 @@ namespace BeavisCli
 
         public abstract Task ExecuteAsync(WebCliContext context);
 
+        private ILogger<WebCliApplication> _logger;
+
         protected async Task OnExecuteAsync(Func<Task<int>> invoke, WebCliContext context)
         {
             if (invoke == null)
@@ -37,11 +40,15 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(context));
             }
 
+            _logger = context.GetLoggerFactory().CreateLogger<WebCliApplication>();
+
+                       
+
             string[] args = context.Request.GetApplicationArgs();
 
-            await context.Host.Cli.OnExecuteAsync(invoke);
+            await context.Cli.OnExecuteAsync(invoke);
 
-            context.Host.Cli.Execute(args);
+            context.Cli.Execute(args);
         }
       
         protected Task<int> Exit(WebCliContext context)
@@ -61,7 +68,8 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(context));
             }
 
-            context.Host.Cli.ShowHelp(this.Meta().Name);
+            context.Cli.ShowHelp(this.GetInfo().Name);
+
             return Exit();
         }
 
@@ -72,12 +80,12 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(context));
             }
 
-            IUnauthorizedHandler handler = context.HttpContext.RequestServices.GetRequiredService<IUnauthorizedHandler>();
-            handler.OnUnauthorizedAsync(context);
+            context.GetUnauthorizedHandler().OnUnauthorizedAsync(context);
+
             return Exit();
         }
 
-        private static Task<int> Exit()
+        private Task<int> Exit()
         {
             const int exitStatusCode = 2;
             return Task.FromResult(exitStatusCode);
