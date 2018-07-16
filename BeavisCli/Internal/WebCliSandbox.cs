@@ -32,17 +32,17 @@ namespace BeavisCli.Internal
         {
             try
             {
-                _logger.LogInformation($"Started to process a WebCliRequest, the input string was '{request.Input}'.");
+                _logger.LogDebug($"Started to process a request with the input '{request.Input}'.");
 
                 // application name entered by the user
                 string name = request.GetApplicationName();
 
-                _logger.LogInformation($"Searching a WebCliApplication by name '{name}'.");
+                _logger.LogDebug($"Searching an application by the name '{name}'.");
 
                 // search application by name, throws WebCliSandboxException if not found!
                 WebCliApplication application = GetApplication(name, httpContext);
 
-                _logger.LogInformation($"Found a WebCliApplication, the concrete type '{application.GetType().FullName}' will be used.");
+                _logger.LogDebug($"Found an application '{application.GetType().FullName}' that matches the name '{name}'.");
 
                 WebCliApplicationInfo info = application.GetInfo();
 
@@ -78,17 +78,17 @@ namespace BeavisCli.Internal
             }
             catch (WebCliSandboxException e)
             {
-                _logger.LogDebug($"An error occurred while searching a WebCliApplication by using the input string '{request.Input}'.", e);
+                _logger.LogDebug($"An error occurred while searching an application by using the input '{request.Input}'.", e);
                 response.WriteError(e);
             }
             catch (CommandParsingException e)
             {
-                _logger.LogDebug($"An error occurred while parsing the input string '{request.Input}'.", e);
+                _logger.LogDebug($"An error occurred while parsing the input '{request.Input}'.", e);
                 response.WriteError(e);
             }
             catch (Exception e)
             {
-                _logger.LogError($"An error occurred while processing the WebCliRequest, the input string was '{request.Input}'.", e);
+                _logger.LogError($"An error occurred while processing the request with the input '{request.Input}'.", e);
 
                 if (_options.DisplayExceptions)
                 {
@@ -96,7 +96,7 @@ namespace BeavisCli.Internal
                 }
                 else
                 {
-                    response.WriteError("An error occurred. Please check your application logs for more details.");
+                    response.WriteError("An error occurred, please check your application logs for more details.");
                 }
             }
         }
@@ -129,6 +129,7 @@ namespace BeavisCli.Internal
                 {
                     throw new WebCliSandboxException($"{name} is not a valid application.{Environment.NewLine}Usage 'help' to get list of applications.");
                 }
+
                 throw new WebCliSandboxException($"{name} is not a valid application.");
             }
 
@@ -160,7 +161,7 @@ namespace BeavisCli.Internal
            
             if (externalHandler)
             {
-                _logger.LogInformation($"The authorization status returned by the current {nameof(IAuthorizationHandler)} implementation {_authorization.GetType().FullName} is {authorized}.");
+                _logger.LogInformation($"The authorization status returned by the current {nameof(IAuthorizationHandler)} implementation '{_authorization.GetType().FullName}' is {authorized}.");
             }
 
             if (authorized)
@@ -169,7 +170,7 @@ namespace BeavisCli.Internal
 
                 if (!builtIn)
                 {
-                    _logger.LogInformation($"The authorization status returned by the WebCliApplication {application.GetType().FullName} is {authorized}.");
+                    _logger.LogInformation($"The authorization status returned by the application '{application.GetType().FullName}' is {authorized}.");
                 }
             }
 
@@ -177,11 +178,11 @@ namespace BeavisCli.Internal
             {
                 if (authorized)
                 {
-                    _logger.LogInformation($"The WebCliApplication {application.GetType().FullName} execution is authorized.");
+                    _logger.LogInformation($"The application '{application.GetType().FullName}' execution is authorized.");
                 }
                 else
                 {
-                    _logger.LogInformation($"The WebCliApplication {application.GetType().FullName} execution is unauthorized.");
+                    _logger.LogInformation($"The application '{application.GetType().FullName}' execution is unauthorized.");
                 }
             }
 

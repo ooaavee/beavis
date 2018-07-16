@@ -41,9 +41,9 @@ namespace BeavisCli.Internal.Middlewares
             _options = options.Value;
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext httpContext)
         {
-            HttpRequest request = context.Request;
+            HttpRequest request = httpContext.Request;
 
             bool IsWebCliPath()
             {
@@ -59,195 +59,195 @@ namespace BeavisCli.Internal.Middlewares
 
             if (IsWebCliPath())
             {
-                _logger.LogInformation($"Started to process WebCli request for a path '{context.Request.Path.ToString()}'.");
+                _logger.LogInformation($"Started to process a request for a path '{httpContext.Request.Path.ToString()}'.");
 
                 // terminal HTML
                 if (IsRequest(_options.Path, HttpMethods.Get))
                 {
-                    await HandleGetTerminal(context);
+                    await HandleGetTerminal(httpContext);
                     return;
                 }
 
                 // terminal CSS
                 if (IsRequest($"{DefaultPath}/content/css", HttpMethods.Get))
                 {
-                    await HandleGetTerminalCss(context);
+                    await HandleGetTerminalCss(httpContext);
                     return;
                 }
 
                 // terminal JS
                 if (IsRequest($"{DefaultPath}/content/js", HttpMethods.Get))
                 {
-                    await HandleGetTerminalJs(context);
+                    await HandleGetTerminalJs(httpContext);
                     return;
                 }
 
                 // initialize terminal
                 if (IsRequest($"{DefaultPath}/api/initialize", HttpMethods.Post))
                 {
-                    await HandleInitializeTerminal(context);
+                    await HandleInitializeTerminal(httpContext);
                     return;
                 }
 
                 // invoke job
                 if (IsRequest($"{DefaultPath}/api/job", HttpMethods.Post))
                 {
-                    await HandleInvokeJob(context);
+                    await HandleInvokeJob(httpContext);
                     return;
                 }
 
                 // invoke application
                 if (IsRequest($"{DefaultPath}/api/request", HttpMethods.Post))
                 {
-                    await HandleInvokeApplication(context);
+                    await HandleInvokeApplication(httpContext);
                     return;
                 }
 
                 // file upload
                 if (IsRequest($"{DefaultPath}/api/upload", HttpMethods.Post))
                 {
-                    await HandleFileUpload(context);
+                    await HandleFileUpload(httpContext);
                     return;
                 }
 
-                _logger.LogInformation($"Received a WebCli request for a path '{context.Request.Path.ToString()}', but unable to find a handler for it.");
+                _logger.LogInformation($"Received a request for a path '{httpContext.Request.Path.ToString()}', but unable to find a handler for it.");
             }
 
-            await _next(context);
+            await _next(httpContext);
         }
 
-        private async Task HandleGetTerminal(HttpContext context)
+        private async Task HandleGetTerminal(HttpContext httpContext)
         {
             try
             {
-                await WebCliRenderer.RenderHtmlAsync(context);
+                await WebCliRenderer.RenderHtmlAsync(httpContext);
             }
             catch (Exception e)
             {
-                _logger.LogError($"An error occurred inside the '{nameof(HandleGetTerminal)}'.", e);
-                await WriteErrorResponseAsync(e, context);
+                _logger.LogError("An error occurred while processing the get terminal html request.", e);
+                await WriteErrorResponseAsync(e, httpContext);
             }
         }
 
-        private async Task HandleGetTerminalCss(HttpContext context)
+        private async Task HandleGetTerminalCss(HttpContext httpContext)
         {
             try
             {
-                await WebCliRenderer.RenderCssAsync(context);
+                await WebCliRenderer.RenderCssAsync(httpContext);
             }
             catch (Exception e)
             {
-                _logger.LogError($"An error occurred inside the '{nameof(HandleGetTerminalCss)}'.", e);
-                await WriteErrorResponseAsync(e, context);
+                _logger.LogError("An error occurred while processing the get terminal css request.", e);
+                await WriteErrorResponseAsync(e, httpContext);
             }
         }
 
-        private async Task HandleGetTerminalJs(HttpContext context)
+        private async Task HandleGetTerminalJs(HttpContext httpContext)
         {
             try
             {
-                await WebCliRenderer.RenderJsAsync(context);
+                await WebCliRenderer.RenderJsAsync(httpContext);
             }
             catch (Exception e)
             {
-                _logger.LogError($"An error occurred inside the '{nameof(HandleGetTerminalJs)}'.", e);
-                await WriteErrorResponseAsync(e, context);
+                _logger.LogError("An error occurred while processing the get terminal js request.", e);
+                await WriteErrorResponseAsync(e, httpContext);
             }
         }
 
-        private async Task HandleInitializeTerminal(HttpContext context)
+        private async Task HandleInitializeTerminal(HttpContext httpContext)
         {
             try
             {
-                WebCliResponse response = new WebCliResponse(context);
+                WebCliResponse response = new WebCliResponse(httpContext);
 
                 // prepare tab completion
-                response.AddJavaScript(new SetTerminalCompletionDictionary(_sandbox.GetApplications(context).Select(x => x.GetInfo().Name)));
+                response.AddJavaScript(new SetTerminalCompletionDictionary(_sandbox.GetApplications(httpContext).Select(x => x.GetInfo().Name)));
 
                 // set window variables
                 response.AddJavaScript(new SetUploadEnabled(_options.EnableFileUpload));
 
                 if (_options.UseTerminalInitializer)
                 {
-                    _initializer?.Initialize(context, response);
+                    _initializer?.Initialize(httpContext, response);
                 }
 
-                await WebCliRenderer.RenderResponseAsync(response, context);
+                await WebCliRenderer.RenderResponseAsync(response, httpContext);
             }
             catch (Exception e)
             {
-                _logger.LogError($"An error occurred inside the '{nameof(HandleInitializeTerminal)}'.", e);
-                await WriteErrorResponseAsync(e, context);
+                _logger.LogError("An error occurred while processing the initialize terminal request.", e);
+                await WriteErrorResponseAsync(e, httpContext);
             }
         }
 
-        private async Task HandleInvokeJob(HttpContext context)
+        private async Task HandleInvokeJob(HttpContext httpContext)
         {
             try
             {
-                WebCliResponse response = new WebCliResponse(context);
-                string key = context.Request.Query["key"];
-                await _jobs.ExecuteAsync(key, context, response);
-                await WebCliRenderer.RenderResponseAsync(response, context);
+                WebCliResponse response = new WebCliResponse(httpContext);
+                string key = httpContext.Request.Query["key"];
+                await _jobs.ExecuteAsync(key, httpContext, response);
+                await WebCliRenderer.RenderResponseAsync(response, httpContext);
             }
             catch (Exception e)
             {
-                _logger.LogError($"An error occurred inside the '{nameof(HandleInvokeJob)}'.", e);
-                await WriteErrorResponseAsync(e, context);
+                _logger.LogError("An error occurred while processing a job.", e);
+                await WriteErrorResponseAsync(e, httpContext);
             }
         }
 
-        private async Task HandleInvokeApplication(HttpContext context)
+        private async Task HandleInvokeApplication(HttpContext httpContext)
         {
             try
             {
-                string body = await ReadBodyAsync(context);
+                string body = await ReadBodyAsync(httpContext);
                 WebCliRequest request = JsonConvert.DeserializeObject<WebCliRequest>(body);
-                WebCliResponse response = new WebCliResponse(context);
-                await _sandbox.ExecuteAsync(request, response, context);
-                await WebCliRenderer.RenderResponseAsync(response, context);
+                WebCliResponse response = new WebCliResponse(httpContext);
+                await _sandbox.ExecuteAsync(request, response, httpContext);
+                await WebCliRenderer.RenderResponseAsync(response, httpContext);
             }
             catch (Exception e)
             {
-                _logger.LogError($"An error occurred inside the '{nameof(HandleInvokeApplication)}'.", e);
-                await WriteErrorResponseAsync(e, context);
+                _logger.LogError("An error occurred while processing the invoke application request.", e);
+                await WriteErrorResponseAsync(e, httpContext);
             }
         }
 
-        private async Task HandleFileUpload(HttpContext context)
+        private async Task HandleFileUpload(HttpContext httpContext)
         {
             try
             {
-                string body = await ReadBodyAsync(context);
-                WebCliResponse response = new WebCliResponse(context);
+                string body = await ReadBodyAsync(httpContext);
+                WebCliResponse response = new WebCliResponse(httpContext);
                 if (_uploadStorage != null)
                 {
                     UploadedFile file = JsonConvert.DeserializeObject<UploadedFile>(body);
                     await _uploadStorage.OnFileUploadedAsync(file, response);
                 }
-                await WebCliRenderer.RenderResponseAsync(response, context);
+                await WebCliRenderer.RenderResponseAsync(response, httpContext);
             }
             catch (Exception e)
             {
-                _logger.LogError($"An error occurred inside the '{nameof(HandleFileUpload)}'.", e);
-                await WriteErrorResponseAsync(e, context);
+                _logger.LogError("An error occurred while processing the file upload request.", e);
+                await WriteErrorResponseAsync(e, httpContext);
             }
         }
 
-        private async Task WriteErrorResponseAsync(Exception e, HttpContext context)
+        private async Task WriteErrorResponseAsync(Exception e, HttpContext httpContext)
         {
             string text = _options.DisplayExceptions ? 
                 e.ToString() : 
                 "An error occurred. Please check your application logs for more details.";
 
-            context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
-            context.Response.ContentType = "text/plain";
-            await context.Response.WriteAsync(text, Encoding.UTF8);
+            httpContext.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+            httpContext.Response.ContentType = "text/plain";
+            await httpContext.Response.WriteAsync(text, Encoding.UTF8);
         }
 
-        private static async Task<string> ReadBodyAsync(HttpContext context)
+        private static async Task<string> ReadBodyAsync(HttpContext httpContext)
         {
-            using (Stream stream = context.Request.Body)
+            using (Stream stream = httpContext.Request.Body)
             {
                 using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
                 {
