@@ -62,10 +62,6 @@ namespace Microsoft.Extensions.DependencyInjection
                 }
             }
 
-            //
-            // TODO: tämän voi ottaa pois, kun ei enää tarvita MemoryCachea
-            services.AddMemoryCache();
-
             return services;
         }
 

@@ -21,7 +21,7 @@ namespace BeavisCli.Internal.Middlewares
         private readonly WebCliSandbox _sandbox;
         private readonly JobPool _jobs;
         private readonly ITerminalInitializer _initializer;
-        private readonly IUploadStorage _uploadStorage;
+        private readonly IUploadStorage _uploads;
         private readonly WebCliOptions _options;
 
         public WebCliMiddleware(RequestDelegate next, 
@@ -29,7 +29,7 @@ namespace BeavisCli.Internal.Middlewares
                                 WebCliSandbox sandbox, 
                                 JobPool jobs, 
                                 ITerminalInitializer initializer, 
-                                IUploadStorage uploadStorage, 
+                                IUploadStorage uploads, 
                                 IOptions<WebCliOptions> options)
         {
             _next = next;
@@ -37,7 +37,7 @@ namespace BeavisCli.Internal.Middlewares
             _sandbox = sandbox;
             _jobs = jobs;
             _initializer = initializer;
-            _uploadStorage = uploadStorage;
+            _uploads = uploads;
             _options = options.Value;
         }
 
@@ -187,7 +187,7 @@ namespace BeavisCli.Internal.Middlewares
             {
                 WebCliResponse response = new WebCliResponse(httpContext);
                 string key = httpContext.Request.Query["key"];
-                await _jobs.ExecuteAsync(key, httpContext, response);
+                await _jobs.RunAsync(key, httpContext, response);
                 await WebCliRenderer.RenderResponseAsync(response, httpContext);
             }
             catch (Exception e)
@@ -220,11 +220,8 @@ namespace BeavisCli.Internal.Middlewares
             {
                 string body = await ReadBodyAsync(httpContext);
                 WebCliResponse response = new WebCliResponse(httpContext);
-                if (_uploadStorage != null)
-                {
-                    UploadedFile file = JsonConvert.DeserializeObject<UploadedFile>(body);
-                    await _uploadStorage.OnFileUploadedAsync(file, response);
-                }
+                UploadedFile file = JsonConvert.DeserializeObject<UploadedFile>(body);
+                await _uploads.OnFileUploadedAsync(file, response);
                 await WebCliRenderer.RenderResponseAsync(response, httpContext);
             }
             catch (Exception e)

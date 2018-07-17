@@ -1,50 +1,63 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace BeavisCli.Internal
 {
     internal class JobPool
     {
-        //
-        // TODO: ei käytetä memorycachea vaan ihan staattinen dictionary menee hyvin!
-        //
-        private readonly IMemoryCache _cache;
+        private readonly ConcurrentDictionary<string, IJob> _jobs = new ConcurrentDictionary<string, IJob>();
+        private readonly ILogger<JobPool> _logger;
 
-        public JobPool(IMemoryCache cache)
+        public JobPool(ILoggerFactory loggerFactory)
         {
-            _cache = cache;
+            _logger = loggerFactory.CreateLogger<JobPool>();
         }
 
-        public async Task ExecuteAsync(string key, HttpContext context, WebCliResponse response)
+        /// <summary>
+        /// Adds a job and returns its identifier. 
+        /// </summary>
+        public string Push(IJob job)
+        {
+            string key = Guid.NewGuid().ToString();
+
+            if (!_jobs.TryAdd(key, job))
+            {
+                _logger.LogError($"Unable to push a new job by using the key '{key}'.");
+                throw new InvalidOperationException($"Unable to push a new job by using the key '{key}'.");
+            }
+
+            return key;
+        }
+
+        /// <summary>
+        /// Finds a job from the job pool by its identifier and removes it from the job pool.
+        /// </summary>
+        public async Task RunAsync(string key, HttpContext context, WebCliResponse response)
         {
             IJob job;
 
-            if (_cache.TryGetValue(key, out job))
+            // find the job and remove it from the memory
+            if (!_jobs.TryRemove(key, out job))
             {
-                await job.ExecuteAsync(context, response);
-
-                _cache.Remove(key);
-            }
-            else
-            {
-                // TODO: Kirjoita jotakin virhettä, koska jobia ei löytynyt!!!
-            }
-        }
-
-        public string Push(IJob job)
-        {
-            if (job == null)
-            {
-                throw new ArgumentNullException(nameof(job));
+                _logger.LogError($"Unable to find a job by using the key '{key}'.");
+                throw new InvalidOperationException($"Unable to find a job by using the key '{key}'.");
             }
 
-            string key = Guid.NewGuid().ToString();
-
-            _cache.Set(key, job);
-
-            return key;
+            // run the job
+            try
+            {
+                _logger.LogDebug($"Executing a job by using the key '{key}'.");
+                await job.RunAsync(context, response);
+                _logger.LogDebug($"Completing a job execution by using the key '{key}'.");
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"An error occurred while executing a job by using the key '{key}'.", e);
+                throw;
+            }
         }
     }
 }
