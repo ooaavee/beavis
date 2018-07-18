@@ -20,7 +20,6 @@ namespace BeavisCli.Demo
             services.AddWebCli(options =>
             {
                 options.Path = "/beavis";
-                options.EnableFileUpload = false;
                 options.DisplayExceptions = true;
             });
 

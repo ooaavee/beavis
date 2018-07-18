@@ -20,9 +20,9 @@ namespace BeavisCli
         }
 
         /// <summary>
-        /// Checks if the application is browsable.
+        /// Checks if the application is visible for 'help'.
         /// </summary>
-        public virtual bool IsBrowsable(WebCliContext context)
+        public virtual bool IsVisibleForHelp(WebCliContext context)
         {
             return true;
         }

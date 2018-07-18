@@ -1,4 +1,5 @@
-﻿using BeavisCli.JavaScriptStatements;
+﻿using BeavisCli.Internal.Applications;
+using BeavisCli.JavaScriptStatements;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -21,7 +22,7 @@ namespace BeavisCli.Internal.Middlewares
         private readonly WebCliSandbox _sandbox;
         private readonly JobPool _jobs;
         private readonly ITerminalInitializer _initializer;
-        private readonly IUploadStorage _uploads;
+        private readonly IFileStorage _files;
         private readonly WebCliOptions _options;
 
         public WebCliMiddleware(RequestDelegate next, 
@@ -29,7 +30,7 @@ namespace BeavisCli.Internal.Middlewares
                                 WebCliSandbox sandbox, 
                                 JobPool jobs, 
                                 ITerminalInitializer initializer, 
-                                IUploadStorage uploads, 
+                                IFileStorage files, 
                                 IOptions<WebCliOptions> options)
         {
             _next = next;
@@ -37,7 +38,7 @@ namespace BeavisCli.Internal.Middlewares
             _sandbox = sandbox;
             _jobs = jobs;
             _initializer = initializer;
-            _uploads = uploads;
+            _files = files;
             _options = options.Value;
         }
 
@@ -165,7 +166,9 @@ namespace BeavisCli.Internal.Middlewares
                 response.AddJavaScript(new SetTerminalCompletionDictionary(_sandbox.GetApplications(httpContext).Select(x => x.GetInfo().Name)));
 
                 // set window variables
-                response.AddJavaScript(new SetUploadEnabled(_options.EnableFileUpload));
+                WebCliApplicationInfo uploadInfo = WebCliApplicationInfo.Parse<Upload>();
+                WebCliOptions.DefaultApplicationBehaviour uploadBehaviour = _options.DefaultApplications[uploadInfo.Name];               
+                response.AddJavaScript(new SetUploadEnabled(uploadBehaviour.Enabled));
 
                 if (_options.UseTerminalInitializer)
                 {
@@ -221,7 +224,9 @@ namespace BeavisCli.Internal.Middlewares
                 string body = await ReadBodyAsync(httpContext);
                 WebCliResponse response = new WebCliResponse(httpContext);
                 UploadedFile file = JsonConvert.DeserializeObject<UploadedFile>(body);
-                await _uploads.OnFileUploadedAsync(file, response);
+                string id = await _files.StoreAsync(file);
+                response.WriteInformation("File upload completed, the file ID is:");
+                response.WriteInformation(id);
                 await WebCliRenderer.RenderResponseAsync(response, httpContext);
             }
             catch (Exception e)

@@ -30,21 +30,27 @@ namespace BeavisCli.Internal.Applications
                 {
                     bool builtIn = application.IsBuiltIn();
 
-                    if (!_options.AllowDefaultApplicationsBrowsing && builtIn)
-                    {
-                        // ignore default applications if configured so
-                        continue;
-                    }
-
-                    if (!application.IsBrowsable(context))
-                    {
-                        // ignore non-browsable applications
-                        continue;
-                    }
+                    WebCliApplicationInfo info = application.GetInfo();
 
                     if (application.GetType() == GetType())
                     {
                         // ignore myself 
+                        continue;
+                    }
+
+                    if (builtIn)
+                    {
+                        WebCliOptions.DefaultApplicationBehaviour behaviour = _options.DefaultApplications[info.Name];
+                        if (!behaviour.IsVisibleForHelp)
+                        {
+                            // ignore non-browsable applications
+                            continue;
+                        }
+                    }
+
+                    if (!application.IsVisibleForHelp(context))
+                    {
+                        // ignore non-browsable applications
                         continue;
                     }
 

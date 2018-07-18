@@ -31,5 +31,10 @@ namespace BeavisCli.Internal
 
             return value;
         }
+
+        public static WebCliApplicationInfo Parse<TWebCliApplication>() where TWebCliApplication : WebCliApplication
+        {
+            return Parse(typeof(TWebCliApplication));
+        }
     }
 }

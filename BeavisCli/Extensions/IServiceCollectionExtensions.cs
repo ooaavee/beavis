@@ -1,7 +1,6 @@
 ﻿using System;
 using BeavisCli;
 using BeavisCli.Internal;
-using BeavisCli.Internal.Applications;
 using BeavisCli.Internal.DefaultServices;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -32,10 +31,10 @@ namespace Microsoft.Extensions.DependencyInjection
                 ? ServiceDescriptor.Singleton(typeof(ITerminalInitializer), typeof(DefaultTerminalInitializer))
                 : ServiceDescriptor.Singleton(typeof(ITerminalInitializer), options.TerminalInitializerType));
 
-            // IUploadStorage
-            services.Add(options.FileUploadStorageType == null
-                ? ServiceDescriptor.Singleton(typeof(IUploadStorage), typeof(DefaultUploadStorage))
-                : ServiceDescriptor.Singleton(typeof(IUploadStorage), options.FileUploadStorageType));
+            // IFileStorage
+            services.Add(options.FileStorageType == null
+                ? ServiceDescriptor.Singleton(typeof(IFileStorage), typeof(DefaultFileStorage))
+                : ServiceDescriptor.Singleton(typeof(IFileStorage), options.FileStorageType));
 
             // IAuthorizationHandler
             services.Add(options.AuthorizationHandlerType == null
@@ -43,22 +42,11 @@ namespace Microsoft.Extensions.DependencyInjection
                 : ServiceDescriptor.Singleton(typeof(IAuthorizationHandler), options.AuthorizationHandlerType));
 
             // register default applications
-            if (options.EnableDefaultApplications)
+            foreach (WebCliOptions.DefaultApplicationBehaviour behaviour in options.DefaultApplications.Values)
             {
-                services.AddSingletonWebCliApplication<Help>();
-                services.AddSingletonWebCliApplication<Clear>();
-                services.AddSingletonWebCliApplication<Reset>();
-                services.AddSingletonWebCliApplication<Shortcuts>();
-                services.AddSingletonWebCliApplication<License>();
-
-                if (options.EnableFileUpload)
+                if (behaviour.Enabled)
                 {
-                    if (options.FileUploadStorageType == null)
-                    {
-                        throw new InvalidOperationException($"{nameof(options.EnableFileUpload)} is true, but {nameof(options.FileUploadStorageType)} has not been set.");
-                    }
-
-                    services.AddSingletonWebCliApplication<Upload>();
+                    services.Add(ServiceDescriptor.Singleton(typeof(WebCliApplication), behaviour.Type));
                 }
             }
 

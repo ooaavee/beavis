@@ -125,12 +125,7 @@ namespace BeavisCli.Internal
 
             if (count == 0)
             {
-                if (_options.EnableDefaultApplications)
-                {
-                    throw new WebCliSandboxException($"{name} is not a valid application.{Environment.NewLine}Usage 'help' to get list of applications.");
-                }
-
-                throw new WebCliSandboxException($"{name} is not a valid application.");
+                throw new WebCliSandboxException($"{name} is not a valid application.{Environment.NewLine}Usage 'help' to get list of applications.");
             }
 
             return result;
