@@ -69,7 +69,7 @@ namespace BeavisCli
 
             return Exit();
         }
-
+       
         protected Task<int> ExitWithHelp(WebCliContext context)
         {
             if (context == null)
@@ -165,5 +165,8 @@ namespace BeavisCli
         {
             return Task.FromResult(ExitStatusCode);
         }
+
+        
+
     }
 }
