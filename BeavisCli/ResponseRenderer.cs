@@ -88,12 +88,10 @@ namespace BeavisCli
             }        
         }
 
-
-        private static string Col(string s, int len)
+        private static string Col(string text, int len)
         {
-            string tmp = s + new string(' ', len - s.Length);
-            return tmp;
+            string col = text + new string(' ', len - text.Length + 2);
+            return col;
         }
-
     }
 }

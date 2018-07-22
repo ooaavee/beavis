@@ -15,7 +15,7 @@ namespace BeavisCli.Internal.Middlewares
 {
     internal class WebCliMiddleware
     {
-        private const string DefaultPath = "/beavis-cli";
+        private const string DefaultPath = "/beaviscli";
 
         private readonly RequestDelegate _next;
         private readonly ILogger<WebCliMiddleware> _logger;
@@ -167,7 +167,7 @@ namespace BeavisCli.Internal.Middlewares
 
                 // set window variables
                 WebCliApplicationInfo uploadInfo = WebCliApplicationInfo.Parse<Upload>();
-                WebCliOptions.DefaultApplicationBehaviour uploadBehaviour = _options.DefaultApplications[uploadInfo.Name];               
+                WebCliOptions.BuiltInApplicationBehaviour uploadBehaviour = _options.BuiltInApplications[uploadInfo.Name];               
                 response.AddJavaScript(new SetUploadEnabled(uploadBehaviour.Enabled));
 
                 if (_options.UseTerminalInitializer)
@@ -223,10 +223,10 @@ namespace BeavisCli.Internal.Middlewares
             {
                 string body = await ReadBodyAsync(httpContext);
                 WebCliResponse response = new WebCliResponse(httpContext);
-                UploadedFile file = JsonConvert.DeserializeObject<UploadedFile>(body);
-                string id = await _files.StoreAsync(file);
+                FileContent file = JsonConvert.DeserializeObject<FileContent>(body);
+                FileId id = await _files.StoreAsync(file);
                 response.WriteInformation("File upload completed, the file ID is:");
-                response.WriteInformation(id);
+                response.WriteInformation(id.ToString());
                 await WebCliRenderer.RenderResponseAsync(response, httpContext);
             }
             catch (Exception e)

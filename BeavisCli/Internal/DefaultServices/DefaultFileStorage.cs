@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace BeavisCli.Internal.DefaultServices
 {
@@ -11,31 +10,14 @@ namespace BeavisCli.Internal.DefaultServices
     {
         private readonly ILogger<DefaultFileStorage> _logger;
 
-        private readonly ConcurrentDictionary<string, UploadedFile> _files = new ConcurrentDictionary<string, UploadedFile>();
-
+        private readonly ConcurrentDictionary<string, FileContent> _files = new ConcurrentDictionary<string, FileContent>();
 
         public DefaultFileStorage(ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<DefaultFileStorage>();
-
-
-
-            _files.TryAdd("aaaa", new UploadedFile() {Type = "aaaa", Name = "AAA"});
-            _files.TryAdd("bbb", new UploadedFile() { Type = "bbbbbbbbbbbbb", Name = "bbbb" });
-            _files.TryAdd("ccccccccc", new UploadedFile() { Type = "cc", Name = "ccccccccccccccc" });
-
-           
-
-            
-
-            //var lines = ResponseRenderer.FormatLines(l, true).ToArray();
-            //foreach (string line in lines)
-            //{
-            //    Console.WriteLine(line);
-            //}
         }
 
-        public Task<string> StoreAsync(UploadedFile file)
+        public Task<FileId> StoreAsync(FileContent file)
         {
             if (file == null)
             {
@@ -43,7 +25,7 @@ namespace BeavisCli.Internal.DefaultServices
             }
 
             // create id for the file
-            string id = ShortKey.Create(s => _files.ContainsKey(s));
+            string id = KeyProvider.Create(s => _files.ContainsKey(s));
 
             // store file into memory
             bool succeed = _files.TryAdd(id, file);
@@ -60,35 +42,30 @@ namespace BeavisCli.Internal.DefaultServices
             }
 
             // return file id
-            return Task.FromResult(id);
+            return Task.FromResult(new FileId(id));
         }
 
-        public Task<UploadedFile> RemoveAsync(string id)
+        public Task<FileContent> RemoveAsync(FileId id)
         {
-            if (id == null)
-            {
-                throw new ArgumentNullException(nameof(id));
-            }
-
-            UploadedFile file = null;
+            FileContent file = null;
 
             // try to find the real id
-            string realId = ShortKey.FindMatching(id, () => _files.Keys);
+            string real = KeyProvider.Find(id.Value, () => _files.Keys);
 
-            if (realId != null)
+            if (real != null)
             {
-                _logger.LogDebug($"{id} -> {realId} will be used when removing the file.");
+                _logger.LogDebug($"{id} -> {real} will be used when removing the file.");
 
                 // try to remove the file by using the real id
-                bool succeed = _files.TryRemove(realId, out file);
+                bool succeed = _files.TryRemove(real, out file);
 
                 if (succeed)
                 {
-                    _logger.LogDebug($"Successfully removed a file by using the id {id} -> {realId}.");
+                    _logger.LogDebug($"Successfully removed a file by using the id {id} -> {real}.");
                 }
                 else
                 {
-                    _logger.LogError($"Failed to remove a file by using the id {id} -> {realId}.");
+                    _logger.LogError($"Failed to remove a file by using the id {id} -> {real}.");
                 }
             }
             else
@@ -100,18 +77,57 @@ namespace BeavisCli.Internal.DefaultServices
             return Task.FromResult(file);
         }
 
-        public Task<IEnumerable<Tuple<string, UploadedFile>>> GetAllAsync()
+        public Task<int> RemoveAllAsync()
         {
-            var result = new List<Tuple<string, UploadedFile>>();
-
-            foreach (KeyValuePair<string, UploadedFile> item in _files)
+            lock (_files)
             {
-                var t = new Tuple<string, UploadedFile>(item.Key, item.Value);
-                result.Add(t);
+                int count = _files.Count;
+                _files.Clear();
+                return Task.FromResult(count);
             }
-            
-            return Task.FromResult((IEnumerable<Tuple<string, UploadedFile>>)result);
         }
 
+        public Task<IEnumerable<Tuple<FileId, FileContent>>> GetAllAsync()
+        {
+            var result = new List<Tuple<FileId, FileContent>>();
+
+            foreach (KeyValuePair<string, FileContent> item in _files)
+            {
+                var t = new Tuple<FileId, FileContent>(new FileId(item.Key), item.Value);
+                result.Add(t);
+            }
+
+            return Task.FromResult((IEnumerable<Tuple<FileId, FileContent>>)result);
+        }
+
+        public Task<FileContent> GetAsync(FileId id)
+        {
+            FileContent file = null;
+
+            // try to find the real id
+            string real = KeyProvider.Find(id.Value, () => _files.Keys);
+
+            if (real != null)
+            {
+                // try to get the file by using the real id
+                bool succeed = _files.TryGetValue(real, out file);
+
+                if (succeed)
+                {
+                    _logger.LogDebug($"Found a file by using the id {id} -> {real}.");
+                }
+                else
+                {
+                    _logger.LogError($"Did not found a file by using the id {id} -> {real}.");
+                }
+            }
+            else
+            {
+                _logger.LogDebug($"Unable to find a file by using the id {id}.");
+            }
+
+            // return the file or null if no data found
+            return Task.FromResult(file);
+        }
     }
 }

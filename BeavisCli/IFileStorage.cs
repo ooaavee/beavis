@@ -11,19 +11,32 @@ namespace BeavisCli
         /// </summary>
         /// <param name="file">a file to store</param>
         /// <returns>file id</returns>
-        Task<string> StoreAsync(UploadedFile file);
+        Task<FileId> StoreAsync(FileContent file);
 
         /// <summary>
         /// Removes a file from the file storage by using the file id.
         /// </summary>
         /// <param name="id">file id</param>
         /// <returns>removed file or null if we didn't remove anything</returns>
-        Task<UploadedFile> RemoveAsync(string id);
+        Task<FileContent> RemoveAsync(FileId id);
 
         /// <summary>
-        /// Gets all files and keys in the file storage.
+        /// Removes all files from the file storage.
         /// </summary>
-        /// <returns>files and keys</returns>
-        Task<IEnumerable<Tuple<string, UploadedFile>>> GetAllAsync();
-    }
+        /// <returns>number of removed files</returns>
+        Task<int> RemoveAllAsync();
+
+        /// <summary>
+        /// Gets all files in the file storage.
+        /// </summary>
+        /// <returns>all files</returns>
+        Task<IEnumerable<Tuple<FileId, FileContent>>> GetAllAsync();
+
+        /// <summary>
+        /// Gets a file from the file storage by using the file .id
+        /// </summary>
+        /// <param name="id">file id</param>
+        /// <returns>file or null if not found</returns>
+        Task<FileContent> GetAsync(FileId id);
+    }   
 }

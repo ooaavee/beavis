@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace BeavisCli.Internal
 {
-    internal static class ShortKey
+    internal static class KeyProvider
     {
         public static string Create()
         {
@@ -15,7 +14,9 @@ namespace BeavisCli.Internal
 
         public static string Create(Func<string, bool> exists)
         {
-            for (int i = 0; i < 3; i++)
+            const int maxTryCount = 3;
+
+            for (int i = 0; i < maxTryCount; i++)
             {
                 string value = Create();
                 if (!exists(value))
@@ -27,22 +28,22 @@ namespace BeavisCli.Internal
             throw new InvalidOperationException("Failed to generate a new random key.");
         }
 
-        public static string FindMatching(string candidate, Func<IEnumerable<string>> existingValues)
+        public static string Find(string candidate, Func<IEnumerable<string>> existing)
         {
-            string value = null;
-
-            if (candidate.Length > 0)
+            if (string.IsNullOrEmpty(candidate))
             {
-                string[] result = existingValues().Where(x => x.StartsWith(candidate)).ToArray();
-
-                if (result.Length == 1)
-                {
-                    value = result[0];
-                }
+                return null;
             }
 
-            return value;
-        }
+            string[] matches = existing().Where(x => x.StartsWith(candidate)).ToArray();
 
+            if (matches.Length == 1)
+            {
+                string value = matches[0];
+                return value;
+            }
+
+            return null;
+        }
     }
 }

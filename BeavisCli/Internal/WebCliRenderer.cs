@@ -38,7 +38,7 @@ namespace BeavisCli.Internal
                 "BeavisCli.Resources.js.jquery.mousewheel-min.js",
                 "BeavisCli.Resources.js.angular.min.js",
                 "BeavisCli.Resources.js.download.js",
-                "BeavisCli.Resources.js.beavis-cli.js"
+                "BeavisCli.Resources.js.beaviscli.js"
             };
 
             string text = await ReadAsync(files);

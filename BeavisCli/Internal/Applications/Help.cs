@@ -40,7 +40,7 @@ namespace BeavisCli.Internal.Applications
 
                     if (builtIn)
                     {
-                        WebCliOptions.DefaultApplicationBehaviour behaviour = _options.DefaultApplications[info.Name];
+                        WebCliOptions.BuiltInApplicationBehaviour behaviour = _options.BuiltInApplications[info.Name];
                         if (!behaviour.IsVisibleForHelp)
                         {
                             // ignore non-browsable applications

@@ -7,22 +7,15 @@ namespace BeavisCli
 {
     public sealed partial class WebCliOptions
     {
-        private IReadOnlyDictionary<string, DefaultApplicationBehaviour> InitDefaultTypes()
+        private static IReadOnlyDictionary<string, BuiltInApplicationBehaviour> GetBuiltInApplications()
         {
-            Dictionary<string, DefaultApplicationBehaviour> behaviours = new Dictionary<string, DefaultApplicationBehaviour>();
+            var values = new Dictionary<string, BuiltInApplicationBehaviour>();
 
             void Use<TWebCliApplication>() where TWebCliApplication : WebCliApplication
             {
                 WebCliApplicationInfo info = WebCliApplicationInfo.Parse<TWebCliApplication>();
 
-                DefaultApplicationBehaviour behaviour = new DefaultApplicationBehaviour
-                {
-                    IsVisibleForHelp = true,
-                    Enabled = true,
-                    Type = typeof(TWebCliApplication)
-                };
-
-                behaviours[info.Name] = behaviour;
+                values[info.Name] = new BuiltInApplicationBehaviour { Type = typeof(TWebCliApplication) };
             }
 
             Use<Help>();
@@ -31,8 +24,9 @@ namespace BeavisCli
             Use<Shortcuts>();
             Use<License>();
             Use<Upload>();
+            Use<FileStorage>();
 
-            return behaviours;
+            return values;
         }
     }
 }

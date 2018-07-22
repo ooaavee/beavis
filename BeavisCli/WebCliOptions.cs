@@ -1,5 +1,4 @@
-﻿using BeavisCli.Internal.Applications;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace BeavisCli
@@ -8,16 +7,10 @@ namespace BeavisCli
     {
         public WebCliOptions()
         {
-            DefaultApplications = InitDefaultTypes();
+            BuiltInApplications = GetBuiltInApplications();
         }
 
-        public string Path { get; set; } = "/beavis-cli";
-
-        ////public bool EnableDefaultApplications { get; set; } = true;
-
-        ////public bool AllowDefaultApplicationsBrowsing { get; set; } = true;
-
-        ////public bool EnableFileUpload { get; set; }
+        public string Path { get; set; } = "/beaviscli";
 
         public bool DisplayExceptions { get; set; }
 
@@ -31,14 +24,13 @@ namespace BeavisCli
 
         public Type AuthorizationHandlerType { get; set; }
 
-        public IReadOnlyDictionary<string, DefaultApplicationBehaviour> DefaultApplications { get; }
+        public IReadOnlyDictionary<string, BuiltInApplicationBehaviour> BuiltInApplications { get; }
 
-        public class DefaultApplicationBehaviour
+        public class BuiltInApplicationBehaviour
         {
+            public bool Enabled { get; set; } = true;
+            public bool IsVisibleForHelp { get; set; } = true;
             internal Type Type { get; set; }
-            public bool Enabled { get; set; }
-            public bool IsVisibleForHelp { get; set; }
         }
-
     }
 }

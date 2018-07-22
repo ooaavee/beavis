@@ -20,10 +20,10 @@ namespace BeavisCli {
 
     interface IUploader {
         input: any;
-        file: IUploaderFile;
+        file: IFileContent;
     }
 
-    interface IUploaderFile {
+    interface IFileContent {
         name: string;
         type: string;
         dataUrl: string;
@@ -72,7 +72,7 @@ namespace BeavisCli {
                 }
             };
 
-            this.$http.post<IResponse>("/beavis-cli/api/initialize", null, { headers: { 'Content-Type': "application/json" } })
+            this.$http.post<IResponse>("/beaviscli/api/initialize", null, { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
                     this.handleResponse(data, this.terminal, this);
                 }).error((data, status) => {
@@ -91,7 +91,7 @@ namespace BeavisCli {
             }
 
             // send server request
-            this.$http.post<IResponse>("/beavis-cli/api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
+            this.$http.post<IResponse>("/beaviscli/api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
                     this.handleResponse(data, this.terminal, this);
                 }).error((data, status) => {
@@ -113,9 +113,10 @@ namespace BeavisCli {
             reader.onload = () => {
                 this.uploader.file.dataUrl = reader.result;
 
-                this.$http.post<IResponse>("/beavis-cli/api/upload", JSON.stringify(this.uploader.file), { headers: { 'Content-Type': "application/json" } })
+                this.$http.post<IResponse>("/beaviscli/api/upload", JSON.stringify(this.uploader.file), { headers: { 'Content-Type': "application/json" } })
                     .success((data: IResponse) => {
                         this.handleResponse(data, this.terminal, this);
+                        $('#uploader').val('');
                     }).error((data, status) => {
                         this.handleError(data, this.terminal);
                     });
@@ -133,7 +134,7 @@ namespace BeavisCli {
          * Begins a new job
          ***************************************************************************************/
         private beginJob(key: string, terminal: any) {
-            this.$http.post<IResponse>("/beavis-cli/api/job?key=" + encodeURIComponent(key), null, { headers: { 'Content-Type': "application/json" } })
+            this.$http.post<IResponse>(`/beaviscli/api/job?key=${encodeURIComponent(key)}`, null, { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
                     this.handleResponse(data, terminal, this);
                 }).error((data, status) => {

@@ -21,7 +21,7 @@ namespace BeavisCli.Internal
         /// </summary>
         public string Push(IJob job)
         {
-            string key = ShortKey.Create(s => _jobs.ContainsKey(s));
+            string key = KeyProvider.Create(s => _jobs.ContainsKey(s));
 
             if (!_jobs.TryAdd(key, job))
             {

@@ -248,6 +248,9 @@ namespace BeavisCli.Microsoft.Extensions.CommandLineUtils
                 Description = description,
                 Inherited = inherited
             };
+
+            option.LongName = option.ShortName;
+
             Options.Add(option);
             configuration(option);
             return option;

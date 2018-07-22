@@ -42,7 +42,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 : ServiceDescriptor.Singleton(typeof(IAuthorizationHandler), options.AuthorizationHandlerType));
 
             // register default applications
-            foreach (WebCliOptions.DefaultApplicationBehaviour behaviour in options.DefaultApplications.Values)
+            foreach (WebCliOptions.BuiltInApplicationBehaviour behaviour in options.BuiltInApplications.Values)
             {
                 if (behaviour.Enabled)
                 {
