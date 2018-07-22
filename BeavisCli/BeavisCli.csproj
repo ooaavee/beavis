@@ -22,6 +22,7 @@
     <None Remove="Resources\js\jquery.min.js" />
     <None Remove="Resources\js\jquery.mousewheel-min.js" />
     <None Remove="Resources\js\jquery.terminal.min.js" />
+    <None Remove="Resources\license\all.txt" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,6 +35,7 @@
     <EmbeddedResource Include="Resources\js\jquery.min.js" />
     <EmbeddedResource Include="Resources\js\jquery.mousewheel-min.js" />
     <EmbeddedResource Include="Resources\js\jquery.terminal.min.js" />
+    <EmbeddedResource Include="Resources\license\all.txt" />
   </ItemGroup>
 
   <ItemGroup>
