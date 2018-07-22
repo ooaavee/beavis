@@ -60,10 +60,10 @@ namespace BeavisCli.Internal.Applications
 
                 if (!succeed)
                 {
-                    return ExitWithHelp(context).Result;
+                    return await ExitWithHelpAsync(context);
                 }
 
-                return Exit(context).Result;
+                return await ExitAsync(context);
             }, context);
         }
 

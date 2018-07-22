@@ -1,7 +1,7 @@
 ﻿using BeavisCli.Internal;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace BeavisCli
 {
@@ -42,7 +42,8 @@ namespace BeavisCli
             }
 
             // register invoke hook
-            await context.Cli.OnExecuteAsync(invoke);
+            //await context.Cli.OnExecuteAsync(invoke);
+            context.Cli.Invoke = () => invoke().Result;
 
             // create logger
             _logger = context.GetLoggerFactory().CreateLogger<WebCliApplication>();
@@ -56,6 +57,8 @@ namespace BeavisCli
             int statusCode = context.Cli.Execute(args);
 
             _logger.LogDebug($"'{GetType().FullName}' execution completed with status code {statusCode}.");
+
+            await Task.CompletedTask;
         }
 
         protected Task<int> Exit(WebCliContext context)
@@ -67,9 +70,21 @@ namespace BeavisCli
 
             _logger?.LogDebug($"Exiting '{GetType().FullName}'.");
 
-            return Exit();
+            return Task.FromResult(ExitStatusCode);
         }
-       
+
+        protected async Task<int> ExitAsync(WebCliContext context)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            int result = Exit(context).Result;
+
+            return await Task.FromResult(result);
+        }
+
         protected Task<int> ExitWithHelp(WebCliContext context)
         {
             if (context == null)
@@ -83,7 +98,19 @@ namespace BeavisCli
 
             context.Cli.ShowHelp(info.Name);
 
-            return Exit();
+            return Task.FromResult(ExitStatusCode);
+        }
+
+        protected async Task<int> ExitWithHelpAsync(WebCliContext context)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            int result = ExitWithHelp(context).Result;
+
+            return await Task.FromResult(result);
         }
 
         protected Task<int> Unauthorized(WebCliContext context)
@@ -96,8 +123,20 @@ namespace BeavisCli
             _logger?.LogDebug($"Exiting '{GetType().FullName}' with unauthorized.");
 
             context.GetUnauthorizedHandler().OnUnauthorizedAsync(context);
-            
-            return Exit();
+
+            return Task.FromResult(ExitStatusCode);
+        }
+
+        protected async Task<int> UnauthorizedAsync(WebCliContext context)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            int result = Unauthorized(context).Result;
+
+            return await Task.FromResult(result);
         }
 
         protected Task<int> Error(WebCliContext context, string text)
@@ -116,7 +155,24 @@ namespace BeavisCli
 
             context.Response.WriteError(text);
 
-            return Exit();
+            return Task.FromResult(ExitStatusCode);
+        }
+
+        protected async Task<int> ErrorAsync(WebCliContext context, string text)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (text == null)
+            {
+                throw new ArgumentNullException(nameof(text));
+            }
+
+            int result = Error(context, text).Result;
+
+            return await Task.FromResult(result);
         }
 
         protected Task<int> Error(WebCliContext context, string text, Exception e)
@@ -141,7 +197,29 @@ namespace BeavisCli
             context.Response.WriteError(text);
             context.Response.WriteError(e, true);
 
-            return Exit();
+            return Task.FromResult(ExitStatusCode);
+        }
+
+        protected async Task<int> ErrorAsync(WebCliContext context, string text, Exception e)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            if (text == null)
+            {
+                throw new ArgumentNullException(nameof(text));
+            }
+
+            if (e == null)
+            {
+                throw new ArgumentNullException(nameof(e));
+            }
+
+            int result = Error(context, text, e).Result;
+
+            return await Task.FromResult(result);
         }
 
         protected Task<int> Error(WebCliContext context, Exception e)
@@ -158,15 +236,25 @@ namespace BeavisCli
 
             _logger?.LogDebug($"Exiting '{GetType().FullName}' with exception '{e}'.");
             context.Response.WriteError(e, true);
-            return Exit();
-        }
 
-        private static Task<int> Exit()
-        {
             return Task.FromResult(ExitStatusCode);
         }
 
-        
+        protected async Task<int> ErrorAsync(WebCliContext context, Exception e)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
 
+            if (e == null)
+            {
+                throw new ArgumentNullException(nameof(e));
+            }
+
+            int result = Error(context, e).Result;
+
+            return await Task.FromResult(result);
+        }
     }
 }

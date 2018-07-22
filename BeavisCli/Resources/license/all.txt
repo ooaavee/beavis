@@ -21,16 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-
-_____________________________________________________________________________
-
-
-
 Following pieces of free and open-source software have been used \(^-^)/
-
-
-
---
+==============================================================================
 
       __ _____                     ________                              __
      / // _  /__ __ _____ ___ __ _/__  ___/__ ___ ______ __ __  __ ___  / /
@@ -67,36 +59,27 @@ licensed under 3 clause BSD license
  
 Date: Mon, 08 Jan 2018 17:19:46 +0000
 
-
 --
-
 
 download.js v4.2, by dandavis; 2008-2016.
 http://danml.com/download.html
 https://github.com/rndme/download
 
-
 --
-
 
 AngularJS v1.5.8
 (c) 2010-2016 Google, Inc. http://angularjs.org
 License: MIT
 
-
 --
-
 
 jQuery v3.2.1 | (c) JS Foundation and other contributors
 https://jquery.org/license/
 
-
 --
-
 
 Microsoft.Extensions.CommandLineUtils
 Copyright (c) .NET Foundation. All rights reserved.
 Licensed under the Apache License, Version 2.0.
-
 
 --
