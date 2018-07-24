@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BeavisCli.Internal.Applications
+namespace BeavisCli.Internal.Commands
 {
-    [WebCliApplication("help", "Displays help.")]
-    internal class Help : WebCliApplication
+    [WebCliCommand("help", "Displays help.")]
+    internal class Help : WebCliCommand
     {
         private readonly WebCliSandbox _sandbox;
         private readonly WebCliOptions _options;
@@ -22,57 +22,52 @@ namespace BeavisCli.Internal.Applications
         {
             await OnExecuteAsync(() =>
             {
-                var defaultApps = new List<WebCliApplication>();
+                var defaults = new List<WebCliCommand>();
 
-                var externalApps = new List<WebCliApplication>();
+                var externals = new List<WebCliCommand>();
 
-                foreach (WebCliApplication application in _sandbox.GetApplications(context.HttpContext))
+                foreach (WebCliCommand cmd in _sandbox.GetCommands(context.HttpContext))
                 {
-                    bool builtIn = application.IsBuiltIn();
-
-                    WebCliApplicationInfo info = application.GetInfo();
-
-                    if (application.GetType() == GetType())
+                    if (cmd.GetType() == GetType())
                     {
                         // ignore myself 
                         continue;
                     }
 
-                    if (builtIn)
+                    if (cmd.IsBuiltIn)
                     {
-                        WebCliOptions.BuiltInApplicationBehaviour behaviour = _options.BuiltInApplications[info.Name];
+                        BuiltInCommandBehaviour behaviour = _options.BuiltInCommands[cmd.Info.Name];
                         if (!behaviour.IsVisibleForHelp)
                         {
-                            // ignore non-browsable applications
+                            // ignore non-browsable commands
                             continue;
                         }
                     }
 
-                    if (!application.IsVisibleForHelp(context))
+                    if (!cmd.IsVisibleForHelp(context))
                     {
-                        // ignore non-browsable applications
+                        // ignore non-browsable commands
                         continue;
                     }
 
-                    if (builtIn)
+                    if (cmd.IsBuiltIn)
                     {
-                        defaultApps.Add(application);
+                        defaults.Add(cmd);
                     }
                     else
                     {
-                        externalApps.Add(application);
+                        externals.Add(cmd);
                     }
                 }
              
                 var lines = new List<Tuple<string, string>>();
 
-                foreach (WebCliApplication application in defaultApps.Concat(externalApps))
+                foreach (WebCliCommand cmd in defaults.Concat(externals))
                 {
-                    WebCliApplicationInfo info = application.GetInfo();
-                    lines.Add(new Tuple<string, string>(info.Name, info.Description));
+                    lines.Add(new Tuple<string, string>(cmd.Info.Name, cmd.Info.Description));
                 }
 
-                context.Response.WriteInformation("Default applications:");
+                context.Response.WriteInformation("Default commands:");
 
                 int lineCount = 0;
 
@@ -81,10 +76,10 @@ namespace BeavisCli.Internal.Applications
                     lineCount++;
                     context.Response.WriteInformation(line);
 
-                    if (externalApps.Any() && lineCount == defaultApps.Count)
+                    if (externals.Any() && lineCount == defaults.Count)
                     {
                         context.Response.WriteEmptyLine();
-                        context.Response.WriteInformation("Custom applications:");
+                        context.Response.WriteInformation("Custom commands:");
                     }
                 }
  

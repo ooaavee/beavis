@@ -281,22 +281,10 @@ namespace BeavisCli.Microsoft.Extensions.CommandLineUtils
             Invoke = invoke;
         }
 
-        // ooaavee, 2017-06-10
-        ////public async Task OnExecuteAsync(Func<int> invoke)
-        ////{
-        ////    Invoke = invoke;
-        ////}
-
         public void OnExecute(Func<Task<int>> invoke)
         {
             Invoke = () => invoke().Result;
         }
-
-        // ooaavee, 2017-06-10
-        ////public async Task OnExecuteAsync(Func<Task<int>> invoke)
-        ////{
-        ////    Invoke = () => invoke().Result;
-        ////}
 
         public int Execute(params string[] args)
         {

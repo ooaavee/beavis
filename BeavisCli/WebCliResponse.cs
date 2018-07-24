@@ -1,11 +1,9 @@
-﻿using BeavisCli.Internal.Jobs;
+﻿using BeavisCli.Internal;
 using BeavisCli.JavaScriptStatements;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using BeavisCli.Internal;
 
 namespace BeavisCli
 {

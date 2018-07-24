@@ -1,4 +1,4 @@
-﻿using BeavisCli.Internal.Applications;
+﻿using BeavisCli.Internal.Commands;
 using BeavisCli.JavaScriptStatements;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -11,7 +11,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BeavisCli.Internal.Middlewares
+namespace BeavisCli.Internal
 {
     internal class WebCliMiddleware
     {
@@ -97,10 +97,10 @@ namespace BeavisCli.Internal.Middlewares
                     return;
                 }
 
-                // invoke application
+                // invoke command
                 if (IsRequest($"{DefaultPath}/api/request", HttpMethods.Post))
                 {
-                    await HandleInvokeApplication(httpContext);
+                    await HandleInvokeCommand(httpContext);
                     return;
                 }
 
@@ -163,11 +163,11 @@ namespace BeavisCli.Internal.Middlewares
                 WebCliResponse response = new WebCliResponse(httpContext);
 
                 // prepare tab completion
-                response.AddJavaScript(new SetTerminalCompletionDictionary(_sandbox.GetApplications(httpContext).Select(x => x.GetInfo().Name)));
+                response.AddJavaScript(new SetTerminalCompletionDictionary(_sandbox.GetCommands(httpContext).Select(cmd => cmd.Info.Name)));
 
                 // set window variables
-                WebCliApplicationInfo uploadInfo = WebCliApplicationInfo.Parse<Upload>();
-                WebCliOptions.BuiltInApplicationBehaviour uploadBehaviour = _options.BuiltInApplications[uploadInfo.Name];               
+                WebCliCommandInfo uploadInfo = WebCliCommandInfo.Parse<Upload>();
+                BuiltInCommandBehaviour uploadBehaviour = _options.BuiltInCommands[uploadInfo.Name];               
                 response.AddJavaScript(new SetUploadEnabled(uploadBehaviour.Enabled));
 
                 if (_options.UseTerminalInitializer)
@@ -200,7 +200,7 @@ namespace BeavisCli.Internal.Middlewares
             }
         }
 
-        private async Task HandleInvokeApplication(HttpContext httpContext)
+        private async Task HandleInvokeCommand(HttpContext httpContext)
         {
             try
             {
@@ -212,7 +212,7 @@ namespace BeavisCli.Internal.Middlewares
             }
             catch (Exception e)
             {
-                _logger.LogError("An error occurred while processing the invoke application request.", e);
+                _logger.LogError("An error occurred while processing the invoke command request.", e);
                 await WriteErrorResponseAsync(e, httpContext);
             }
         }

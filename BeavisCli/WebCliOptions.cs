@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using BeavisCli.Internal;
+using BeavisCli.Internal.Commands;
 
 namespace BeavisCli
 {
-    public sealed partial class WebCliOptions
+    public sealed class WebCliOptions
     {
         public WebCliOptions()
         {
-            BuiltInApplications = GetBuiltInApplications();
+            BuiltInCommands = GetBuiltInCommands();
         }
 
         public string Path { get; set; } = "/beaviscli";
@@ -24,13 +26,28 @@ namespace BeavisCli
 
         public Type AuthorizationHandlerType { get; set; }
 
-        public IReadOnlyDictionary<string, BuiltInApplicationBehaviour> BuiltInApplications { get; }
+        public IReadOnlyDictionary<string, BuiltInCommandBehaviour> BuiltInCommands { get; }
 
-        public class BuiltInApplicationBehaviour
+        private static IReadOnlyDictionary<string, BuiltInCommandBehaviour> GetBuiltInCommands()
         {
-            public bool Enabled { get; set; } = true;
-            public bool IsVisibleForHelp { get; set; } = true;
-            internal Type Type { get; set; }
+            var values = new Dictionary<string, BuiltInCommandBehaviour>();
+
+            void Init<TWebCliCommand>() where TWebCliCommand : WebCliCommand
+            {
+                WebCliCommandInfo info = WebCliCommandInfo.Parse<TWebCliCommand>();
+
+                values[info.Name] = new BuiltInCommandBehaviour { Type = typeof(TWebCliCommand) };
+            }
+
+            Init<Help>();
+            Init<Clear>();
+            Init<Reset>();
+            Init<Shortcuts>();
+            Init<License>();
+            Init<Upload>();
+            Init<FileStorage>();
+
+            return values;
         }
     }
 }

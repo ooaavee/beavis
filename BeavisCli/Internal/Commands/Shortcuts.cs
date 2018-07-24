@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BeavisCli.Internal.Applications
+namespace BeavisCli.Internal.Commands
 {
-    [WebCliApplication("shortcuts", "Displays a list of keyboard shortcuts.")]
-    internal class Shortcuts : WebCliApplication
+    [WebCliCommand("shortcuts", "Displays keyboard shortcuts.")]
+    internal class Shortcuts : WebCliCommand
     {
         public override async Task ExecuteAsync(WebCliContext context)
         {

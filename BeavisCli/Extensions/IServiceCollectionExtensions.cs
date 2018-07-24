@@ -41,53 +41,53 @@ namespace Microsoft.Extensions.DependencyInjection
                 ? ServiceDescriptor.Singleton(typeof(IAuthorizationHandler), typeof(DefaultAuthorizationHandler))
                 : ServiceDescriptor.Singleton(typeof(IAuthorizationHandler), options.AuthorizationHandlerType));
 
-            // register default applications
-            foreach (WebCliOptions.BuiltInApplicationBehaviour behaviour in options.BuiltInApplications.Values)
+            // register default commands
+            foreach (BuiltInCommandBehaviour behaviour in options.BuiltInCommands.Values)
             {
                 if (behaviour.Enabled)
                 {
-                    services.Add(ServiceDescriptor.Singleton(typeof(WebCliApplication), behaviour.Type));
+                    services.Add(ServiceDescriptor.Singleton(typeof(WebCliCommand), behaviour.Type));
                 }
             }
 
             return services;
         }
 
-        public static IServiceCollection AddScopedWebCliApplication<TWebCliApplication>(this IServiceCollection services) where TWebCliApplication : WebCliApplication
+        public static IServiceCollection AddScopedWebCliCommand<TWebCliCommand>(this IServiceCollection services) where TWebCliCommand : WebCliCommand
         {
-            Validate<TWebCliApplication>();
-            return services.AddScoped<WebCliApplication, TWebCliApplication>();
+            Validate<TWebCliCommand>();
+            return services.AddScoped<WebCliCommand, TWebCliCommand>();
         }
 
-        public static IServiceCollection AddSingletonWebCliApplication<TWebCliApplication>(this IServiceCollection services) where TWebCliApplication : WebCliApplication
+        public static IServiceCollection AddSingletonWebCliCommand<TWebCliCommand>(this IServiceCollection services) where TWebCliCommand : WebCliCommand
         {
-            Validate<TWebCliApplication>();
-            return services.AddSingleton<WebCliApplication, TWebCliApplication>();
+            Validate<TWebCliCommand>();
+            return services.AddSingleton<WebCliCommand, TWebCliCommand>();
         }
       
-        public static IServiceCollection AddTransientWebCliApplication<TWebCliApplication>(this IServiceCollection services) where TWebCliApplication : WebCliApplication
+        public static IServiceCollection AddTransientWebCliCommand<TWebCliCommand>(this IServiceCollection services) where TWebCliCommand : WebCliCommand
         {
-            Validate<TWebCliApplication>();
-            return services.AddTransient<WebCliApplication, TWebCliApplication>();
+            Validate<TWebCliCommand>();
+            return services.AddTransient<WebCliCommand, TWebCliCommand>();
         }
 
-        private static void Validate<TWebCliApplication>()where TWebCliApplication : WebCliApplication
+        private static void Validate<TWebCliCommand>()where TWebCliCommand : WebCliCommand
         {
-            WebCliApplicationInfo info = WebCliApplicationInfo.Parse(typeof(TWebCliApplication));
+            WebCliCommandInfo info = WebCliCommandInfo.Parse(typeof(TWebCliCommand));
 
             if (info == null)
             {
-                throw new InvalidOperationException($"{typeof(TWebCliApplication)} is not a valid WebCliApplication, unable to find {nameof(WebCliApplicationAttribute)} attribute.");
+                throw new InvalidOperationException($"{typeof(TWebCliCommand)} is not a valid command, unable to find {nameof(WebCliCommandAttribute)} attribute.");
             }
 
             if (string.IsNullOrEmpty(info.Name))
             {
-                throw new InvalidOperationException($"{nameof(WebCliApplicationAttribute)}.{nameof(WebCliApplicationInfo.Name)} is mandatory.");
+                throw new InvalidOperationException($"{nameof(WebCliCommandAttribute)}.{nameof(WebCliCommandInfo.Name)} is mandatory.");
             }
 
             if (string.IsNullOrEmpty(info.Description))
             {
-                throw new InvalidOperationException($"{nameof(WebCliApplicationAttribute)}.{nameof(WebCliApplicationInfo.Description)} is mandatory.");
+                throw new InvalidOperationException($"{nameof(WebCliCommandAttribute)}.{nameof(WebCliCommandInfo.Description)} is mandatory.");
             }
         }
     }

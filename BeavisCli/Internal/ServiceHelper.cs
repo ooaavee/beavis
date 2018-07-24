@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 
 namespace BeavisCli.Internal
 {
     internal static class ServiceHelper
     {
-        public static IEnumerable<WebCliApplication> GetWebCliApplications(this HttpContext httpContext)
+        public static IEnumerable<WebCliCommand> GetWebCliCommands(this HttpContext httpContext)
         {
-            return httpContext.RequestServices.GetServices<WebCliApplication>();
+            return httpContext.RequestServices.GetServices<WebCliCommand>();
         }
 
         public static IUnauthorizedHandler GetUnauthorizedHandler(this WebCliContext context)
@@ -29,6 +26,5 @@ namespace BeavisCli.Internal
         {
             return context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
         }
-
     }
 }

@@ -1,18 +1,25 @@
 ﻿using BeavisCli.Internal;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Concurrent;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace BeavisCli
 {
-    public abstract class WebCliApplication
+    public abstract class WebCliCommand
     {
+        private static readonly Assembly ThisAssembly = typeof(WebCliCommand).Assembly;
+
+        // we can safely use a static dictionary cache here, because these values doesn't change during runtime
+        private static readonly ConcurrentDictionary<Type, WebCliCommandInfo> InfoCache = new ConcurrentDictionary<Type, WebCliCommandInfo>();
+
         private const int ExitStatusCode = 2;
 
-        private ILogger<WebCliApplication> _logger;
+        private ILogger<WebCliCommand> _logger;
 
         /// <summary>
-        /// Checks if the application execution is authorized.
+        /// Checks if the command execution is authorized.
         /// </summary>
         public virtual bool IsAuthorized(WebCliContext context)
         {
@@ -20,7 +27,7 @@ namespace BeavisCli
         }
 
         /// <summary>
-        /// Checks if the application is visible for 'help'.
+        /// Checks if the command is visible for 'help'.
         /// </summary>
         public virtual bool IsVisibleForHelp(WebCliContext context)
         {
@@ -42,19 +49,18 @@ namespace BeavisCli
             }
 
             // register invoke hook
-            //await context.Cli.OnExecuteAsync(invoke);
-            context.Cli.Invoke = () => invoke().Result;
+            context.Processor.Invoke = () => invoke().Result;
 
             // create logger
-            _logger = context.GetLoggerFactory().CreateLogger<WebCliApplication>();
-                       
-            // get arguments for the application
-            string[] args = context.Request.GetApplicationArgs();
+            _logger = context.GetLoggerFactory().CreateLogger<WebCliCommand>();
+
+            // get arguments for the command
+            string[] args = context.Request.GetCommandArgs();
 
             _logger.LogDebug($"Started to execute '{GetType().FullName}' with arguments '{string.Join(" ", args)}'.");
 
-            // execute the application
-            int statusCode = context.Cli.Execute(args);
+            // execute the command
+            int statusCode = context.Processor.Execute(args);
 
             _logger.LogDebug($"'{GetType().FullName}' execution completed with status code {statusCode}.");
 
@@ -94,9 +100,8 @@ namespace BeavisCli
 
             _logger?.LogDebug($"Exiting '{GetType().FullName}' with help.");
 
-            WebCliApplicationInfo info = this.GetInfo();
-
-            context.Cli.ShowHelp(info.Name);
+            
+            context.Processor.ShowHelp(Info.Name);
 
             return Task.FromResult(ExitStatusCode);
         }
@@ -255,6 +260,26 @@ namespace BeavisCli
             int result = Error(context, e).Result;
 
             return await Task.FromResult(result);
+        }
+
+        internal WebCliCommandInfo Info => GetInfo();
+
+        internal bool IsValid => GetInfo() != null;
+
+        internal bool IsBuiltIn => GetType().Assembly.Equals(ThisAssembly);
+
+        private WebCliCommandInfo GetInfo()
+        {
+            Type type = GetType();
+            if (!InfoCache.TryGetValue(type, out WebCliCommandInfo info))
+            {
+                info = WebCliCommandInfo.Parse(type);
+                if (info != null)
+                {
+                    InfoCache.TryAdd(type, info);
+                }
+            }
+            return info;
         }
     }
 }

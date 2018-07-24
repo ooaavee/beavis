@@ -5,9 +5,9 @@ namespace BeavisCli.Internal
     internal static class WebCliRequestExtensions
     {
         /// <summary>
-        /// Parses the application name from the request.
+        /// Parses the command name from the request.
         /// </summary>
-        public static string GetApplicationName(this WebCliRequest request)
+        public static string GetCommandName(this WebCliRequest request)
         {
             if (request.Input != null)
             {
@@ -27,9 +27,9 @@ namespace BeavisCli.Internal
         }
 
         /// <summary>
-        /// Parses application arguments from the request.
+        /// Parses command arguments from the request.
         /// </summary>
-        public static string[] GetApplicationArgs(this WebCliRequest request)
+        public static string[] GetCommandArgs(this WebCliRequest request)
         {
             List<string> args = new List<string>(); 
             

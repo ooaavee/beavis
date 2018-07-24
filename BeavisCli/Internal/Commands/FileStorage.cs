@@ -4,10 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using BeavisCli.JavaScriptStatements;
 
-namespace BeavisCli.Internal.Applications
+namespace BeavisCli.Internal.Commands
 {
-    [WebCliApplication("filestorage", "Manage file storage.")]
-    internal class FileStorage : WebCliApplication
+    [WebCliCommand("filestorage", "Manage file storage.")]
+    internal class FileStorage : WebCliCommand
     {
         private readonly IFileStorage _files;
 

@@ -2,6 +2,7 @@
 ///<reference path="typings\globals/jquery/index.d.ts" />
 
 namespace BeavisCli {
+
     const app: ng.IModule = angular.module("BeavisCli", []);
 
     interface IRequest {
@@ -47,9 +48,9 @@ namespace BeavisCli {
             });
         }
 
-        /***************************************************************************************
+        /**
          * Initializes the file uploader
-         ***************************************************************************************/
+         **/
         private initUploader() {
             var input = document.querySelector("#uploader");
 
@@ -60,9 +61,9 @@ namespace BeavisCli {
             this.uploader = { input: input, file: null };
         }
 
-        /***************************************************************************************
+        /**
          * Occurs when the JQuery Terminal component has been mounted
-         ***************************************************************************************/
+         **/
         private onMount(terminal: any) {
             this.terminal = terminal;
 
@@ -80,9 +81,9 @@ namespace BeavisCli {
                 });
         }
 
-        /***************************************************************************************
+        /**
          * Process JQuery terminal input events
-         ***************************************************************************************/
+         **/
         private processInput(input: string) {
             // triggers file uploading process
             if (input === "upload" && window["__upload_enabled"]) {
@@ -99,9 +100,9 @@ namespace BeavisCli {
                 });
         }
 
-        /***************************************************************************************
+        /**
          * Begins file uploading
-         ***************************************************************************************/
+         **/
         private beginUpload() {
             var file = this.uploader.input.files.item(0);
 
@@ -130,9 +131,9 @@ namespace BeavisCli {
             };
         }
 
-        /***************************************************************************************
+        /**
          * Begins a new job
-         ***************************************************************************************/
+         **/
         private beginJob(key: string, terminal: any) {
             this.$http.post<IResponse>(`/beaviscli/api/job?key=${encodeURIComponent(key)}`, null, { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
@@ -142,9 +143,9 @@ namespace BeavisCli {
                 });
         }
 
-        /***************************************************************************************
+        /**
          * Handles a response from the server
-         ***************************************************************************************/
+         **/
         private handleResponse(response: IResponse, terminal: any, $ctrl: CliController) {
             // 1. Write terminal output messages.
             this.$rootScope.$emit("terminal.output", response.messages);

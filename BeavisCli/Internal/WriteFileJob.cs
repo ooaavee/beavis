@@ -2,7 +2,7 @@
 using BeavisCli.JavaScriptStatements;
 using Microsoft.AspNetCore.Http;
 
-namespace BeavisCli.Internal.Jobs
+namespace BeavisCli.Internal
 {
     internal class WriteFileJob : IJob
     {
@@ -19,8 +19,8 @@ namespace BeavisCli.Internal.Jobs
 
         public Task RunAsync(HttpContext context, WebCliResponse response)
         {
-            IJavaScriptStatement stmt = new DownloadJs(_data, _fileName, _mimeType);
-            response.AddJavaScript(stmt);
+            IJavaScriptStatement js = new DownloadJs(_data, _fileName, _mimeType);
+            response.AddJavaScript(js);
             return Task.CompletedTask;
         }
     }

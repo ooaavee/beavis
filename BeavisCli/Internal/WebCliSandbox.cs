@@ -34,41 +34,39 @@ namespace BeavisCli.Internal
             {
                 _logger.LogDebug($"Started to process a request with the input '{request.Input}'.");
 
-                // application name entered by the user
-                string name = request.GetApplicationName();
+                // command name entered by the user
+                string name = request.GetCommandName();
 
-                _logger.LogDebug($"Searching an application by the name '{name}'.");
+                _logger.LogDebug($"Searching an command by the name '{name}'.");
 
-                // search application by name, throws WebCliSandboxException if not found!
-                WebCliApplication application = GetApplication(name, httpContext);
+                // search command by name, throws WebCliSandboxException if not found!
+                WebCliCommand cmd = GetCommand(name, httpContext);
 
-                _logger.LogDebug($"Found an application '{application.GetType().FullName}' that matches the name '{name}'.");
-
-                WebCliApplicationInfo info = application.GetInfo();
+                _logger.LogDebug($"Found a command '{cmd.GetType().FullName}' that matches the name '{name}'.");
 
                 // these TextWriters are for writing console out and error messages, just
                 // like Console.Out and Console.Error
                 TextWriter outWriter = new ResponseMessageTextWriter(response.WriteInformation);
                 TextWriter errorWriter = new ResponseMessageTextWriter(response.WriteError);
 
-                CommandLineApplication cli = new CommandLineApplication
+                CommandLineApplication processor = new CommandLineApplication
                 {
-                    Name = info.Name,
-                    FullName = info.Name,
-                    Description = info.Description,
+                    Name = cmd.Info.Name,
+                    FullName = cmd.Info.Name,
+                    Description = cmd.Info.Description,
                     Out = outWriter,
                     Error = errorWriter
                 };                
-                cli.HelpOption("-?|-h|--help");
+                processor.HelpOption("-?|-h|--help");
 
-                WebCliContext context = new WebCliContext(cli, httpContext, request, response);
+                WebCliContext context = new WebCliContext(processor, httpContext, request, response);
 
                 // check authorization
-                bool authorized = IsAuthorized(application, context);
+                bool authorized = IsAuthorized(cmd, context);
 
                 if (authorized)
                 {
-                    await application.ExecuteAsync(context);
+                    await cmd.ExecuteAsync(context);
                 }
                 else
                 {
@@ -78,7 +76,7 @@ namespace BeavisCli.Internal
             }
             catch (WebCliSandboxException e)
             {
-                _logger.LogDebug($"An error occurred while searching an application by using the input '{request.Input}'.", e);
+                _logger.LogDebug($"An error occurred while searching a command by using the input '{request.Input}'.", e);
                 response.WriteError(e);
             }
             catch (CommandParsingException e)
@@ -101,58 +99,53 @@ namespace BeavisCli.Internal
             }
         }
 
-        public WebCliApplication GetApplication(string name, HttpContext httpContext)
+        public WebCliCommand GetCommand(string name, HttpContext httpContext)
         {
             int count = 0;
 
-            WebCliApplication result = null;
+            WebCliCommand result = null;
 
-            foreach (WebCliApplication application in GetApplications(httpContext))
+            foreach (WebCliCommand cmd in GetCommands(httpContext))
             {
-                WebCliApplicationInfo info = application.GetInfo();
-
-                if (info.Name == name)
+                if (cmd.Info.Name == name)
                 {
                     count++;
-                    result = application;
+                    result = cmd;
                 }
 
                 if (count > 1)
                 {
-                    throw new WebCliSandboxException($"Found more than one application with name a '{name}'. Application names must me unique.");
+                    throw new WebCliSandboxException($"Found more than one command with name a '{name}'. Command names must me unique.");
                 }
             }
 
             if (count == 0)
             {
-                throw new WebCliSandboxException($"{name} is not a valid application.{Environment.NewLine}Usage 'help' to get list of applications.");
+                throw new WebCliSandboxException($"{name} is not a valid command.{Environment.NewLine}Usage 'help' to get list of commands.");
             }
 
             return result;
         }
 
-        public IEnumerable<WebCliApplication> GetApplications(HttpContext httpContext)
+        public IEnumerable<WebCliCommand> GetCommands(HttpContext httpContext)
         {
-            foreach (WebCliApplication application in httpContext.GetWebCliApplications())
+            foreach (WebCliCommand cmd in httpContext.GetWebCliCommands())
             {
-                WebCliApplicationInfo info = application.GetInfo();
-                if (info != null)
+                if (cmd.IsValid)
                 {
-                    yield return application;
+                    yield return cmd;
                 }
             }
         }
 
         /// <summary>
-        /// Checks if the application execution is authorized.
+        /// Checks if the command execution is authorized.
         /// </summary>
-        private bool IsAuthorized(WebCliApplication application, WebCliContext context)
+        private bool IsAuthorized(WebCliCommand cmd, WebCliContext context)
         {
-            bool authorized = _authorization.IsAuthorized(application, context);
+            bool authorized = _authorization.IsAuthorized(cmd, context);
 
             bool externalHandler = !(_authorization is DefaultAuthorizationHandler);
-
-            bool builtIn = application.IsBuiltIn();
            
             if (externalHandler)
             {
@@ -161,23 +154,23 @@ namespace BeavisCli.Internal
 
             if (authorized)
             {
-                authorized = application.IsAuthorized(context);
+                authorized = cmd.IsAuthorized(context);
 
-                if (!builtIn)
+                if (!cmd.IsBuiltIn)
                 {
-                    _logger.LogInformation($"The authorization status returned by the application '{application.GetType().FullName}' is {authorized}.");
+                    _logger.LogInformation($"The authorization status returned by the command '{cmd.GetType().FullName}' is {authorized}.");
                 }
             }
 
-            if (!builtIn || externalHandler)
+            if (!cmd.IsBuiltIn || externalHandler)
             {
                 if (authorized)
                 {
-                    _logger.LogInformation($"The application '{application.GetType().FullName}' execution is authorized.");
+                    _logger.LogInformation($"The command '{cmd.GetType().FullName}' execution is authorized.");
                 }
                 else
                 {
-                    _logger.LogInformation($"The application '{application.GetType().FullName}' execution is unauthorized.");
+                    _logger.LogInformation($"The command '{cmd.GetType().FullName}' execution is unauthorized.");
                 }
             }
 

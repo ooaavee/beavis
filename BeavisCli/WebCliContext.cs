@@ -3,24 +3,23 @@ using System.IO;
 using BeavisCli.Internal;
 using BeavisCli.Microsoft.Extensions.CommandLineUtils;
 using Microsoft.AspNetCore.Http;
-using CommandArgument = BeavisCli.Microsoft.Extensions.CommandLineUtils.CommandArgument;
 
 namespace BeavisCli
 {
     public class WebCliContext
     {
-        internal WebCliContext(CommandLineApplication cli,
+        internal WebCliContext(CommandLineApplication processor,
                                HttpContext httpContext,
                                WebCliRequest request, 
                                WebCliResponse response)
         {
-            Cli = cli;
+            Processor = processor;
             HttpContext = httpContext;
             Request = request;
             Response = response;
         }
 
-        internal CommandLineApplication Cli { get; }
+        internal CommandLineApplication Processor { get; }
 
         /// <summary>
         /// HTTP context
@@ -40,25 +39,24 @@ namespace BeavisCli
         /// <summary>
         /// Writer for out message, like Console.Out
         /// </summary>
-        public TextWriter OutWriter => Cli.Out;
+        public TextWriter OutWriter => Processor.Out;
 
         /// <summary>
         /// Writer for error messages, like Console.Error
         /// </summary>
-        public TextWriter ErrorWriter => Cli.Error;
+        public TextWriter ErrorWriter => Processor.Error;
 
         public IOption Option(string template, string description, CommandOptionType optionType)
         {
-            CommandOption option = Cli.Option(template, description, Map(optionType));
+            CommandOption option = Processor.Option(template, description, Map(optionType));
             return new Option(option);
         }
 
         public IArgument Argument(string name, string description, bool multipleValues = false)
         {
-            CommandArgument argument = Cli.Argument(name, description, multipleValues);
+            Microsoft.Extensions.CommandLineUtils.CommandArgument argument = Processor.Argument(name, description, multipleValues);
             return new Internal.CommandArgument(argument);
         }
-
 
         private static Microsoft.Extensions.CommandLineUtils.CommandOptionType Map(CommandOptionType optionType)
         {

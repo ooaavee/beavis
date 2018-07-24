@@ -1,5 +1,4 @@
 ﻿using BeavisCli.Internal;
-using BeavisCli.Internal.Middlewares;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
