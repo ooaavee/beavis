@@ -16,11 +16,9 @@ namespace BeavisCli
 
         public bool DisplayExceptions { get; set; }
 
-        public bool UseTerminalInitializer { get; set; } = true;
-
         public Type UnauthorizedHandlerType { get; set; }
 
-        public Type TerminalInitializerType { get; set; }
+        public Type TerminalBehaviourType { get; set; }
 
         public Type FileStorageType { get; set; }
 
@@ -34,7 +32,7 @@ namespace BeavisCli
 
             void Init<TWebCliCommand>() where TWebCliCommand : WebCliCommand
             {
-                var info = WebCliCommandInfo.Parse(typeof(TWebCliCommand));
+                var info = WebCliCommandInfo.FromType(typeof(TWebCliCommand));
                 var definition = new BuiltInCommandDefinition {Type = typeof(TWebCliCommand)};
                 values[info.Name] = definition;
             }

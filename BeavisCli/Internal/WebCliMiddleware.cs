@@ -1,11 +1,8 @@
-﻿using BeavisCli.Internal.Commands;
-using BeavisCli.JavaScriptStatements;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -21,7 +18,7 @@ namespace BeavisCli.Internal
         private readonly ILogger<WebCliMiddleware> _logger;
         private readonly WebCliSandbox _sandbox;
         private readonly JobPool _jobs;
-        private readonly ITerminalInitializer _initializer;
+        private readonly ITerminalBehaviour _behaviour;
         private readonly IFileStorage _files;
         private readonly WebCliOptions _options;
 
@@ -29,7 +26,7 @@ namespace BeavisCli.Internal
                                 ILoggerFactory loggerFactory,
                                 WebCliSandbox sandbox, 
                                 JobPool jobs, 
-                                ITerminalInitializer initializer, 
+                                ITerminalBehaviour behaviour, 
                                 IFileStorage files, 
                                 IOptions<WebCliOptions> options)
         {
@@ -37,7 +34,7 @@ namespace BeavisCli.Internal
             _logger = loggerFactory.CreateLogger<WebCliMiddleware>();
             _sandbox = sandbox;
             _jobs = jobs;
-            _initializer = initializer;
+            _behaviour = behaviour;
             _files = files;
             _options = options.Value;
         }
@@ -163,39 +160,8 @@ namespace BeavisCli.Internal
         {
             try
             {
-                WebCliResponse response = new WebCliResponse(httpContext);
-
-                // prepare tab completion
-                var names = new List<string>();
-                foreach (WebCliCommand cmd in _sandbox.GetCommands(httpContext))
-                {
-                    bool enabled;
-                    if (cmd.IsBuiltIn)
-                    {
-                        BuiltInCommandDefinition def = _options.BuiltInCommands[cmd.Info.Name];
-                        enabled = def.IsEnabled && def.IsTabCompletionEnabled;
-                    }
-                    else
-                    {
-                        enabled = cmd.IsTabCompletionEnabled();
-                    }
-                    if (enabled)
-                    {
-                        names.Add(cmd.Info.Name);
-                    }
-                }
-                response.AddJavaScript(new SetTerminalCompletionDictionary(names));
-
-                // set window variables
-                WebCliCommandInfo info = WebCliCommandInfo.Parse(typeof(Upload));
-                BuiltInCommandDefinition definition = _options.BuiltInCommands[info.Name];
-                response.AddJavaScript(new SetUploadEnabled(definition.IsEnabled));
-
-                if (_options.UseTerminalInitializer)
-                {
-                    _initializer?.Initialize(httpContext, response);
-                }
-
+                WebCliResponse response = new WebCliResponse(httpContext);                
+                _behaviour.OnInitialize(httpContext, response);
                 await WebCliRenderer.RenderResponseAsync(response, httpContext);
             }
             catch (Exception e)

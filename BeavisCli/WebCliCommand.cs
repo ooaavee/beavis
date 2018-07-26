@@ -1,4 +1,5 @@
 ﻿using BeavisCli.Internal;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
@@ -55,7 +56,8 @@ namespace BeavisCli
             context.Processor.Invoke = () => invoke().Result;
 
             // create logger
-            _logger = context.GetLoggerFactory().CreateLogger<WebCliCommand>();
+            ILoggerFactory loggerFactory = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
+            _logger = loggerFactory.CreateLogger<WebCliCommand>();
 
             // get arguments for the command
             string[] args = context.Request.GetCommandArgs();
@@ -121,7 +123,8 @@ namespace BeavisCli
             }
 
             _logger?.LogDebug($"Exiting '{GetType().FullName}' with unauthorized.");
-            context.GetUnauthorizedHandler().OnUnauthorizedAsync(this, context);
+            IUnauthorizedHandler handler = context.HttpContext.RequestServices.GetRequiredService<IUnauthorizedHandler>();
+            handler.OnUnauthorizedAsync(this, context);
             return Task.FromResult(ExitStatusCode);
         }
 
@@ -257,7 +260,7 @@ namespace BeavisCli
                 WebCliCommandInfo value;
                 if (!ResolvedInfo.TryGetValue(GetType(), out value))
                 {
-                    if ((value = WebCliCommandInfo.Parse(GetType())) != null)
+                    if ((value = WebCliCommandInfo.FromType(GetType())) != null)
                     {
                         ResolvedInfo.TryAdd(GetType(), value);
                     }

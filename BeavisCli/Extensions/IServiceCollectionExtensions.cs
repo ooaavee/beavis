@@ -1,7 +1,7 @@
 ﻿using System;
 using BeavisCli;
+using BeavisCli.DefaultServices;
 using BeavisCli.Internal;
-using BeavisCli.Internal.DefaultServices;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -26,10 +26,10 @@ namespace Microsoft.Extensions.DependencyInjection
                 ? ServiceDescriptor.Singleton(typeof(IUnauthorizedHandler), typeof(DefaultUnauthorizedHandler))
                 : ServiceDescriptor.Singleton(typeof(IUnauthorizedHandler), options.UnauthorizedHandlerType));
 
-            // ITerminalInitializer
-            services.Add(options.TerminalInitializerType == null
-                ? ServiceDescriptor.Singleton(typeof(ITerminalInitializer), typeof(DefaultTerminalInitializer))
-                : ServiceDescriptor.Singleton(typeof(ITerminalInitializer), options.TerminalInitializerType));
+            // ITerminalBehaviour
+            services.Add(options.TerminalBehaviourType == null
+                ? ServiceDescriptor.Singleton(typeof(ITerminalBehaviour), typeof(DefaultTerminalBehaviour))
+                : ServiceDescriptor.Singleton(typeof(ITerminalBehaviour), options.TerminalBehaviourType));
 
             // IFileStorage
             services.Add(options.FileStorageType == null
@@ -73,7 +73,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void Validate<TWebCliCommand>()where TWebCliCommand : WebCliCommand
         {
-            WebCliCommandInfo info = WebCliCommandInfo.Parse(typeof(TWebCliCommand));
+            WebCliCommandInfo info = WebCliCommandInfo.FromType(typeof(TWebCliCommand));
 
             if (info == null)
             {

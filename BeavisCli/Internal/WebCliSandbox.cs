@@ -1,6 +1,7 @@
-﻿using BeavisCli.Internal.DefaultServices;
+﻿using BeavisCli.DefaultServices;
 using BeavisCli.Microsoft.Extensions.CommandLineUtils;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -130,7 +131,7 @@ namespace BeavisCli.Internal
 
         public IEnumerable<WebCliCommand> GetCommands(HttpContext httpContext)
         {
-            foreach (WebCliCommand cmd in httpContext.GetWebCliCommands())
+            foreach (WebCliCommand cmd in httpContext.RequestServices.GetServices<WebCliCommand>())
             {
                 if (cmd.Info != null)
                 {

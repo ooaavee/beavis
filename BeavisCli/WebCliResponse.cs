@@ -1,6 +1,7 @@
 ﻿using BeavisCli.Internal;
 using BeavisCli.JavaScriptStatements;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -190,10 +191,10 @@ namespace BeavisCli
             // this will be invoked just before we are sending the response
             Sending += (sender, args) =>
             {
-                // push job
-                string key = _httpContext.GetJobPool().Push(job);
-
-                // add a JavaScript statement that begins the job on the client-side
+                // push a new job into the pool and add a JavaScript statement that
+                // begins the job on the client-side
+                JobPool pool = _httpContext.RequestServices.GetRequiredService<JobPool>();
+                string key = pool.Push(job);
                 IJavaScriptStatement js = new BeginJob(key);
                 AddJavaScript(js);
             };
@@ -204,13 +205,13 @@ namespace BeavisCli
         /// </summary>
         internal void OnSending()
         {
-            EventHandler evt = Sending;
+            EventHandler handler = Sending;
 
-            if (evt != null)
+            if (handler != null)
             {
-                lock (evt)
+                lock (handler)
                 {
-                    evt(this, EventArgs.Empty);
+                    handler(this, EventArgs.Empty);
                 }
             }
         }

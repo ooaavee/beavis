@@ -3,10 +3,11 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BeavisCli.Internal;
 
-namespace BeavisCli.Internal.DefaultServices
+namespace BeavisCli.DefaultServices
 {
-    internal class DefaultFileStorage : IFileStorage
+    public class DefaultFileStorage : IFileStorage
     {
         private readonly ILogger<DefaultFileStorage> _logger;
 
@@ -17,7 +18,7 @@ namespace BeavisCli.Internal.DefaultServices
             _logger = loggerFactory.CreateLogger<DefaultFileStorage>();
         }
 
-        public Task<FileId> StoreAsync(FileContent file)
+        public virtual Task<FileId> StoreAsync(FileContent file)
         {
             if (file == null)
             {
@@ -45,7 +46,7 @@ namespace BeavisCli.Internal.DefaultServices
             return Task.FromResult(new FileId(id));
         }
 
-        public Task<FileContent> RemoveAsync(FileId id)
+        public virtual Task<FileContent> RemoveAsync(FileId id)
         {
             FileContent file = null;
 
@@ -77,7 +78,7 @@ namespace BeavisCli.Internal.DefaultServices
             return Task.FromResult(file);
         }
 
-        public Task<int> RemoveAllAsync()
+        public virtual Task<int> RemoveAllAsync()
         {
             lock (_files)
             {
@@ -87,7 +88,7 @@ namespace BeavisCli.Internal.DefaultServices
             }
         }
 
-        public Task<IEnumerable<Tuple<FileId, FileContent>>> GetAllAsync()
+        public virtual Task<IEnumerable<Tuple<FileId, FileContent>>> GetAllAsync()
         {
             var result = new List<Tuple<FileId, FileContent>>();
 
@@ -100,7 +101,7 @@ namespace BeavisCli.Internal.DefaultServices
             return Task.FromResult((IEnumerable<Tuple<FileId, FileContent>>)result);
         }
 
-        public Task<FileContent> GetAsync(FileId id)
+        public virtual Task<FileContent> GetAsync(FileId id)
         {
             FileContent file = null;
 

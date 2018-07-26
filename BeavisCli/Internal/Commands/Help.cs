@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,12 +9,12 @@ namespace BeavisCli.Internal.Commands
     internal class Help : WebCliCommand
     {
         private readonly WebCliSandbox _sandbox;
-        private readonly WebCliOptions _options;
+        private readonly ITerminalBehaviour _behaviour;
 
-        public Help(WebCliSandbox sandbox, IOptions<WebCliOptions> options)
+        public Help(WebCliSandbox sandbox, ITerminalBehaviour behaviour)
         {
             _sandbox = sandbox;
-            _options = options.Value;
+            _behaviour = behaviour;
         }
 
         public override async Task ExecuteAsync(WebCliContext context)
@@ -28,35 +27,16 @@ namespace BeavisCli.Internal.Commands
 
                 foreach (WebCliCommand cmd in _sandbox.GetCommands(context.HttpContext))
                 {
-                    if (cmd.GetType() == GetType())
+                    if (_behaviour.IsVisibleForHelp(cmd, context))
                     {
-                        // ignore myself 
-                        continue;
-                    }
-
-                    if (cmd.IsBuiltIn)
-                    {
-                        BuiltInCommandDefinition definition = _options.BuiltInCommands[cmd.Info.Name];
-                        if (!definition.IsVisibleForHelp)
+                        if (cmd.IsBuiltIn)
                         {
-                            // ignore non-browsable commands
-                            continue;
+                            defaults.Add(cmd);
                         }
-                    }
-
-                    if (!cmd.IsVisibleForHelp(context))
-                    {
-                        // ignore non-browsable commands
-                        continue;
-                    }
-
-                    if (cmd.IsBuiltIn)
-                    {
-                        defaults.Add(cmd);
-                    }
-                    else
-                    {
-                        externals.Add(cmd);
+                        else
+                        {
+                            externals.Add(cmd);
+                        }
                     }
                 }
              

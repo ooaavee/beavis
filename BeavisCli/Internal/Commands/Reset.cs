@@ -12,6 +12,7 @@ namespace BeavisCli.Internal.Commands
             {
                 context.Response.AddJavaScript(new ClearTerminal());
                 context.Response.AddJavaScript(new ClearTerminalHistory());
+                context.Response.AddJavaScript(new Reload(true));
 
                 return Exit(context);
             }, context);
