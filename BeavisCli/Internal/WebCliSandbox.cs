@@ -52,7 +52,7 @@ namespace BeavisCli.Internal
                 CommandLineApplication processor = new CommandLineApplication
                 {
                     Name = cmd.Info.Name,
-                    FullName = cmd.Info.Name,
+                    FullName = cmd.Info.FullName,
                     Description = cmd.Info.Description,
                     Out = outWriter,
                     Error = errorWriter
@@ -66,12 +66,13 @@ namespace BeavisCli.Internal
 
                 if (authorized)
                 {
+                    // execute command
                     await cmd.ExecuteAsync(context);
                 }
                 else
                 {
-                    // handle unauthorized attempts
-                    await _unauthorized.OnUnauthorizedAsync(context);
+                    // handle unauthorized execution attempts
+                    await _unauthorized.OnUnauthorizedAsync(cmd, context);
                 }               
             }
             catch (WebCliSandboxException e)
@@ -131,7 +132,7 @@ namespace BeavisCli.Internal
         {
             foreach (WebCliCommand cmd in httpContext.GetWebCliCommands())
             {
-                if (cmd.IsValid)
+                if (cmd.Info != null)
                 {
                     yield return cmd;
                 }

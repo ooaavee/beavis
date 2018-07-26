@@ -2,7 +2,7 @@
 
 namespace BeavisCli.Internal.Commands
 {
-    [WebCliCommand("upload", "Uploads a file.")]
+    [WebCliCommand("upload", "A tool for uploading files")]
     internal class Upload : WebCliCommand
     {
         public override async Task ExecuteAsync(WebCliContext context)

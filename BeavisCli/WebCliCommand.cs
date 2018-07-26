@@ -9,11 +9,6 @@ namespace BeavisCli
 {
     public abstract class WebCliCommand
     {
-        private static readonly Assembly ThisAssembly = typeof(WebCliCommand).Assembly;
-
-        // we can safely use a static dictionary cache here, because these values doesn't change during runtime
-        private static readonly ConcurrentDictionary<Type, WebCliCommandInfo> InfoCache = new ConcurrentDictionary<Type, WebCliCommandInfo>();
-
         private const int ExitStatusCode = 2;
 
         private ILogger<WebCliCommand> _logger;
@@ -30,6 +25,14 @@ namespace BeavisCli
         /// Checks if the command is visible for 'help'.
         /// </summary>
         public virtual bool IsVisibleForHelp(WebCliContext context)
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Checks if the tab completion is enabled for this command.
+        /// </summary>
+        public virtual bool IsTabCompletionEnabled()
         {
             return true;
         }
@@ -75,7 +78,6 @@ namespace BeavisCli
             }
 
             _logger?.LogDebug($"Exiting '{GetType().FullName}'.");
-
             return Task.FromResult(ExitStatusCode);
         }
 
@@ -85,10 +87,8 @@ namespace BeavisCli
             {
                 throw new ArgumentNullException(nameof(context));
             }
-
-            int result = Exit(context).Result;
-
-            return await Task.FromResult(result);
+     
+            return await Task.FromResult(Exit(context).Result);
         }
 
         protected Task<int> ExitWithHelp(WebCliContext context)
@@ -98,11 +98,8 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(context));
             }
 
-            _logger?.LogDebug($"Exiting '{GetType().FullName}' with help.");
-
-            
+            _logger?.LogDebug($"Exiting '{GetType().FullName}' with help.");            
             context.Processor.ShowHelp(Info.Name);
-
             return Task.FromResult(ExitStatusCode);
         }
 
@@ -113,9 +110,7 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(context));
             }
 
-            int result = ExitWithHelp(context).Result;
-
-            return await Task.FromResult(result);
+            return await Task.FromResult(ExitWithHelp(context).Result);
         }
 
         protected Task<int> Unauthorized(WebCliContext context)
@@ -126,9 +121,7 @@ namespace BeavisCli
             }
 
             _logger?.LogDebug($"Exiting '{GetType().FullName}' with unauthorized.");
-
-            context.GetUnauthorizedHandler().OnUnauthorizedAsync(context);
-
+            context.GetUnauthorizedHandler().OnUnauthorizedAsync(this, context);
             return Task.FromResult(ExitStatusCode);
         }
 
@@ -139,9 +132,7 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(context));
             }
 
-            int result = Unauthorized(context).Result;
-
-            return await Task.FromResult(result);
+            return await Task.FromResult(Unauthorized(context).Result);
         }
 
         protected Task<int> Error(WebCliContext context, string text)
@@ -157,9 +148,7 @@ namespace BeavisCli
             }
 
             _logger?.LogDebug($"Exiting '{GetType().FullName}' with error '{text}'.");
-
             context.Response.WriteError(text);
-
             return Task.FromResult(ExitStatusCode);
         }
 
@@ -175,9 +164,7 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(text));
             }
 
-            int result = Error(context, text).Result;
-
-            return await Task.FromResult(result);
+            return await Task.FromResult(Error(context, text).Result);
         }
 
         protected Task<int> Error(WebCliContext context, string text, Exception e)
@@ -198,10 +185,8 @@ namespace BeavisCli
             }
 
             _logger?.LogDebug($"Exiting '{GetType().FullName}' with error '{text}' and exception '{e}'.");
-
             context.Response.WriteError(text);
             context.Response.WriteError(e, true);
-
             return Task.FromResult(ExitStatusCode);
         }
 
@@ -222,9 +207,7 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(e));
             }
 
-            int result = Error(context, text, e).Result;
-
-            return await Task.FromResult(result);
+            return await Task.FromResult(Error(context, text, e).Result);
         }
 
         protected Task<int> Error(WebCliContext context, Exception e)
@@ -241,7 +224,6 @@ namespace BeavisCli
 
             _logger?.LogDebug($"Exiting '{GetType().FullName}' with exception '{e}'.");
             context.Response.WriteError(e, true);
-
             return Task.FromResult(ExitStatusCode);
         }
 
@@ -257,29 +239,36 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(e));
             }
 
-            int result = Error(context, e).Result;
-
-            return await Task.FromResult(result);
+            return await Task.FromResult(Error(context, e).Result);
         }
 
-        internal WebCliCommandInfo Info => GetInfo();
+        private static readonly Assembly ThisAssembly = typeof(WebCliCommand).Assembly;
 
-        internal bool IsValid => GetInfo() != null;
+        // we can safely use a static dictionary cache here, because these values doesn't change during runtime
+        private static readonly ConcurrentDictionary<Type, WebCliCommandInfo> ResolvedInfo = new ConcurrentDictionary<Type, WebCliCommandInfo>();
 
-        internal bool IsBuiltIn => GetType().Assembly.Equals(ThisAssembly);
-
-        private WebCliCommandInfo GetInfo()
+        /// <summary>
+        /// Gets information about this command.
+        /// </summary>
+        internal WebCliCommandInfo Info
         {
-            Type type = GetType();
-            if (!InfoCache.TryGetValue(type, out WebCliCommandInfo info))
+            get
             {
-                info = WebCliCommandInfo.Parse(type);
-                if (info != null)
+                WebCliCommandInfo value;
+                if (!ResolvedInfo.TryGetValue(GetType(), out value))
                 {
-                    InfoCache.TryAdd(type, info);
+                    if ((value = WebCliCommandInfo.Parse(GetType())) != null)
+                    {
+                        ResolvedInfo.TryAdd(GetType(), value);
+                    }
                 }
+                return value;
             }
-            return info;
         }
+
+        /// <summary>
+        /// Checks if this built-in command.
+        /// </summary>
+        internal bool IsBuiltIn => GetType().Assembly.Equals(ThisAssembly);
     }
 }

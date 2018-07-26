@@ -6,7 +6,7 @@ using BeavisCli.JavaScriptStatements;
 
 namespace BeavisCli.Internal.Commands
 {
-    [WebCliCommand("filestorage", "Manage file storage.")]
+    [WebCliCommand("filestorage", "A tool for managing files in the file storage")]
     internal class FileStorage : WebCliCommand
     {
         private readonly IFileStorage _files;

@@ -2,7 +2,7 @@
 {
     internal class DefaultAuthorizationHandler : IAuthorizationHandler
     {
-        public bool IsAuthorized(WebCliCommand command, WebCliContext context)
+        public bool IsAuthorized(WebCliCommand cmd, WebCliContext context)
         {
             // By default every command execution is authorized. If you want some custom 
             // authorization logic, you should

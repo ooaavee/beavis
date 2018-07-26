@@ -26,17 +26,17 @@ namespace BeavisCli
 
         public Type AuthorizationHandlerType { get; set; }
 
-        public IReadOnlyDictionary<string, BuiltInCommandBehaviour> BuiltInCommands { get; }
+        public IReadOnlyDictionary<string, BuiltInCommandDefinition> BuiltInCommands { get; }
 
-        private static IReadOnlyDictionary<string, BuiltInCommandBehaviour> GetBuiltInCommands()
+        private static IReadOnlyDictionary<string, BuiltInCommandDefinition> GetBuiltInCommands()
         {
-            var values = new Dictionary<string, BuiltInCommandBehaviour>();
+            var values = new Dictionary<string, BuiltInCommandDefinition>();
 
             void Init<TWebCliCommand>() where TWebCliCommand : WebCliCommand
             {
-                WebCliCommandInfo info = WebCliCommandInfo.Parse<TWebCliCommand>();
-
-                values[info.Name] = new BuiltInCommandBehaviour { Type = typeof(TWebCliCommand) };
+                var info = WebCliCommandInfo.Parse(typeof(TWebCliCommand));
+                var definition = new BuiltInCommandDefinition {Type = typeof(TWebCliCommand)};
+                values[info.Name] = definition;
             }
 
             Init<Help>();

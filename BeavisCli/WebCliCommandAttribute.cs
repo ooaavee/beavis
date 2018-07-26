@@ -8,7 +8,7 @@ namespace BeavisCli
         public WebCliCommandAttribute(string name, string description)
         {
             Name = name;
-            Description = description;
+            FullName = description;
         }
 
         /// <summary>
@@ -17,8 +17,8 @@ namespace BeavisCli
         public string Name { get; }
 
         /// <summary>
-        /// Command description
+        /// Command full name
         /// </summary>
-        public string Description { get; }
+        public string FullName { get; }
     }
 }

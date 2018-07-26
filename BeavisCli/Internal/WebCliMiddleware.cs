@@ -5,8 +5,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,79 +42,82 @@ namespace BeavisCli.Internal
             _options = options.Value;
         }
 
-        public async Task InvokeAsync(HttpContext httpContext)
+        public async Task InvokeAsync(HttpContext context)
         {
-            HttpRequest request = httpContext.Request;
+            HttpRequest request = context.Request;
 
-            bool IsWebCliPath()
+            if (!IsPotentialMatch(request))
             {
-                return request.Path.StartsWithSegments(_options.Path, StringComparison.InvariantCultureIgnoreCase) ||
-                       request.Path.StartsWithSegments(DefaultPath, StringComparison.InvariantCultureIgnoreCase);
+                await _next(context);
+                return;
             }
 
-            bool IsRequest(string path, string method)
+            _logger.LogInformation($"Started to process a request for a path '{request.Path.ToString()}'.");
+
+            // terminal HTML
+            if (Match(_options.Path, HttpMethods.Get, request))
             {
-                return request.Method == method &&
-                       request.Path.Equals(path, StringComparison.InvariantCultureIgnoreCase);
+                await HandleGetTerminal(context);
+                return;
             }
 
-            if (IsWebCliPath())
+            // terminal CSS
+            if (Match($"{DefaultPath}/content/css", HttpMethods.Get, request))
             {
-                _logger.LogInformation($"Started to process a request for a path '{httpContext.Request.Path.ToString()}'.");
-
-                // terminal HTML
-                if (IsRequest(_options.Path, HttpMethods.Get))
-                {
-                    await HandleGetTerminal(httpContext);
-                    return;
-                }
-
-                // terminal CSS
-                if (IsRequest($"{DefaultPath}/content/css", HttpMethods.Get))
-                {
-                    await HandleGetTerminalCss(httpContext);
-                    return;
-                }
-
-                // terminal JS
-                if (IsRequest($"{DefaultPath}/content/js", HttpMethods.Get))
-                {
-                    await HandleGetTerminalJs(httpContext);
-                    return;
-                }
-
-                // initialize terminal
-                if (IsRequest($"{DefaultPath}/api/initialize", HttpMethods.Post))
-                {
-                    await HandleInitializeTerminal(httpContext);
-                    return;
-                }
-
-                // invoke job
-                if (IsRequest($"{DefaultPath}/api/job", HttpMethods.Post))
-                {
-                    await HandleInvokeJob(httpContext);
-                    return;
-                }
-
-                // invoke command
-                if (IsRequest($"{DefaultPath}/api/request", HttpMethods.Post))
-                {
-                    await HandleInvokeCommand(httpContext);
-                    return;
-                }
-
-                // file upload
-                if (IsRequest($"{DefaultPath}/api/upload", HttpMethods.Post))
-                {
-                    await HandleFileUpload(httpContext);
-                    return;
-                }
-
-                _logger.LogInformation($"Received a request for a path '{httpContext.Request.Path.ToString()}', but unable to find a handler for it.");
+                await HandleGetTerminalCss(context);
+                return;
             }
 
-            await _next(httpContext);
+            // terminal JS
+            if (Match($"{DefaultPath}/content/js", HttpMethods.Get, request))
+            {
+                await HandleGetTerminalJs(context);
+                return;
+            }
+
+            // initialize terminal
+            if (Match($"{DefaultPath}/api/initialize", HttpMethods.Post, request))
+            {
+                await HandleInitializeTerminal(context);
+                return;
+            }
+
+            // invoke job
+            if (Match($"{DefaultPath}/api/job", HttpMethods.Post, request))
+            {
+                await HandleInvokeJob(context);
+                return;
+            }
+
+            // invoke command
+            if (Match($"{DefaultPath}/api/request", HttpMethods.Post, request))
+            {
+                await HandleInvokeCommand(context);
+                return;
+            }
+
+            // file upload
+            if (Match($"{DefaultPath}/api/upload", HttpMethods.Post, request))
+            {
+                await HandleFileUpload(context);
+                return;
+            }
+
+            _logger.LogInformation($"Received a request for path '{request.Path.ToString()}', but unable to find a handler for it.");
+
+            await _next(context);
+        }
+
+        private bool IsPotentialMatch(HttpRequest request)
+        {
+            return request.Path.StartsWithSegments(_options.Path, StringComparison.InvariantCultureIgnoreCase) ||
+                   request.Path.StartsWithSegments(DefaultPath, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        private bool Match(string path, string method, HttpRequest request)
+        {
+            return request.Method == method &&
+                   request.Path.Equals(path, StringComparison.InvariantCultureIgnoreCase);
         }
 
         private async Task HandleGetTerminal(HttpContext httpContext)
@@ -163,12 +166,30 @@ namespace BeavisCli.Internal
                 WebCliResponse response = new WebCliResponse(httpContext);
 
                 // prepare tab completion
-                response.AddJavaScript(new SetTerminalCompletionDictionary(_sandbox.GetCommands(httpContext).Select(cmd => cmd.Info.Name)));
+                var names = new List<string>();
+                foreach (WebCliCommand cmd in _sandbox.GetCommands(httpContext))
+                {
+                    bool enabled;
+                    if (cmd.IsBuiltIn)
+                    {
+                        BuiltInCommandDefinition def = _options.BuiltInCommands[cmd.Info.Name];
+                        enabled = def.IsEnabled && def.IsTabCompletionEnabled;
+                    }
+                    else
+                    {
+                        enabled = cmd.IsTabCompletionEnabled();
+                    }
+                    if (enabled)
+                    {
+                        names.Add(cmd.Info.Name);
+                    }
+                }
+                response.AddJavaScript(new SetTerminalCompletionDictionary(names));
 
                 // set window variables
-                WebCliCommandInfo uploadInfo = WebCliCommandInfo.Parse<Upload>();
-                BuiltInCommandBehaviour uploadBehaviour = _options.BuiltInCommands[uploadInfo.Name];               
-                response.AddJavaScript(new SetUploadEnabled(uploadBehaviour.Enabled));
+                WebCliCommandInfo info = WebCliCommandInfo.Parse(typeof(Upload));
+                BuiltInCommandDefinition definition = _options.BuiltInCommands[info.Name];
+                response.AddJavaScript(new SetUploadEnabled(definition.IsEnabled));
 
                 if (_options.UseTerminalInitializer)
                 {

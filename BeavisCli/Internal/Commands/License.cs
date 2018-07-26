@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Internal.Commands
 {
-    [WebCliCommand("license", "Displays license information.")]
+    [WebCliCommand("license", "License information")]
     internal class License : WebCliCommand
     {
         public override async Task ExecuteAsync(WebCliContext context)

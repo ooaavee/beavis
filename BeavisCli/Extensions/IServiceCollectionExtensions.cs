@@ -42,11 +42,11 @@ namespace Microsoft.Extensions.DependencyInjection
                 : ServiceDescriptor.Singleton(typeof(IAuthorizationHandler), options.AuthorizationHandlerType));
 
             // register default commands
-            foreach (BuiltInCommandBehaviour behaviour in options.BuiltInCommands.Values)
+            foreach (BuiltInCommandDefinition definition in options.BuiltInCommands.Values)
             {
-                if (behaviour.Enabled)
+                if (definition.IsEnabled)
                 {
-                    services.Add(ServiceDescriptor.Singleton(typeof(WebCliCommand), behaviour.Type));
+                    services.Add(ServiceDescriptor.Singleton(typeof(WebCliCommand), definition.Type));
                 }
             }
 
@@ -82,12 +82,12 @@ namespace Microsoft.Extensions.DependencyInjection
 
             if (string.IsNullOrEmpty(info.Name))
             {
-                throw new InvalidOperationException($"{nameof(WebCliCommandAttribute)}.{nameof(WebCliCommandInfo.Name)} is mandatory.");
+                throw new InvalidOperationException($"{nameof(WebCliCommandAttribute)}.{nameof(WebCliCommandAttribute.Name)} is mandatory.");
             }
 
-            if (string.IsNullOrEmpty(info.Description))
+            if (string.IsNullOrEmpty(info.FullName))
             {
-                throw new InvalidOperationException($"{nameof(WebCliCommandAttribute)}.{nameof(WebCliCommandInfo.Description)} is mandatory.");
+                throw new InvalidOperationException($"{nameof(WebCliCommandAttribute)}.{nameof(WebCliCommandAttribute.FullName)} is mandatory.");
             }
         }
     }

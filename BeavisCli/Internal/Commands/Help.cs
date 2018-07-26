@@ -36,8 +36,8 @@ namespace BeavisCli.Internal.Commands
 
                     if (cmd.IsBuiltIn)
                     {
-                        BuiltInCommandBehaviour behaviour = _options.BuiltInCommands[cmd.Info.Name];
-                        if (!behaviour.IsVisibleForHelp)
+                        BuiltInCommandDefinition definition = _options.BuiltInCommands[cmd.Info.Name];
+                        if (!definition.IsVisibleForHelp)
                         {
                             // ignore non-browsable commands
                             continue;
@@ -64,7 +64,7 @@ namespace BeavisCli.Internal.Commands
 
                 foreach (WebCliCommand cmd in defaults.Concat(externals))
                 {
-                    lines.Add(new Tuple<string, string>(cmd.Info.Name, cmd.Info.Description));
+                    lines.Add(new Tuple<string, string>(cmd.Info.Name, cmd.Info.FullName));
                 }
 
                 context.Response.WriteInformation("Default commands:");
