@@ -14,7 +14,7 @@ body {
     padding-left: 10px;
     padding-top: 10px;
     min-height: calc(100vh);
-    max-height: calc(100vh);
+    max-height: calc(100vh);  
 }
 
 #uploader {
