@@ -1,5 +1,8 @@
 ﻿namespace BeavisCli.JavaScriptStatements
 {
+    /// <summary>
+    /// This statement enables or disables the upload command.
+    /// </summary>
     public sealed class SetUploadEnabled : IJavaScriptStatement
     {
         private readonly bool _enabled;

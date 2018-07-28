@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using BeavisCli.Commands;
 using BeavisCli.Internal;
-using BeavisCli.Internal.Commands;
 
 namespace BeavisCli
 {
@@ -24,16 +24,16 @@ namespace BeavisCli
 
         public Type AuthorizationHandlerType { get; set; }
 
-        public IReadOnlyDictionary<string, BuiltInCommandDefinition> BuiltInCommands { get; }
+        public IReadOnlyDictionary<string, CommandDefinition> BuiltInCommands { get; }
 
-        private static IReadOnlyDictionary<string, BuiltInCommandDefinition> GetBuiltInCommands()
+        private static IReadOnlyDictionary<string, CommandDefinition> GetBuiltInCommands()
         {
-            var values = new Dictionary<string, BuiltInCommandDefinition>();
+            var values = new Dictionary<string, CommandDefinition>();
 
             void Init<TWebCliCommand>() where TWebCliCommand : WebCliCommand
             {
                 var info = WebCliCommandInfo.FromType(typeof(TWebCliCommand));
-                var definition = new BuiltInCommandDefinition {Type = typeof(TWebCliCommand)};
+                var definition = new CommandDefinition {Type = typeof(TWebCliCommand)};
                 values[info.Name] = definition;
             }
 

@@ -2,10 +2,10 @@
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace BeavisCli.Internal.Commands
+namespace BeavisCli.Commands
 {
     [WebCliCommand("license", "License information")]
-    internal class License : WebCliCommand
+    public class License : WebCliCommand
     {
         public override async Task ExecuteAsync(WebCliContext context)
         {
@@ -15,7 +15,7 @@ namespace BeavisCli.Internal.Commands
 
                 string text;
 
-                using (Stream stream = Assembly.GetAssembly(typeof(WebCliRenderer)).GetManifestResourceStream(licenseFileEmbeddedResource))
+                using (Stream stream = Assembly.GetAssembly(typeof(License)).GetManifestResourceStream(licenseFileEmbeddedResource))
                 {
                     using (StreamReader reader = new StreamReader(stream))
                     {

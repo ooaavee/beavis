@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BeavisCli.Internal.Commands
+namespace BeavisCli.Commands
 {
     [WebCliCommand("help", "Displays help.")]
-    internal class Help : WebCliCommand
+    public class Help : WebCliCommand
     {
-        private readonly WebCliSandbox _sandbox;
+        private readonly ICommandProvider _commands;
         private readonly ITerminalBehaviour _behaviour;
 
-        public Help(WebCliSandbox sandbox, ITerminalBehaviour behaviour)
+        public Help(ICommandProvider commands, ITerminalBehaviour behaviour)
         {
-            _sandbox = sandbox;
+            _commands = commands;
             _behaviour = behaviour;
         }
 
@@ -25,7 +25,7 @@ namespace BeavisCli.Internal.Commands
 
                 var externals = new List<WebCliCommand>();
 
-                foreach (WebCliCommand cmd in _sandbox.GetCommands(context.HttpContext))
+                foreach (WebCliCommand cmd in _commands.GetCommands(context.HttpContext))
                 {
                     if (_behaviour.IsVisibleForHelp(cmd, context))
                     {

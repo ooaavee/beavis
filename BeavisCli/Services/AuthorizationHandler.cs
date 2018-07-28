@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace BeavisCli.DefaultServices
+namespace BeavisCli.Services
 {
-    public class DefaultAuthorizationHandler : IAuthorizationHandler
+    public class AuthorizationHandler : IAuthorizationHandler
     {
         public virtual bool IsAuthorized(WebCliCommand cmd, WebCliContext context)
         {

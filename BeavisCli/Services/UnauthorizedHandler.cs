@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace BeavisCli.DefaultServices
+namespace BeavisCli.Services
 {
-    public class DefaultUnauthorizedHandler : IUnauthorizedHandler
+    public class UnauthorizedHandler : IUnauthorizedHandler
     {
         public virtual Task OnUnauthorizedAsync(WebCliCommand cmd, WebCliContext context)
         {

@@ -1,24 +1,24 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using BeavisCli.Internal;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BeavisCli.Internal;
 
-namespace BeavisCli.DefaultServices
+namespace BeavisCli.Services
 {
-    public class DefaultFileStorage : IFileStorage
+    public class FileStorage : IFileStorage
     {
-        private readonly ILogger<DefaultFileStorage> _logger;
+        private readonly ILogger<FileStorage> _logger;
 
         private readonly ConcurrentDictionary<string, FileContent> _files = new ConcurrentDictionary<string, FileContent>();
 
-        public DefaultFileStorage(ILoggerFactory loggerFactory)
+        public FileStorage(ILoggerFactory loggerFactory)
         {
-            _logger = loggerFactory.CreateLogger<DefaultFileStorage>();
+            _logger = loggerFactory.CreateLogger<FileStorage>();
         }
 
-        public virtual Task<FileId> StoreAsync(FileContent file)
+        public virtual Task<string> StoreAsync(FileContent file)
         {
             if (file == null)
             {
@@ -43,15 +43,15 @@ namespace BeavisCli.DefaultServices
             }
 
             // return file id
-            return Task.FromResult(new FileId(id));
+            return Task.FromResult(id);
         }
 
-        public virtual Task<FileContent> RemoveAsync(FileId id)
+        public virtual Task<FileContent> RemoveAsync(string id)
         {
             FileContent file = null;
 
             // try to find the real id
-            string real = KeyProvider.Find(id.Value, () => _files.Keys);
+            string real = KeyProvider.Find(id, () => _files.Keys);
 
             if (real != null)
             {
@@ -88,25 +88,25 @@ namespace BeavisCli.DefaultServices
             }
         }
 
-        public virtual Task<IEnumerable<Tuple<FileId, FileContent>>> GetAllAsync()
+        public virtual Task<IEnumerable<Tuple<string, FileContent>>> GetAllAsync()
         {
-            var result = new List<Tuple<FileId, FileContent>>();
+            var result = new List<Tuple<string, FileContent>>();
 
             foreach (KeyValuePair<string, FileContent> item in _files)
             {
-                var t = new Tuple<FileId, FileContent>(new FileId(item.Key), item.Value);
+                var t = new Tuple<string, FileContent>(item.Key, item.Value);
                 result.Add(t);
             }
 
-            return Task.FromResult((IEnumerable<Tuple<FileId, FileContent>>)result);
+            return Task.FromResult((IEnumerable<Tuple<string, FileContent>>)result);
         }
 
-        public virtual Task<FileContent> GetAsync(FileId id)
+        public virtual Task<FileContent> GetAsync(string id)
         {
             FileContent file = null;
 
             // try to find the real id
-            string real = KeyProvider.Find(id.Value, () => _files.Keys);
+            string real = KeyProvider.Find(id, () => _files.Keys);
 
             if (real != null)
             {

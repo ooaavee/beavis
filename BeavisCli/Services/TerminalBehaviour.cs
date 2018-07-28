@@ -1,5 +1,4 @@
 ﻿using BeavisCli.Internal;
-using BeavisCli.Internal.Commands;
 using BeavisCli.JavaScriptStatements;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,10 +6,11 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using BeavisCli.Commands;
 
-namespace BeavisCli.DefaultServices
+namespace BeavisCli.Services
 {
-    public class DefaultTerminalBehaviour : ITerminalBehaviour
+    public class TerminalBehaviour : ITerminalBehaviour
     {
         public virtual void OnInitialize(HttpContext context, WebCliResponse response)
         {
@@ -57,7 +57,7 @@ namespace BeavisCli.DefaultServices
 
             if (cmd.IsBuiltIn)
             {
-                BuiltInCommandDefinition definition = options.BuiltInCommands[cmd.Info.Name];
+                CommandDefinition definition = options.BuiltInCommands[cmd.Info.Name];
                 if (!definition.IsVisibleForHelp)
                 {
                     // ignore non-browsable commands
@@ -100,7 +100,7 @@ namespace BeavisCli.DefaultServices
                 throw new ArgumentNullException(nameof(context));
             }
 
-            yield return new SetTerminalCompletionDictionary(GetTabCompletionCommands(context));
+            yield return new SetTabCompletionCommands(GetTabCompletionCommands(context));
             yield return new SetUploadEnabled(IsUploadEnabled(context));
         }
 
@@ -111,9 +111,9 @@ namespace BeavisCli.DefaultServices
                 throw new ArgumentNullException(nameof(context));
             }
 
-            WebCliSandbox sandbox = context.RequestServices.GetRequiredService<WebCliSandbox>();
+            ICommandProvider commands = context.RequestServices.GetRequiredService<ICommandProvider>();
 
-            foreach (WebCliCommand cmd in sandbox.GetCommands(context))
+            foreach (WebCliCommand cmd in commands.GetCommands(context))
             {
                 if (IsTabCompletionEnabled(cmd, context))
                 {
@@ -140,7 +140,7 @@ namespace BeavisCli.DefaultServices
 
             if (cmd.IsBuiltIn)
             {
-                BuiltInCommandDefinition definition = options.BuiltInCommands[cmd.Info.Name];
+                CommandDefinition definition = options.BuiltInCommands[cmd.Info.Name];
 
                 if (definition.IsEnabled && definition.IsTabCompletionEnabled)
                 {
@@ -167,7 +167,7 @@ namespace BeavisCli.DefaultServices
 
             WebCliOptions options = context.RequestServices.GetRequiredService<IOptions<WebCliOptions>>().Value;
             WebCliCommandInfo info = WebCliCommandInfo.FromType(typeof(Upload));
-            BuiltInCommandDefinition definition = options.BuiltInCommands[info.Name];
+            CommandDefinition definition = options.BuiltInCommands[info.Name];
             return definition.IsEnabled;
         }
     }

@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BeavisCli.Internal;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
-namespace BeavisCli.Internal
+namespace BeavisCli.Services
 {
-    internal class JobPool
+    public class JobPool : IJobPool
     {
         private readonly ConcurrentDictionary<string, IJob> _jobs = new ConcurrentDictionary<string, IJob>();
         private readonly ILogger<JobPool> _logger;

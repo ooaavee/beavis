@@ -10,6 +10,11 @@ namespace BeavisCli
 {
     public abstract class WebCliCommand
     {
+        private static readonly Assembly ThisAssembly = typeof(WebCliCommand).Assembly;
+
+        // we can safely use a static dictionary cache here, because these values doesn't change during runtime
+        private static readonly ConcurrentDictionary<Type, WebCliCommandInfo> ResolvedInfo = new ConcurrentDictionary<Type, WebCliCommandInfo>();
+
         private const int ExitStatusCode = 2;
 
         private ILogger<WebCliCommand> _logger;
@@ -245,20 +250,14 @@ namespace BeavisCli
             return await Task.FromResult(Error(context, e).Result);
         }
 
-        private static readonly Assembly ThisAssembly = typeof(WebCliCommand).Assembly;
-
-        // we can safely use a static dictionary cache here, because these values doesn't change during runtime
-        private static readonly ConcurrentDictionary<Type, WebCliCommandInfo> ResolvedInfo = new ConcurrentDictionary<Type, WebCliCommandInfo>();
-
         /// <summary>
         /// Gets information about this command.
         /// </summary>
-        internal WebCliCommandInfo Info
+        public WebCliCommandInfo Info
         {
             get
             {
-                WebCliCommandInfo value;
-                if (!ResolvedInfo.TryGetValue(GetType(), out value))
+                if (!ResolvedInfo.TryGetValue(GetType(), out WebCliCommandInfo value))
                 {
                     if ((value = WebCliCommandInfo.FromType(GetType())) != null)
                     {
@@ -272,6 +271,6 @@ namespace BeavisCli
         /// <summary>
         /// Checks if this built-in command.
         /// </summary>
-        internal bool IsBuiltIn => GetType().Assembly.Equals(ThisAssembly);
+        public bool IsBuiltIn => GetType().Assembly.Equals(ThisAssembly);
     }
 }

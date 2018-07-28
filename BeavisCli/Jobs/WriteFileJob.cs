@@ -1,10 +1,10 @@
-﻿using System.Threading.Tasks;
-using BeavisCli.JavaScriptStatements;
+﻿using BeavisCli.JavaScriptStatements;
 using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
-namespace BeavisCli.Internal
+namespace BeavisCli.Jobs
 {
-    internal class WriteFileJob : IJob
+    public class WriteFileJob : IJob
     {
         private readonly byte[] _data;
         private readonly string _fileName;

@@ -1,8 +1,17 @@
 ﻿using System.Collections.Generic;
 
-namespace BeavisCli.Internal
+namespace BeavisCli
 {
-    internal class CommandArgument : IArgument
+    public interface ICommandArgument
+    {
+        List<string> Values { get; }
+
+        bool MultipleValues { get; }
+
+        string Value { get; }
+    }
+
+    internal sealed class CommandArgument : ICommandArgument
     {
         private readonly Microsoft.Extensions.CommandLineUtils.CommandArgument _target;
 

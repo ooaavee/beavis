@@ -4,11 +4,13 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BeavisCli.Internal
+namespace BeavisCli.Middlewares
 {
     internal class WebCliMiddleware
     {
@@ -16,23 +18,23 @@ namespace BeavisCli.Internal
 
         private readonly RequestDelegate _next;
         private readonly ILogger<WebCliMiddleware> _logger;
-        private readonly WebCliSandbox _sandbox;
-        private readonly JobPool _jobs;
+        private readonly IRequestExecutor _executor;
+        private readonly IJobPool _jobs;
         private readonly ITerminalBehaviour _behaviour;
         private readonly IFileStorage _files;
         private readonly WebCliOptions _options;
 
         public WebCliMiddleware(RequestDelegate next, 
                                 ILoggerFactory loggerFactory,
-                                WebCliSandbox sandbox, 
-                                JobPool jobs, 
+                                IRequestExecutor executor,
+                                IJobPool jobs, 
                                 ITerminalBehaviour behaviour, 
                                 IFileStorage files, 
                                 IOptions<WebCliOptions> options)
         {
             _next = next;
             _logger = loggerFactory.CreateLogger<WebCliMiddleware>();
-            _sandbox = sandbox;
+            _executor = executor;
             _jobs = jobs;
             _behaviour = behaviour;
             _files = files;
@@ -121,7 +123,7 @@ namespace BeavisCli.Internal
         {
             try
             {
-                await WebCliRenderer.RenderHtmlAsync(httpContext);
+                await RenderHtmlAsync(httpContext);
             }
             catch (Exception e)
             {
@@ -134,7 +136,7 @@ namespace BeavisCli.Internal
         {
             try
             {
-                await WebCliRenderer.RenderCssAsync(httpContext);
+                await RenderCssAsync(httpContext);
             }
             catch (Exception e)
             {
@@ -147,7 +149,7 @@ namespace BeavisCli.Internal
         {
             try
             {
-                await WebCliRenderer.RenderJsAsync(httpContext);
+                await RenderJsAsync(httpContext);
             }
             catch (Exception e)
             {
@@ -162,7 +164,7 @@ namespace BeavisCli.Internal
             {
                 WebCliResponse response = new WebCliResponse(httpContext);                
                 _behaviour.OnInitialize(httpContext, response);
-                await WebCliRenderer.RenderResponseAsync(response, httpContext);
+                await RenderResponseAsync(response, httpContext);
             }
             catch (Exception e)
             {
@@ -178,7 +180,7 @@ namespace BeavisCli.Internal
                 WebCliResponse response = new WebCliResponse(httpContext);
                 string key = httpContext.Request.Query["key"];
                 await _jobs.RunAsync(key, httpContext, response);
-                await WebCliRenderer.RenderResponseAsync(response, httpContext);
+                await RenderResponseAsync(response, httpContext);
             }
             catch (Exception e)
             {
@@ -194,8 +196,8 @@ namespace BeavisCli.Internal
                 string body = await ReadBodyAsync(httpContext);
                 WebCliRequest request = JsonConvert.DeserializeObject<WebCliRequest>(body);
                 WebCliResponse response = new WebCliResponse(httpContext);
-                await _sandbox.ExecuteAsync(request, response, httpContext);
-                await WebCliRenderer.RenderResponseAsync(response, httpContext);
+                await _executor.ExecuteAsync(request, response, httpContext);
+                await RenderResponseAsync(response, httpContext);
             }
             catch (Exception e)
             {
@@ -211,10 +213,10 @@ namespace BeavisCli.Internal
                 string body = await ReadBodyAsync(httpContext);
                 WebCliResponse response = new WebCliResponse(httpContext);
                 FileContent file = JsonConvert.DeserializeObject<FileContent>(body);
-                FileId id = await _files.StoreAsync(file);
+                string id = await _files.StoreAsync(file);
                 response.WriteInformation("File upload completed, the file ID is:");
-                response.WriteInformation(id.ToString());
-                await WebCliRenderer.RenderResponseAsync(response, httpContext);
+                response.WriteInformation(id);
+                await RenderResponseAsync(response, httpContext);
             }
             catch (Exception e)
             {
@@ -244,6 +246,80 @@ namespace BeavisCli.Internal
                     return body;
                 }
             }
+        }
+
+        private static async Task RenderHtmlAsync(HttpContext httpContext)
+        {
+            string text = await ReadEmbeddedResourcesAsync("BeavisCli.Resources.html.index.html");
+
+            await WriteAsync(text, httpContext.Response, "text/html");
+        }
+
+        private static async Task RenderCssAsync(HttpContext httpContext)
+        {
+            string[] files = {
+                "BeavisCli.Resources.css.jquery.terminal.min.css",
+                "BeavisCli.Resources.css.site.css"
+            };
+
+            string text = await ReadEmbeddedResourcesAsync(files);
+
+            await WriteAsync(text, httpContext.Response, "text/css");
+        }
+
+        private static async Task RenderJsAsync(HttpContext httpContext)
+        {
+            string[] files = {
+                "BeavisCli.Resources.js.jquery.min.js",
+                "BeavisCli.Resources.js.jquery.terminal.min.js",
+                "BeavisCli.Resources.js.jquery.mousewheel-min.js",
+                "BeavisCli.Resources.js.angular.min.js",
+                "BeavisCli.Resources.js.download.js",
+                "BeavisCli.Resources.js.beaviscli.js"
+            };
+
+            string text = await ReadEmbeddedResourcesAsync(files);
+
+            await WriteAsync(text, httpContext.Response, "application/javascript");
+        }
+
+        private static async Task RenderResponseAsync(WebCliResponse response, HttpContext httpContext)
+        {
+            if (response.Messages.Any())
+            {
+                response.WriteEmptyLine();
+            }
+
+            response.OnSending();
+
+            string text = JsonConvert.SerializeObject(response);
+
+            await WriteAsync(text, httpContext.Response, "application/json");
+        }
+
+        private static async Task WriteAsync(string text, HttpResponse response, string contentType)
+        {
+            byte[] content = Encoding.UTF8.GetBytes(text);
+            response.ContentType = contentType;
+            response.StatusCode = (int)HttpStatusCode.OK;
+            await response.Body.WriteAsync(content, 0, content.Length);
+        }
+
+        private static async Task<string> ReadEmbeddedResourcesAsync(params string[] files)
+        {
+            StringBuilder text = new StringBuilder();
+            foreach (string file in files)
+            {
+                using (Stream stream = Assembly.GetAssembly(typeof(WebCliMiddleware)).GetManifestResourceStream(file))
+                {
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        string tmp = await reader.ReadToEndAsync();
+                        text.AppendLine(tmp);
+                    }
+                }
+            }
+            return text.ToString();
         }
     }
 }

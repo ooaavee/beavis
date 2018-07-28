@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace BeavisCli.Internal
 {
-    internal class WebCliCommandInfo
+    public sealed class WebCliCommandInfo
     {
         private WebCliCommandInfo()
         {
@@ -26,6 +26,11 @@ namespace BeavisCli.Internal
 
         public static WebCliCommandInfo FromType(Type type)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             WebCliCommandInfo value = null;
 
             if (type.GetCustomAttributes(typeof(WebCliCommandAttribute), true) is WebCliCommandAttribute[] attrs1 && attrs1.Any())

@@ -3,6 +3,14 @@ using System.Text.Encodings.Web;
 
 namespace BeavisCli.JavaScriptStatements
 {
+    /// <summary>
+    /// This statements starts a file download by using the download.js library.
+    /// </summary>
+    /// <remarks>
+    /// download.js v4.2, by dandavis; 2008-2016.
+    /// http://danml.com/download.html
+    /// https://github.com/rndme/download
+    /// </remarks>
     public sealed class DownloadJs : IJavaScriptStatement
     {
         private readonly byte[] _data;

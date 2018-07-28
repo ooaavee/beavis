@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
 
-namespace BeavisCli.Internal.Commands
+namespace BeavisCli.Commands
 {
     [WebCliCommand("upload", "A tool for uploading files")]
-    internal class Upload : WebCliCommand
+    public class Upload : WebCliCommand
     {
         public override async Task ExecuteAsync(WebCliContext context)
         {

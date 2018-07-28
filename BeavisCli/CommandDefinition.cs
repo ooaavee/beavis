@@ -2,7 +2,7 @@
 
 namespace BeavisCli
 {
-    public class BuiltInCommandDefinition
+    public class CommandDefinition
     {
         public bool IsEnabled { get; set; } = true;
 
@@ -10,6 +10,6 @@ namespace BeavisCli
 
         public bool IsTabCompletionEnabled { get; set; } = true;
 
-        internal Type Type { get; set; }
+        public Type Type { get; set; }
     }
 }

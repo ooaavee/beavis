@@ -1,5 +1,8 @@
 ﻿namespace BeavisCli.JavaScriptStatements
 {
+    /// <summary>
+    /// This statement reloads the terminal
+    /// </summary>
     public sealed class Reload : IJavaScriptStatement
     {
         private readonly bool _forceGet;

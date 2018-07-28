@@ -1,36 +1,52 @@
-﻿using BeavisCli.DefaultServices;
+﻿using BeavisCli.Internal;
 using BeavisCli.Microsoft.Extensions.CommandLineUtils;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace BeavisCli.Internal
+namespace BeavisCli.Services
 {
-    internal class WebCliSandbox
+    public class RequestExecutor : IRequestExecutor
     {
-        private readonly ILogger<WebCliSandbox> _logger;
+        private readonly ILogger<RequestExecutor> _logger;
+        private readonly ICommandProvider _commands;
         private readonly IAuthorizationHandler _authorization;
         private readonly IUnauthorizedHandler _unauthorized;
         private readonly WebCliOptions _options;
 
-        public WebCliSandbox(ILoggerFactory loggerFactory, 
-                             IAuthorizationHandler authorization, 
-                             IUnauthorizedHandler unauthorized, 
-                             IOptions<WebCliOptions> options)
+        public RequestExecutor(ILoggerFactory loggerFactory,
+                               ICommandProvider commands, 
+                               IAuthorizationHandler authorization,
+                               IUnauthorizedHandler unauthorized,
+                               IOptions<WebCliOptions> options)
         {
-            _logger = loggerFactory.CreateLogger<WebCliSandbox>();
+            _logger = loggerFactory.CreateLogger<RequestExecutor>();
+            _commands = commands;
             _authorization = authorization;
             _unauthorized = unauthorized;
             _options = options.Value;
         }
 
         public async Task ExecuteAsync(WebCliRequest request, WebCliResponse response, HttpContext httpContext)
-        {
+        {         
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            if (response == null)
+            {
+                throw new ArgumentNullException(nameof(response));
+            }
+
+            if (httpContext == null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
+
             try
             {
                 _logger.LogDebug($"Started to process a request with the input '{request.Input}'.");
@@ -40,8 +56,18 @@ namespace BeavisCli.Internal
 
                 _logger.LogDebug($"Searching an command by the name '{name}'.");
 
-                // search command by name, throws WebCliSandboxException if not found!
-                WebCliCommand cmd = GetCommand(name, httpContext);
+                // find the command
+                WebCliCommand cmd;
+                try
+                {
+                    cmd = _commands.GetCommand(name, httpContext);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogDebug($"An error occurred while searching a command by using the input '{request.Input}'.", e);
+                    response.WriteError(e);
+                    return;
+                }
 
                 _logger.LogDebug($"Found a command '{cmd.GetType().FullName}' that matches the name '{name}'.");
 
@@ -57,7 +83,7 @@ namespace BeavisCli.Internal
                     Description = cmd.Info.Description,
                     Out = outWriter,
                     Error = errorWriter
-                };                
+                };
                 processor.HelpOption("-?|-h|--help");
 
                 WebCliContext context = new WebCliContext(processor, httpContext, request, response);
@@ -74,12 +100,7 @@ namespace BeavisCli.Internal
                 {
                     // handle unauthorized execution attempts
                     await _unauthorized.OnUnauthorizedAsync(cmd, context);
-                }               
-            }
-            catch (WebCliSandboxException e)
-            {
-                _logger.LogDebug($"An error occurred while searching a command by using the input '{request.Input}'.", e);
-                response.WriteError(e);
+                }
             }
             catch (CommandParsingException e)
             {
@@ -101,54 +122,25 @@ namespace BeavisCli.Internal
             }
         }
 
-        public WebCliCommand GetCommand(string name, HttpContext httpContext)
-        {
-            int count = 0;
-
-            WebCliCommand result = null;
-
-            foreach (WebCliCommand cmd in GetCommands(httpContext))
-            {
-                if (cmd.Info.Name == name)
-                {
-                    count++;
-                    result = cmd;
-                }
-
-                if (count > 1)
-                {
-                    throw new WebCliSandboxException($"Found more than one command with name a '{name}'. Command names must me unique.");
-                }
-            }
-
-            if (count == 0)
-            {
-                throw new WebCliSandboxException($"{name} is not a valid command.{Environment.NewLine}Usage 'help' to get list of commands.");
-            }
-
-            return result;
-        }
-
-        public IEnumerable<WebCliCommand> GetCommands(HttpContext httpContext)
-        {
-            foreach (WebCliCommand cmd in httpContext.RequestServices.GetServices<WebCliCommand>())
-            {
-                if (cmd.Info != null)
-                {
-                    yield return cmd;
-                }
-            }
-        }
-
         /// <summary>
         /// Checks if the command execution is authorized.
         /// </summary>
-        private bool IsAuthorized(WebCliCommand cmd, WebCliContext context)
+        protected virtual bool IsAuthorized(WebCliCommand cmd, WebCliContext context)
         {
+            if (cmd == null)
+            {
+                throw new ArgumentNullException(nameof(cmd));
+            }
+
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
             bool authorized = _authorization.IsAuthorized(cmd, context);
 
-            bool externalHandler = !(_authorization is DefaultAuthorizationHandler);
-           
+            bool externalHandler = !(_authorization is AuthorizationHandler);
+
             if (externalHandler)
             {
                 _logger.LogInformation($"The authorization status returned by the current {nameof(IAuthorizationHandler)} implementation '{_authorization.GetType().FullName}' is {authorized}.");
@@ -177,6 +169,6 @@ namespace BeavisCli.Internal
             }
 
             return authorized;
-        }        
+        }
     }
 }

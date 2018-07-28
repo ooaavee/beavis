@@ -1,12 +1,14 @@
-﻿using System;
-using BeavisCli;
-using BeavisCli.DefaultServices;
+﻿using BeavisCli;
 using BeavisCli.Internal;
+using BeavisCli.Services;
+using System;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class IServiceCollectionExtensions
     {
+        internal static bool ConfigureServicesFlag;
+
         public static IServiceCollection AddWebCli(this IServiceCollection services)
         {
             return services.AddWebCli(options => { });
@@ -18,31 +20,32 @@ namespace Microsoft.Extensions.DependencyInjection
             setupAction(options);
             services.Configure(setupAction);
 
-            services.AddSingleton<WebCliSandbox>();          
-            services.AddSingleton<JobPool>();
+            services.AddSingleton<ICommandProvider, CommandProvider>();
+            services.AddSingleton<IRequestExecutor, RequestExecutor>();
+            services.AddSingleton<IJobPool, JobPool>();
 
             // IUnauthorizedHandler
             services.Add(options.UnauthorizedHandlerType == null
-                ? ServiceDescriptor.Singleton(typeof(IUnauthorizedHandler), typeof(DefaultUnauthorizedHandler))
+                ? ServiceDescriptor.Singleton(typeof(IUnauthorizedHandler), typeof(UnauthorizedHandler))
                 : ServiceDescriptor.Singleton(typeof(IUnauthorizedHandler), options.UnauthorizedHandlerType));
 
             // ITerminalBehaviour
             services.Add(options.TerminalBehaviourType == null
-                ? ServiceDescriptor.Singleton(typeof(ITerminalBehaviour), typeof(DefaultTerminalBehaviour))
+                ? ServiceDescriptor.Singleton(typeof(ITerminalBehaviour), typeof(TerminalBehaviour))
                 : ServiceDescriptor.Singleton(typeof(ITerminalBehaviour), options.TerminalBehaviourType));
 
             // IFileStorage
             services.Add(options.FileStorageType == null
-                ? ServiceDescriptor.Singleton(typeof(IFileStorage), typeof(DefaultFileStorage))
+                ? ServiceDescriptor.Singleton(typeof(IFileStorage), typeof(FileStorage))
                 : ServiceDescriptor.Singleton(typeof(IFileStorage), options.FileStorageType));
 
             // IAuthorizationHandler
             services.Add(options.AuthorizationHandlerType == null
-                ? ServiceDescriptor.Singleton(typeof(IAuthorizationHandler), typeof(DefaultAuthorizationHandler))
+                ? ServiceDescriptor.Singleton(typeof(IAuthorizationHandler), typeof(AuthorizationHandler))
                 : ServiceDescriptor.Singleton(typeof(IAuthorizationHandler), options.AuthorizationHandlerType));
 
             // register default commands
-            foreach (BuiltInCommandDefinition definition in options.BuiltInCommands.Values)
+            foreach (CommandDefinition definition in options.BuiltInCommands.Values)
             {
                 if (definition.IsEnabled)
                 {
@@ -50,28 +53,30 @@ namespace Microsoft.Extensions.DependencyInjection
                 }
             }
 
+            ConfigureServicesFlag = true;
+
             return services;
         }
 
         public static IServiceCollection AddScopedWebCliCommand<TWebCliCommand>(this IServiceCollection services) where TWebCliCommand : WebCliCommand
         {
-            Validate<TWebCliCommand>();
+            ValidateCommand<TWebCliCommand>();
             return services.AddScoped<WebCliCommand, TWebCliCommand>();
         }
 
         public static IServiceCollection AddSingletonWebCliCommand<TWebCliCommand>(this IServiceCollection services) where TWebCliCommand : WebCliCommand
         {
-            Validate<TWebCliCommand>();
+            ValidateCommand<TWebCliCommand>();
             return services.AddSingleton<WebCliCommand, TWebCliCommand>();
         }
       
         public static IServiceCollection AddTransientWebCliCommand<TWebCliCommand>(this IServiceCollection services) where TWebCliCommand : WebCliCommand
         {
-            Validate<TWebCliCommand>();
+            ValidateCommand<TWebCliCommand>();
             return services.AddTransient<WebCliCommand, TWebCliCommand>();
         }
 
-        private static void Validate<TWebCliCommand>()where TWebCliCommand : WebCliCommand
+        private static void ValidateCommand<TWebCliCommand>() where TWebCliCommand : WebCliCommand
         {
             WebCliCommandInfo info = WebCliCommandInfo.FromType(typeof(TWebCliCommand));
 

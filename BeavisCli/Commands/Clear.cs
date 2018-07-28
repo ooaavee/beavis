@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
 
-namespace BeavisCli.Internal.Commands
+namespace BeavisCli.Commands
 {
     [WebCliCommand("clear", "Clear terminal")]
-    internal class Clear : WebCliCommand
+    public class Clear : WebCliCommand
     {
         public override async Task ExecuteAsync(WebCliContext context)
         {

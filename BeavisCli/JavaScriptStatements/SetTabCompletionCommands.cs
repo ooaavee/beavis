@@ -6,11 +6,14 @@ using System.Text.Encodings.Web;
 
 namespace BeavisCli.JavaScriptStatements
 {
-    public sealed class SetTerminalCompletionDictionary : IJavaScriptStatement
+    /// <summary>
+    /// This statement notifies which commands are known by the terminal tab completion.
+    /// </summary>
+    public sealed class SetTabCompletionCommands : IJavaScriptStatement
     {
         private readonly string[] _names;
 
-        public SetTerminalCompletionDictionary(IEnumerable<string> names)
+        public SetTabCompletionCommands(IEnumerable<string> names)
         {
             if (names == null)
             {
@@ -22,23 +25,18 @@ namespace BeavisCli.JavaScriptStatements
 
         public string GetJavaScript()
         {
-            var buf  = new StringBuilder();
-
-            buf.Append("[");
-
+            var s  = new StringBuilder();
+            s.Append("[");
             for (var i = 0; i < _names.Length; i++)
             {
                 if (i > 0)
                 {
-                    buf.Append(", ");
+                    s.Append(", ");
                 }
-                buf.Append($"'{JavaScriptEncoder.Default.Encode(_names[i])}'");
+                s.Append($"'{JavaScriptEncoder.Default.Encode(_names[i])}'");
             }
-
-            buf.Append("]");
-
-            var js = $"window[\"__terminal_completion\"] = {buf};";
-
+            s.Append("]");
+            var js = $"window[\"__terminal_completion\"] = {s};";
             return js;
         }
     }

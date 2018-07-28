@@ -46,16 +46,16 @@ namespace BeavisCli
         /// </summary>
         public TextWriter ErrorWriter => Processor.Error;
 
-        public IOption Option(string template, string description, CommandOptionType optionType)
+        public ICommandOption Option(string template, string description, CommandOptionType optionType)
         {
-            CommandOption option = Processor.Option(template, description, Map(optionType));
-            return new Option(option);
+            var option = Processor.Option(template, description, Map(optionType));
+            return new CommandOption(option);
         }
 
-        public IArgument Argument(string name, string description, bool multipleValues = false)
+        public ICommandArgument Argument(string name, string description, bool multipleValues = false)
         {
-            Microsoft.Extensions.CommandLineUtils.CommandArgument argument = Processor.Argument(name, description, multipleValues);
-            return new Internal.CommandArgument(argument);
+            var argument = Processor.Argument(name, description, multipleValues);
+            return new CommandArgument(argument);
         }
 
         private static Microsoft.Extensions.CommandLineUtils.CommandOptionType Map(CommandOptionType optionType)

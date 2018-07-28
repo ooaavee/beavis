@@ -1,13 +1,13 @@
-﻿using System;
+﻿using BeavisCli.JavaScriptStatements;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BeavisCli.JavaScriptStatements;
 
-namespace BeavisCli.Internal.Commands
+namespace BeavisCli.Commands
 {
     [WebCliCommand("filestorage", "A tool for managing files in the file storage")]
-    internal class FileStorage : WebCliCommand
+    public class FileStorage : WebCliCommand
     {
         private readonly IFileStorage _files;
 
@@ -19,10 +19,10 @@ namespace BeavisCli.Internal.Commands
         public override async Task ExecuteAsync(WebCliContext context)
         {
             // options
-            IOption ls = context.Option("-ls", "Lists all files.", CommandOptionType.NoValue);
-            IOption remove = context.Option("-rm", "Removes a file by using the file id.", CommandOptionType.SingleValue);
-            IOption removeAll = context.Option("-ra", "Removes all files.", CommandOptionType.NoValue);
-            IOption download = context.Option("-download", "Downloads a file by using the file id.", CommandOptionType.SingleValue);
+            ICommandOption ls = context.Option("-ls", "Lists all files.", CommandOptionType.NoValue);
+            ICommandOption remove = context.Option("-rm", "Removes a file by using the file id.", CommandOptionType.SingleValue);
+            ICommandOption removeAll = context.Option("-ra", "Removes all files.", CommandOptionType.NoValue);
+            ICommandOption download = context.Option("-download", "Downloads a file by using the file id.", CommandOptionType.SingleValue);
 
             await OnExecuteAsync(async () =>
             {
@@ -38,7 +38,7 @@ namespace BeavisCli.Internal.Commands
                 // removes a file by using the file id
                 else if (remove.HasValue())
                 {
-                    FileId id = new FileId(remove.Value());
+                    string id = remove.Value();
                     await Remove(context, id);
                     succeed = true;
                 }
@@ -53,7 +53,7 @@ namespace BeavisCli.Internal.Commands
                 // downloads a file by using the file id
                 else if (download.HasValue())
                 {
-                    FileId id = new FileId(download.Value());
+                    string id = download.Value();
                     await Download(context, id);
                     succeed = true;
                 }
@@ -74,9 +74,9 @@ namespace BeavisCli.Internal.Commands
         {
             var items = new List<Tuple<string, string, string>>();
 
-            foreach (Tuple<FileId, FileContent> item in await _files.GetAllAsync())
+            foreach (Tuple<string, FileContent> item in await _files.GetAllAsync())
             {
-                items.Add(new Tuple<string, string, string>(item.Item1.Value, item.Item2.Type, item.Item2.Name));
+                items.Add(new Tuple<string, string, string>(item.Item1, item.Item2.Type, item.Item2.Name));
             }
 
             if (items.Any())
@@ -97,7 +97,7 @@ namespace BeavisCli.Internal.Commands
         /// <summary>
         /// Removes a file by using the file id.
         /// </summary>
-        private async Task Remove(WebCliContext context, FileId id)
+        private async Task Remove(WebCliContext context, string id)
         {
             FileContent file = await _files.RemoveAsync(id);
 
@@ -131,7 +131,7 @@ namespace BeavisCli.Internal.Commands
         /// <summary>
         /// Downloads a file by using the file id.
         /// </summary>
-        private async Task Download(WebCliContext context, FileId id)
+        private async Task Download(WebCliContext context, string id)
         {
             FileContent file = await _files.GetAsync(id);
 
@@ -145,6 +145,5 @@ namespace BeavisCli.Internal.Commands
                 context.Response.WriteError($"Unable to find a file to download by using the id '{id}'.");
             }
         }
-
     }
 }

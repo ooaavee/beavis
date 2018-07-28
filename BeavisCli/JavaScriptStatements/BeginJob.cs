@@ -3,6 +3,9 @@ using System.Text.Encodings.Web;
 
 namespace BeavisCli.JavaScriptStatements
 {
+    /// <summary>
+    /// This statement begins a job.
+    /// </summary>
     public sealed class BeginJob : IJavaScriptStatement
     {
         private readonly string _key;

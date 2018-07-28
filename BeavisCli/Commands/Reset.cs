@@ -1,10 +1,10 @@
-﻿using BeavisCli.JavaScriptStatements;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using BeavisCli.JavaScriptStatements;
 
-namespace BeavisCli.Internal.Commands
+namespace BeavisCli.Commands
 {
     [WebCliCommand("reset", "Reset terminal")]
-    internal class Reset : WebCliCommand
+    public class Reset : WebCliCommand
     {
         public override async Task ExecuteAsync(WebCliContext context)
         {
