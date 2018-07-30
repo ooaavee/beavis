@@ -7,7 +7,7 @@
     {
         private readonly bool _forceGet;
 
-        public Reload()
+        public Reload() : this(false)
         {
         }
 

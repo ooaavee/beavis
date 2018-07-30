@@ -4,7 +4,7 @@ namespace BeavisCli.Services
 {
     public class AuthorizationHandler : IAuthorizationHandler
     {
-        public virtual bool IsAuthorized(WebCliCommand cmd, WebCliContext context)
+        public virtual bool IsAuthorized(Command cmd, CommandContext context)
         {
             if (cmd == null)
             {

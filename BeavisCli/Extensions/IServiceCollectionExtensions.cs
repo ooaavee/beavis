@@ -1,5 +1,4 @@
 ﻿using BeavisCli;
-using BeavisCli.Internal;
 using BeavisCli.Services;
 using System;
 
@@ -9,14 +8,14 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         internal static bool ConfigureServicesFlag;
 
-        public static IServiceCollection AddWebCli(this IServiceCollection services)
+        public static IServiceCollection AddBeavisCli(this IServiceCollection services)
         {
-            return services.AddWebCli(options => { });
+            return services.AddBeavisCli(options => { });
         }
 
-        public static IServiceCollection AddWebCli(this IServiceCollection services, Action<WebCliOptions> setupAction)
+        public static IServiceCollection AddBeavisCli(this IServiceCollection services, Action<BeavisCliOptions> setupAction)
         {
-            var options = new WebCliOptions();
+            var options = new BeavisCliOptions();
             setupAction(options);
             services.Configure(setupAction);
 
@@ -49,7 +48,7 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 if (definition.IsEnabled)
                 {
-                    services.Add(ServiceDescriptor.Singleton(typeof(WebCliCommand), definition.Type));
+                    services.Add(ServiceDescriptor.Singleton(typeof(Command), definition.Type));
                 }
             }
 
@@ -58,41 +57,41 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddScopedWebCliCommand<TWebCliCommand>(this IServiceCollection services) where TWebCliCommand : WebCliCommand
+        public static IServiceCollection AddScopedCommand<TWebCliCommand>(this IServiceCollection services) where TWebCliCommand : Command
         {
             ValidateCommand<TWebCliCommand>();
-            return services.AddScoped<WebCliCommand, TWebCliCommand>();
+            return services.AddScoped<Command, TWebCliCommand>();
         }
 
-        public static IServiceCollection AddSingletonWebCliCommand<TWebCliCommand>(this IServiceCollection services) where TWebCliCommand : WebCliCommand
+        public static IServiceCollection AddSingletonCommand<TWebCliCommand>(this IServiceCollection services) where TWebCliCommand : Command
         {
             ValidateCommand<TWebCliCommand>();
-            return services.AddSingleton<WebCliCommand, TWebCliCommand>();
-        }
-      
-        public static IServiceCollection AddTransientWebCliCommand<TWebCliCommand>(this IServiceCollection services) where TWebCliCommand : WebCliCommand
-        {
-            ValidateCommand<TWebCliCommand>();
-            return services.AddTransient<WebCliCommand, TWebCliCommand>();
+            return services.AddSingleton<Command, TWebCliCommand>();
         }
 
-        private static void ValidateCommand<TWebCliCommand>() where TWebCliCommand : WebCliCommand
+        public static IServiceCollection AddTransientCommand<TWebCliCommand>(this IServiceCollection services) where TWebCliCommand : Command
         {
-            WebCliCommandInfo info = WebCliCommandInfo.FromType(typeof(TWebCliCommand));
+            ValidateCommand<TWebCliCommand>();
+            return services.AddTransient<Command, TWebCliCommand>();
+        }
+
+        private static void ValidateCommand<TWebCliCommand>() where TWebCliCommand : Command
+        {
+            CommandInfo info = CommandInfo.FromType(typeof(TWebCliCommand));
 
             if (info == null)
             {
-                throw new InvalidOperationException($"{typeof(TWebCliCommand)} is not a valid command, unable to find {nameof(WebCliCommandAttribute)} attribute.");
+                throw new InvalidOperationException($"{typeof(TWebCliCommand)} is not a valid command, unable to find {nameof(CommandAttribute)} attribute.");
             }
 
             if (string.IsNullOrEmpty(info.Name))
             {
-                throw new InvalidOperationException($"{nameof(WebCliCommandAttribute)}.{nameof(WebCliCommandAttribute.Name)} is mandatory.");
+                throw new InvalidOperationException($"{nameof(CommandAttribute)}.{nameof(CommandAttribute.Name)} is mandatory.");
             }
 
             if (string.IsNullOrEmpty(info.FullName))
             {
-                throw new InvalidOperationException($"{nameof(WebCliCommandAttribute)}.{nameof(WebCliCommandAttribute.FullName)} is mandatory.");
+                throw new InvalidOperationException($"{nameof(CommandAttribute)}.{nameof(CommandAttribute.FullName)} is mandatory.");
             }
         }
     }

@@ -15,13 +15,13 @@ namespace BeavisCli.Services
         private readonly ICommandProvider _commands;
         private readonly IAuthorizationHandler _authorization;
         private readonly IUnauthorizedHandler _unauthorized;
-        private readonly WebCliOptions _options;
+        private readonly BeavisCliOptions _options;
 
         public RequestExecutor(ILoggerFactory loggerFactory,
                                ICommandProvider commands, 
                                IAuthorizationHandler authorization,
                                IUnauthorizedHandler unauthorized,
-                               IOptions<WebCliOptions> options)
+                               IOptions<BeavisCliOptions> options)
         {
             _logger = loggerFactory.CreateLogger<RequestExecutor>();
             _commands = commands;
@@ -30,7 +30,7 @@ namespace BeavisCli.Services
             _options = options.Value;
         }
 
-        public async Task ExecuteAsync(WebCliRequest request, WebCliResponse response, HttpContext httpContext)
+        public async Task ExecuteAsync(Request request, Response response, HttpContext httpContext)
         {         
             if (request == null)
             {
@@ -57,7 +57,7 @@ namespace BeavisCli.Services
                 _logger.LogDebug($"Searching an command by the name '{name}'.");
 
                 // find the command
-                WebCliCommand cmd;
+                Command cmd;
                 try
                 {
                     cmd = _commands.GetCommand(name, httpContext);
@@ -86,7 +86,7 @@ namespace BeavisCli.Services
                 };
                 processor.HelpOption("-?|-h|--help");
 
-                WebCliContext context = new WebCliContext(processor, httpContext, request, response);
+                CommandContext context = new CommandContext(processor, httpContext, request, response);
 
                 // check authorization
                 bool authorized = IsAuthorized(cmd, context);
@@ -125,7 +125,7 @@ namespace BeavisCli.Services
         /// <summary>
         /// Checks if the command execution is authorized.
         /// </summary>
-        protected virtual bool IsAuthorized(WebCliCommand cmd, WebCliContext context)
+        protected virtual bool IsAuthorized(Command cmd, CommandContext context)
         {
             if (cmd == null)
             {

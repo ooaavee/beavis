@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace BeavisCli
 {
-    public class WebCliRequest
+    public class Request
     {
         /// <summary>
         /// An input string from the web client.

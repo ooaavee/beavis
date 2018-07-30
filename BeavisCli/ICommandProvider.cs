@@ -1,16 +1,12 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
-using System.Text;
-using Microsoft.AspNetCore.Http;
 
 namespace BeavisCli
 {
     public interface ICommandProvider
     {
-        WebCliCommand GetCommand(string name, HttpContext httpContext);
+        Command GetCommand(string name, HttpContext httpContext);
 
-        IEnumerable<WebCliCommand> GetCommands(HttpContext httpContext);
-
-
+        IEnumerable<Command> GetCommands(HttpContext httpContext);
     }
 }

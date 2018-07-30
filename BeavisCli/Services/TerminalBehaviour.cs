@@ -1,4 +1,4 @@
-﻿using BeavisCli.Internal;
+﻿using BeavisCli.Commands;
 using BeavisCli.JavaScriptStatements;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,13 +6,12 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using BeavisCli.Commands;
 
 namespace BeavisCli.Services
 {
     public class TerminalBehaviour : ITerminalBehaviour
     {
-        public virtual void OnInitialize(HttpContext context, WebCliResponse response)
+        public virtual void OnInitialize(HttpContext context, Response response)
         {
             if (context == null)
             {
@@ -35,7 +34,7 @@ namespace BeavisCli.Services
             }
         }
 
-        public virtual bool IsVisibleForHelp(WebCliCommand cmd, WebCliContext context)
+        public virtual bool IsVisibleForHelp(Command cmd, CommandContext context)
         {
             if (cmd == null)
             {
@@ -47,7 +46,7 @@ namespace BeavisCli.Services
                 throw new ArgumentNullException(nameof(context));
             }
 
-            WebCliOptions options = context.HttpContext.RequestServices.GetRequiredService<IOptions<WebCliOptions>>().Value;
+            BeavisCliOptions options = context.HttpContext.RequestServices.GetRequiredService<IOptions<BeavisCliOptions>>().Value;
 
             if (cmd.GetType() == typeof(Help))
             {
@@ -113,7 +112,7 @@ namespace BeavisCli.Services
 
             ICommandProvider commands = context.RequestServices.GetRequiredService<ICommandProvider>();
 
-            foreach (WebCliCommand cmd in commands.GetCommands(context))
+            foreach (Command cmd in commands.GetCommands(context))
             {
                 if (IsTabCompletionEnabled(cmd, context))
                 {
@@ -122,7 +121,7 @@ namespace BeavisCli.Services
             }
         }
 
-        protected virtual bool IsTabCompletionEnabled(WebCliCommand cmd, HttpContext context)
+        protected virtual bool IsTabCompletionEnabled(Command cmd, HttpContext context)
         {
             if (cmd == null)
             {
@@ -134,7 +133,7 @@ namespace BeavisCli.Services
                 throw new ArgumentNullException(nameof(context));
             }
 
-            WebCliOptions options = context.RequestServices.GetRequiredService<IOptions<WebCliOptions>>().Value;
+            BeavisCliOptions options = context.RequestServices.GetRequiredService<IOptions<BeavisCliOptions>>().Value;
 
             bool enabled = false;
 
@@ -165,8 +164,8 @@ namespace BeavisCli.Services
                 throw new ArgumentNullException(nameof(context));
             }
 
-            WebCliOptions options = context.RequestServices.GetRequiredService<IOptions<WebCliOptions>>().Value;
-            WebCliCommandInfo info = WebCliCommandInfo.FromType(typeof(Upload));
+            BeavisCliOptions options = context.RequestServices.GetRequiredService<IOptions<BeavisCliOptions>>().Value;
+            CommandInfo info = CommandInfo.FromType(typeof(Upload));
             CommandDefinition definition = options.BuiltInCommands[info.Name];
             return definition.IsEnabled;
         }

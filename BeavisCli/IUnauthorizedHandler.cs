@@ -4,6 +4,6 @@ namespace BeavisCli
 {
     public interface IUnauthorizedHandler
     {
-        Task OnUnauthorizedAsync(WebCliCommand cmd, WebCliContext context);
+        Task OnUnauthorizedAsync(Command cmd, CommandContext context);
     }
 }

@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Commands
 {
-    [WebCliCommand("license", "License information")]
-    public class License : WebCliCommand
+    [Command("license", "License information")]
+    public class License : Command
     {
-        public override async Task ExecuteAsync(WebCliContext context)
+        public override async Task ExecuteAsync(CommandContext context)
         {
             await OnExecuteAsync(async () =>
             {

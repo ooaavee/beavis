@@ -8,21 +8,21 @@ using System.Threading.Tasks;
 
 namespace BeavisCli
 {
-    public abstract class WebCliCommand
+    public abstract class Command
     {
-        private static readonly Assembly ThisAssembly = typeof(WebCliCommand).Assembly;
+        private static readonly Assembly ThisAssembly = typeof(Command).Assembly;
 
         // we can safely use a static dictionary cache here, because these values doesn't change during runtime
-        private static readonly ConcurrentDictionary<Type, WebCliCommandInfo> ResolvedInfo = new ConcurrentDictionary<Type, WebCliCommandInfo>();
+        private static readonly ConcurrentDictionary<Type, CommandInfo> ResolvedInfo = new ConcurrentDictionary<Type, CommandInfo>();
 
         private const int ExitStatusCode = 2;
 
-        private ILogger<WebCliCommand> _logger;
+        private ILogger<Command> _logger;
 
         /// <summary>
         /// Checks if the command execution is authorized.
         /// </summary>
-        public virtual bool IsAuthorized(WebCliContext context)
+        public virtual bool IsAuthorized(CommandContext context)
         {
             return true;
         }
@@ -30,7 +30,7 @@ namespace BeavisCli
         /// <summary>
         /// Checks if the command is visible for 'help'.
         /// </summary>
-        public virtual bool IsVisibleForHelp(WebCliContext context)
+        public virtual bool IsVisibleForHelp(CommandContext context)
         {
             return true;
         }
@@ -43,9 +43,9 @@ namespace BeavisCli
             return true;
         }
 
-        public abstract Task ExecuteAsync(WebCliContext context);
+        public abstract Task ExecuteAsync(CommandContext context);
 
-        protected async Task OnExecuteAsync(Func<Task<int>> invoke, WebCliContext context)
+        protected async Task OnExecuteAsync(Func<Task<int>> invoke, CommandContext context)
         {
             if (invoke == null)
             {
@@ -62,7 +62,7 @@ namespace BeavisCli
 
             // create logger
             ILoggerFactory loggerFactory = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
-            _logger = loggerFactory.CreateLogger<WebCliCommand>();
+            _logger = loggerFactory.CreateLogger<Command>();
 
             // get arguments for the command
             string[] args = context.Request.GetCommandArgs();
@@ -77,7 +77,7 @@ namespace BeavisCli
             await Task.CompletedTask;
         }
 
-        protected Task<int> Exit(WebCliContext context)
+        protected Task<int> Exit(CommandContext context)
         {
             if (context == null)
             {
@@ -88,7 +88,7 @@ namespace BeavisCli
             return Task.FromResult(ExitStatusCode);
         }
 
-        protected async Task<int> ExitAsync(WebCliContext context)
+        protected async Task<int> ExitAsync(CommandContext context)
         {
             if (context == null)
             {
@@ -98,7 +98,7 @@ namespace BeavisCli
             return await Task.FromResult(Exit(context).Result);
         }
 
-        protected Task<int> ExitWithHelp(WebCliContext context)
+        protected Task<int> ExitWithHelp(CommandContext context)
         {
             if (context == null)
             {
@@ -110,7 +110,7 @@ namespace BeavisCli
             return Task.FromResult(ExitStatusCode);
         }
 
-        protected async Task<int> ExitWithHelpAsync(WebCliContext context)
+        protected async Task<int> ExitWithHelpAsync(CommandContext context)
         {
             if (context == null)
             {
@@ -120,7 +120,7 @@ namespace BeavisCli
             return await Task.FromResult(ExitWithHelp(context).Result);
         }
 
-        protected Task<int> Unauthorized(WebCliContext context)
+        protected Task<int> Unauthorized(CommandContext context)
         {
             if (context == null)
             {
@@ -133,7 +133,7 @@ namespace BeavisCli
             return Task.FromResult(ExitStatusCode);
         }
 
-        protected async Task<int> UnauthorizedAsync(WebCliContext context)
+        protected async Task<int> UnauthorizedAsync(CommandContext context)
         {
             if (context == null)
             {
@@ -143,7 +143,7 @@ namespace BeavisCli
             return await Task.FromResult(Unauthorized(context).Result);
         }
 
-        protected Task<int> Error(WebCliContext context, string text)
+        protected Task<int> Error(CommandContext context, string text)
         {
             if (context == null)
             {
@@ -160,7 +160,7 @@ namespace BeavisCli
             return Task.FromResult(ExitStatusCode);
         }
 
-        protected async Task<int> ErrorAsync(WebCliContext context, string text)
+        protected async Task<int> ErrorAsync(CommandContext context, string text)
         {
             if (context == null)
             {
@@ -175,7 +175,7 @@ namespace BeavisCli
             return await Task.FromResult(Error(context, text).Result);
         }
 
-        protected Task<int> Error(WebCliContext context, string text, Exception e)
+        protected Task<int> Error(CommandContext context, string text, Exception e)
         {
             if (context == null)
             {
@@ -198,7 +198,7 @@ namespace BeavisCli
             return Task.FromResult(ExitStatusCode);
         }
 
-        protected async Task<int> ErrorAsync(WebCliContext context, string text, Exception e)
+        protected async Task<int> ErrorAsync(CommandContext context, string text, Exception e)
         {
             if (context == null)
             {
@@ -218,7 +218,7 @@ namespace BeavisCli
             return await Task.FromResult(Error(context, text, e).Result);
         }
 
-        protected Task<int> Error(WebCliContext context, Exception e)
+        protected Task<int> Error(CommandContext context, Exception e)
         {
             if (context == null)
             {
@@ -235,7 +235,7 @@ namespace BeavisCli
             return Task.FromResult(ExitStatusCode);
         }
 
-        protected async Task<int> ErrorAsync(WebCliContext context, Exception e)
+        protected async Task<int> ErrorAsync(CommandContext context, Exception e)
         {
             if (context == null)
             {
@@ -253,13 +253,13 @@ namespace BeavisCli
         /// <summary>
         /// Gets information about this command.
         /// </summary>
-        public WebCliCommandInfo Info
+        public CommandInfo Info
         {
             get
             {
-                if (!ResolvedInfo.TryGetValue(GetType(), out WebCliCommandInfo value))
+                if (!ResolvedInfo.TryGetValue(GetType(), out CommandInfo value))
                 {
-                    if ((value = WebCliCommandInfo.FromType(GetType())) != null)
+                    if ((value = CommandInfo.FromType(GetType())) != null)
                     {
                         ResolvedInfo.TryAdd(GetType(), value);
                     }

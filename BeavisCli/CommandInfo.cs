@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
 
-namespace BeavisCli.Internal
+namespace BeavisCli
 {
-    public sealed class WebCliCommandInfo
+    public sealed class CommandInfo
     {
-        private WebCliCommandInfo()
+        private CommandInfo()
         {
         }
 
@@ -24,22 +24,22 @@ namespace BeavisCli.Internal
         /// </summary>
         public string Description { get; private set; }
 
-        public static WebCliCommandInfo FromType(Type type)
+        public static CommandInfo FromType(Type type)
         {
             if (type == null)
             {
                 throw new ArgumentNullException(nameof(type));
             }
 
-            WebCliCommandInfo value = null;
+            CommandInfo value = null;
 
-            if (type.GetCustomAttributes(typeof(WebCliCommandAttribute), true) is WebCliCommandAttribute[] attrs1 && attrs1.Any())
+            if (type.GetCustomAttributes(typeof(CommandAttribute), true) is CommandAttribute[] attrs1 && attrs1.Any())
             {
-                value = new WebCliCommandInfo();
+                value = new CommandInfo();
                 value.Name = attrs1[0].Name;
                 value.FullName = attrs1[0].FullName;
 
-                if (type.GetCustomAttributes(typeof(WebCliCommandDescriptionAttribute), true) is WebCliCommandDescriptionAttribute[] attrs2 && attrs2.Any())
+                if (type.GetCustomAttributes(typeof(CommandDescriptionAttribute), true) is CommandDescriptionAttribute[] attrs2 && attrs2.Any())
                 {
                     value.Description = attrs2[0].Description;
                 }

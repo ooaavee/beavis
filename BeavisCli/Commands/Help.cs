@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Commands
 {
-    [WebCliCommand("help", "Displays help.")]
-    public class Help : WebCliCommand
+    [Command("help", "Displays help.")]
+    public class Help : Command
     {
         private readonly ICommandProvider _commands;
         private readonly ITerminalBehaviour _behaviour;
@@ -17,15 +17,15 @@ namespace BeavisCli.Commands
             _behaviour = behaviour;
         }
 
-        public override async Task ExecuteAsync(WebCliContext context)
+        public override async Task ExecuteAsync(CommandContext context)
         {
             await OnExecuteAsync(() =>
             {
-                var defaults = new List<WebCliCommand>();
+                var defaults = new List<Command>();
 
-                var externals = new List<WebCliCommand>();
+                var externals = new List<Command>();
 
-                foreach (WebCliCommand cmd in _commands.GetCommands(context.HttpContext))
+                foreach (Command cmd in _commands.GetCommands(context.HttpContext))
                 {
                     if (_behaviour.IsVisibleForHelp(cmd, context))
                     {
@@ -42,7 +42,7 @@ namespace BeavisCli.Commands
              
                 var lines = new List<Tuple<string, string>>();
 
-                foreach (WebCliCommand cmd in defaults.Concat(externals))
+                foreach (Command cmd in defaults.Concat(externals))
                 {
                     lines.Add(new Tuple<string, string>(cmd.Info.Name, cmd.Info.FullName));
                 }

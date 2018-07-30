@@ -8,6 +8,6 @@ namespace BeavisCli
 {
     public interface IRequestExecutor
     {
-        Task ExecuteAsync(WebCliRequest request, WebCliResponse response, HttpContext httpContext);
+        Task ExecuteAsync(Request request, Response response, HttpContext httpContext);
     }
 }

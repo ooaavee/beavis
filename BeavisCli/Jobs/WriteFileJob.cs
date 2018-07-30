@@ -17,7 +17,7 @@ namespace BeavisCli.Jobs
             _mimeType = mimeType;
         }
 
-        public Task RunAsync(HttpContext context, WebCliResponse response)
+        public Task RunAsync(HttpContext context, Response response)
         {
             IJavaScriptStatement js = new DownloadJs(_data, _fileName, _mimeType);
             response.AddJavaScript(js);

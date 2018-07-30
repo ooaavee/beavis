@@ -8,11 +8,11 @@ using System.Collections.Generic;
 
 namespace BeavisCli
 {
-    public class WebCliResponse
+    public class Response
     {
         private readonly HttpContext _httpContext;
 
-        internal WebCliResponse(HttpContext httpContext)
+        internal Response(HttpContext httpContext)
         {
             _httpContext = httpContext;
         }

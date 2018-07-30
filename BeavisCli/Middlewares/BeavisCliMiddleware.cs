@@ -12,28 +12,28 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Middlewares
 {
-    internal class WebCliMiddleware
+    internal class BeavisCliMiddleware
     {
         private const string DefaultPath = "/beaviscli";
 
         private readonly RequestDelegate _next;
-        private readonly ILogger<WebCliMiddleware> _logger;
+        private readonly ILogger<BeavisCliMiddleware> _logger;
         private readonly IRequestExecutor _executor;
         private readonly IJobPool _jobs;
         private readonly ITerminalBehaviour _behaviour;
         private readonly IFileStorage _files;
-        private readonly WebCliOptions _options;
+        private readonly BeavisCliOptions _options;
 
-        public WebCliMiddleware(RequestDelegate next, 
-                                ILoggerFactory loggerFactory,
-                                IRequestExecutor executor,
-                                IJobPool jobs, 
-                                ITerminalBehaviour behaviour, 
-                                IFileStorage files, 
-                                IOptions<WebCliOptions> options)
+        public BeavisCliMiddleware(RequestDelegate next, 
+                                   ILoggerFactory loggerFactory,
+                                   IRequestExecutor executor,
+                                   IJobPool jobs, 
+                                   ITerminalBehaviour behaviour, 
+                                   IFileStorage files, 
+                                   IOptions<BeavisCliOptions> options)
         {
             _next = next;
-            _logger = loggerFactory.CreateLogger<WebCliMiddleware>();
+            _logger = loggerFactory.CreateLogger<BeavisCliMiddleware>();
             _executor = executor;
             _jobs = jobs;
             _behaviour = behaviour;
@@ -162,7 +162,7 @@ namespace BeavisCli.Middlewares
         {
             try
             {
-                WebCliResponse response = new WebCliResponse(httpContext);                
+                Response response = new Response(httpContext);                
                 _behaviour.OnInitialize(httpContext, response);
                 await RenderResponseAsync(response, httpContext);
             }
@@ -177,7 +177,7 @@ namespace BeavisCli.Middlewares
         {
             try
             {
-                WebCliResponse response = new WebCliResponse(httpContext);
+                Response response = new Response(httpContext);
                 string key = httpContext.Request.Query["key"];
                 await _jobs.RunAsync(key, httpContext, response);
                 await RenderResponseAsync(response, httpContext);
@@ -194,8 +194,8 @@ namespace BeavisCli.Middlewares
             try
             {
                 string body = await ReadBodyAsync(httpContext);
-                WebCliRequest request = JsonConvert.DeserializeObject<WebCliRequest>(body);
-                WebCliResponse response = new WebCliResponse(httpContext);
+                Request request = JsonConvert.DeserializeObject<Request>(body);
+                Response response = new Response(httpContext);
                 await _executor.ExecuteAsync(request, response, httpContext);
                 await RenderResponseAsync(response, httpContext);
             }
@@ -211,7 +211,7 @@ namespace BeavisCli.Middlewares
             try
             {
                 string body = await ReadBodyAsync(httpContext);
-                WebCliResponse response = new WebCliResponse(httpContext);
+                Response response = new Response(httpContext);
                 FileContent file = JsonConvert.DeserializeObject<FileContent>(body);
                 string id = await _files.StoreAsync(file);
                 response.WriteInformation("File upload completed, the file ID is:");
@@ -283,7 +283,7 @@ namespace BeavisCli.Middlewares
             await WriteAsync(text, httpContext.Response, "application/javascript");
         }
 
-        private static async Task RenderResponseAsync(WebCliResponse response, HttpContext httpContext)
+        private static async Task RenderResponseAsync(Response response, HttpContext httpContext)
         {
             if (response.Messages.Any())
             {
@@ -307,10 +307,10 @@ namespace BeavisCli.Middlewares
 
         private static async Task<string> ReadEmbeddedResourcesAsync(params string[] files)
         {
-            StringBuilder text = new StringBuilder();
+            var text = new StringBuilder();
             foreach (string file in files)
             {
-                using (Stream stream = Assembly.GetAssembly(typeof(WebCliMiddleware)).GetManifestResourceStream(file))
+                using (Stream stream = Assembly.GetAssembly(typeof(BeavisCliMiddleware)).GetManifestResourceStream(file))
                 {
                     using (StreamReader reader = new StreamReader(stream))
                     {

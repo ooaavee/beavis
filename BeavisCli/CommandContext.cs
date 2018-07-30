@@ -1,17 +1,16 @@
-﻿using System;
-using System.IO;
-using BeavisCli.Internal;
-using BeavisCli.Microsoft.Extensions.CommandLineUtils;
+﻿using BeavisCli.Microsoft.Extensions.CommandLineUtils;
 using Microsoft.AspNetCore.Http;
+using System;
+using System.IO;
 
 namespace BeavisCli
 {
-    public class WebCliContext
+    public class CommandContext
     {
-        internal WebCliContext(CommandLineApplication processor,
-                               HttpContext httpContext,
-                               WebCliRequest request, 
-                               WebCliResponse response)
+        internal CommandContext(CommandLineApplication processor,
+                                HttpContext httpContext,
+                                Request request, 
+                                Response response)
         {
             Processor = processor;
             HttpContext = httpContext;
@@ -29,12 +28,12 @@ namespace BeavisCli
         /// <summary>
         /// Request
         /// </summary>
-        public WebCliRequest Request { get; }
+        public Request Request { get; }
 
         /// <summary>
         /// Response
         /// </summary>
-        public WebCliResponse Response { get; }
+        public Response Response { get; }
 
         /// <summary>
         /// Writer for out message, like Console.Out

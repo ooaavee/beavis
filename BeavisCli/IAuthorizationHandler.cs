@@ -2,6 +2,6 @@
 {
     public interface IAuthorizationHandler
     {
-        bool IsAuthorized(WebCliCommand cmd, WebCliContext context);
+        bool IsAuthorized(Command cmd, CommandContext context);
     }
 }

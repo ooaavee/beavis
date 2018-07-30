@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Commands
 {
-    [WebCliCommand("shortcuts", "Keyboard shortcuts")]
-    public class Shortcuts : WebCliCommand
+    [Command("shortcuts", "Keyboard shortcuts")]
+    public class Shortcuts : Command
     {
-        public override async Task ExecuteAsync(WebCliContext context)
+        public override async Task ExecuteAsync(CommandContext context)
         {
             await OnExecuteAsync(() =>
             {

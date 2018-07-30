@@ -7,7 +7,7 @@ namespace BeavisCli.Services
 {
     public class CommandProvider : ICommandProvider
     {
-        public virtual WebCliCommand GetCommand(string name, HttpContext httpContext)
+        public virtual Command GetCommand(string name, HttpContext httpContext)
         {
             if (name == null)
             {
@@ -21,9 +21,9 @@ namespace BeavisCli.Services
 
             int count = 0;
 
-            WebCliCommand result = null;
+            Command result = null;
 
-            foreach (WebCliCommand cmd in GetCommands(httpContext))
+            foreach (Command cmd in GetCommands(httpContext))
             {
                 if (cmd.Info.Name == name)
                 {
@@ -47,14 +47,14 @@ namespace BeavisCli.Services
             return result;
         }
 
-        public virtual IEnumerable<WebCliCommand> GetCommands(HttpContext httpContext)
+        public virtual IEnumerable<Command> GetCommands(HttpContext httpContext)
         {
             if (httpContext == null)
             {
                 throw new ArgumentNullException(nameof(httpContext));
             }
 
-            foreach (WebCliCommand cmd in httpContext.RequestServices.GetServices<WebCliCommand>())
+            foreach (Command cmd in httpContext.RequestServices.GetServices<Command>())
             {
                 if (cmd.Info != null)
                 {

@@ -36,7 +36,7 @@ namespace BeavisCli.Services
         /// <summary>
         /// Finds a job from the job pool by its identifier and removes it from the job pool.
         /// </summary>
-        public async Task RunAsync(string key, HttpContext context, WebCliResponse response)
+        public async Task RunAsync(string key, HttpContext context, Response response)
         {
             IJob job;
 

@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Commands
 {
-    [WebCliCommand("filestorage", "A tool for managing files in the file storage")]
-    public class FileStorage : WebCliCommand
+    [Command("filestorage", "A tool for managing files in the file storage")]
+    public class FileStorage : Command
     {
         private readonly IFileStorage _files;
 
@@ -16,7 +16,7 @@ namespace BeavisCli.Commands
             _files = files;
         }
 
-        public override async Task ExecuteAsync(WebCliContext context)
+        public override async Task ExecuteAsync(CommandContext context)
         {
             // options
             ICommandOption ls = context.Option("-ls", "Lists all files.", CommandOptionType.NoValue);
@@ -70,7 +70,7 @@ namespace BeavisCli.Commands
         /// <summary>
         /// Lists all files.
         /// </summary>
-        private async Task ListFiles(WebCliContext context)
+        private async Task ListFiles(CommandContext context)
         {
             var items = new List<Tuple<string, string, string>>();
 
@@ -97,7 +97,7 @@ namespace BeavisCli.Commands
         /// <summary>
         /// Removes a file by using the file id.
         /// </summary>
-        private async Task Remove(WebCliContext context, string id)
+        private async Task Remove(CommandContext context, string id)
         {
             FileContent file = await _files.RemoveAsync(id);
 
@@ -114,7 +114,7 @@ namespace BeavisCli.Commands
         /// <summary>
         /// Removes all files.
         /// </summary>
-        private async Task RemoveAll(WebCliContext context)
+        private async Task RemoveAll(CommandContext context)
         {
             int count = await _files.RemoveAllAsync();
 
@@ -131,7 +131,7 @@ namespace BeavisCli.Commands
         /// <summary>
         /// Downloads a file by using the file id.
         /// </summary>
-        private async Task Download(WebCliContext context, string id)
+        private async Task Download(CommandContext context, string id)
         {
             FileContent file = await _files.GetAsync(id);
 

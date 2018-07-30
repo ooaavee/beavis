@@ -3,9 +3,9 @@
 namespace BeavisCli
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class WebCliCommandAttribute : Attribute
+    public class CommandAttribute : Attribute
     {
-        public WebCliCommandAttribute(string name, string description)
+        public CommandAttribute(string name, string description)
         {
             Name = name;
             FullName = description;

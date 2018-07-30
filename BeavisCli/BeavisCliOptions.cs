@@ -1,13 +1,12 @@
-﻿using System;
+﻿using BeavisCli.Commands;
+using System;
 using System.Collections.Generic;
-using BeavisCli.Commands;
-using BeavisCli.Internal;
 
 namespace BeavisCli
 {
-    public sealed class WebCliOptions
+    public sealed class BeavisCliOptions
     {
-        public WebCliOptions()
+        public BeavisCliOptions()
         {
             BuiltInCommands = GetBuiltInCommands();
         }
@@ -30,9 +29,9 @@ namespace BeavisCli
         {
             var values = new Dictionary<string, CommandDefinition>();
 
-            void Init<TWebCliCommand>() where TWebCliCommand : WebCliCommand
+            void Init<TWebCliCommand>() where TWebCliCommand : Command
             {
-                var info = WebCliCommandInfo.FromType(typeof(TWebCliCommand));
+                var info = CommandInfo.FromType(typeof(TWebCliCommand));
                 var definition = new CommandDefinition {Type = typeof(TWebCliCommand)};
                 values[info.Name] = definition;
             }

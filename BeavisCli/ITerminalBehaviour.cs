@@ -4,8 +4,8 @@ namespace BeavisCli
 {
     public interface ITerminalBehaviour
     {
-        void OnInitialize(HttpContext context, WebCliResponse response);
+        void OnInitialize(HttpContext context, Response response);
 
-        bool IsVisibleForHelp(WebCliCommand cmd, WebCliContext context);
+        bool IsVisibleForHelp(Command cmd, CommandContext context);
     }
 }

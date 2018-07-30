@@ -9,21 +9,21 @@ namespace BeavisCli.Demo
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddWebCli(options =>
+            services.AddBeavisCli(options =>
             {
                 options.Path = "/beavis";
                 options.DisplayExceptions = true;
             });
 
-            //services.AddSingletonWebCliCommand<Services>();
-            //services.AddSingletonWebCliCommand<Types>();
+            //services.AddSingletonCommand<Services>();
+            //services.AddSingletonCommand<Types>();
 
 
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.UseWebCli();
+            app.UseBeavisCli();
 
             //app.Run(async (context) =>
             //{

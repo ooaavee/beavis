@@ -2,10 +2,10 @@
 
 namespace BeavisCli.Commands
 {
-    [WebCliCommand("clear", "Clear terminal")]
-    public class Clear : WebCliCommand
+    [Command("clear", "Clear terminal")]
+    public class Clear : Command
     {
-        public override async Task ExecuteAsync(WebCliContext context)
+        public override async Task ExecuteAsync(CommandContext context)
         {
             await OnExecuteAsync(() =>
             {

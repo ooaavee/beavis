@@ -3,10 +3,10 @@ using BeavisCli.JavaScriptStatements;
 
 namespace BeavisCli.Commands
 {
-    [WebCliCommand("reset", "Reset terminal")]
-    public class Reset : WebCliCommand
+    [Command("reset", "Reset terminal")]
+    public class Reset : Command
     {
-        public override async Task ExecuteAsync(WebCliContext context)
+        public override async Task ExecuteAsync(CommandContext context)
         {
             await OnExecuteAsync(() =>
             {

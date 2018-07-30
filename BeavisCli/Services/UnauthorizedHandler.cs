@@ -5,7 +5,7 @@ namespace BeavisCli.Services
 {
     public class UnauthorizedHandler : IUnauthorizedHandler
     {
-        public virtual Task OnUnauthorizedAsync(WebCliCommand cmd, WebCliContext context)
+        public virtual Task OnUnauthorizedAsync(Command cmd, CommandContext context)
         {
             if (cmd == null)
             {

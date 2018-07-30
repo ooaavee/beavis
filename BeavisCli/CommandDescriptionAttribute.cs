@@ -3,9 +3,9 @@
 namespace BeavisCli
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class WebCliCommandDescriptionAttribute : Attribute
+    public class CommandDescriptionAttribute : Attribute
     {
-        public WebCliCommandDescriptionAttribute(string description)
+        public CommandDescriptionAttribute(string description)
         {
             Description = description;
         }

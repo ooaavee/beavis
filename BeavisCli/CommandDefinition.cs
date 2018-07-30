@@ -10,6 +10,6 @@ namespace BeavisCli
 
         public bool IsTabCompletionEnabled { get; set; } = true;
 
-        public Type Type { get; set; }
+        internal Type Type { get; set; }
     }
 }

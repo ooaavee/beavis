@@ -5,6 +5,6 @@ namespace BeavisCli
 {
     public interface IJob
     {
-        Task RunAsync(HttpContext context, WebCliResponse response);
+        Task RunAsync(HttpContext context, Response response);
     }
 }
