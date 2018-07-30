@@ -1,5 +1,4 @@
-﻿using BeavisCli.Internal;
-using BeavisCli.Microsoft.Extensions.CommandLineUtils;
+﻿using BeavisCli.Microsoft.Extensions.CommandLineUtils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -9,21 +8,22 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Services
 {
-    public class RequestExecutor : IRequestExecutor
+    public class DefaultRequestExecutor : IRequestExecutor
     {
-        private readonly ILogger<RequestExecutor> _logger;
+        private readonly ILogger<DefaultRequestExecutor> _logger;
         private readonly ICommandProvider _commands;
         private readonly IAuthorizationHandler _authorization;
         private readonly IUnauthorizedHandler _unauthorized;
         private readonly BeavisCliOptions _options;
 
-        public RequestExecutor(ILoggerFactory loggerFactory,
-                               ICommandProvider commands, 
-                               IAuthorizationHandler authorization,
-                               IUnauthorizedHandler unauthorized,
-                               IOptions<BeavisCliOptions> options)
+        public DefaultRequestExecutor(
+            ILoggerFactory loggerFactory,
+            ICommandProvider commands, 
+            IAuthorizationHandler authorization,
+            IUnauthorizedHandler unauthorized,
+            IOptions<BeavisCliOptions> options)
         {
-            _logger = loggerFactory.CreateLogger<RequestExecutor>();
+            _logger = loggerFactory.CreateLogger<DefaultRequestExecutor>();
             _commands = commands;
             _authorization = authorization;
             _unauthorized = unauthorized;
@@ -139,7 +139,7 @@ namespace BeavisCli.Services
 
             bool authorized = _authorization.IsAuthorized(cmd, context);
 
-            bool externalHandler = !(_authorization is AuthorizationHandler);
+            bool externalHandler = !(_authorization is DefaultAuthorizationHandler);
 
             if (externalHandler)
             {

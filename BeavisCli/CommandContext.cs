@@ -47,14 +47,12 @@ namespace BeavisCli
 
         public ICommandOption Option(string template, string description, CommandOptionType optionType)
         {
-            var option = Processor.Option(template, description, Map(optionType));
-            return new CommandOption(option);
+            return new CommandOption(Processor.Option(template, description, Map(optionType)));
         }
 
         public ICommandArgument Argument(string name, string description, bool multipleValues = false)
         {
-            var argument = Processor.Argument(name, description, multipleValues);
-            return new CommandArgument(argument);
+            return new CommandArgument(Processor.Argument(name, description, multipleValues));
         }
 
         private static Microsoft.Extensions.CommandLineUtils.CommandOptionType Map(CommandOptionType optionType)

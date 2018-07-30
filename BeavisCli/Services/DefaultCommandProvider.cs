@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace BeavisCli.Services
 {
-    public class CommandProvider : ICommandProvider
+    public class DefaultCommandProvider : ICommandProvider
     {
         public virtual Command GetCommand(string name, HttpContext httpContext)
         {

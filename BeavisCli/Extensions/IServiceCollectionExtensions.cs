@@ -19,36 +19,47 @@ namespace Microsoft.Extensions.DependencyInjection
             setupAction(options);
             services.Configure(setupAction);
 
-            services.AddSingleton<ICommandProvider, CommandProvider>();
-            services.AddSingleton<IRequestExecutor, RequestExecutor>();
-            services.AddSingleton<IJobPool, JobPool>();
+            services.Add(ServiceDescriptor.Describe(
+                options.CommandProviderService.ServiceType,
+                options.CommandProviderService.ImplementationType,
+                options.CommandProviderService.Lifetime));
 
-            // IUnauthorizedHandler
-            services.Add(options.UnauthorizedHandlerType == null
-                ? ServiceDescriptor.Singleton(typeof(IUnauthorizedHandler), typeof(UnauthorizedHandler))
-                : ServiceDescriptor.Singleton(typeof(IUnauthorizedHandler), options.UnauthorizedHandlerType));
+            services.Add(ServiceDescriptor.Describe(
+                options.RequestExecutorService.ServiceType,
+                options.RequestExecutorService.ImplementationType,
+                options.RequestExecutorService.Lifetime));
 
-            // ITerminalBehaviour
-            services.Add(options.TerminalBehaviourType == null
-                ? ServiceDescriptor.Singleton(typeof(ITerminalBehaviour), typeof(TerminalBehaviour))
-                : ServiceDescriptor.Singleton(typeof(ITerminalBehaviour), options.TerminalBehaviourType));
+            services.Add(ServiceDescriptor.Describe(
+                options.JobPoolService.ServiceType,
+                options.JobPoolService.ImplementationType,
+                options.JobPoolService.Lifetime));
 
-            // IFileStorage
-            services.Add(options.FileStorageType == null
-                ? ServiceDescriptor.Singleton(typeof(IFileStorage), typeof(FileStorage))
-                : ServiceDescriptor.Singleton(typeof(IFileStorage), options.FileStorageType));
+            services.Add(ServiceDescriptor.Describe(
+                options.UnauthorizedHandlerService.ServiceType,
+                options.UnauthorizedHandlerService.ImplementationType,
+                options.UnauthorizedHandlerService.Lifetime));
 
-            // IAuthorizationHandler
-            services.Add(options.AuthorizationHandlerType == null
-                ? ServiceDescriptor.Singleton(typeof(IAuthorizationHandler), typeof(AuthorizationHandler))
-                : ServiceDescriptor.Singleton(typeof(IAuthorizationHandler), options.AuthorizationHandlerType));
+            services.Add(ServiceDescriptor.Describe(
+                options.TerminalBehaviourService.ServiceType,
+                options.TerminalBehaviourService.ImplementationType,
+                options.TerminalBehaviourService.Lifetime));
 
-            // register default commands
+            services.Add(ServiceDescriptor.Describe(
+                options.FileStorageService.ServiceType,
+                options.FileStorageService.ImplementationType,
+                options.FileStorageService.Lifetime));
+
+            services.Add(ServiceDescriptor.Describe(
+                options.AuthorizationHandlerService.ServiceType,
+                options.AuthorizationHandlerService.ImplementationType,
+                options.AuthorizationHandlerService.Lifetime));
+
+            // default commands
             foreach (CommandDefinition definition in options.BuiltInCommands.Values)
             {
                 if (definition.IsEnabled)
                 {
-                    services.Add(ServiceDescriptor.Singleton(typeof(Command), definition.Type));
+                    services.Add(ServiceDescriptor.Singleton(typeof(Command), definition.ImplementationType));
                 }
             }
 
@@ -77,7 +88,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void ValidateCommand<TWebCliCommand>() where TWebCliCommand : Command
         {
-            CommandInfo info = CommandInfo.FromType(typeof(TWebCliCommand));
+            CommandInfo info = CommandInfo.ForType(typeof(TWebCliCommand));
 
             if (info == null)
             {

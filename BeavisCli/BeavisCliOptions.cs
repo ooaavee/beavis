@@ -1,5 +1,6 @@
 ﻿using BeavisCli.Commands;
-using System;
+using BeavisCli.Services;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 
 namespace BeavisCli
@@ -15,13 +16,54 @@ namespace BeavisCli
 
         public bool DisplayExceptions { get; set; }
 
-        public Type UnauthorizedHandlerType { get; set; }
+        public ServiceDefinition UnauthorizedHandlerService { get; } = new ServiceDefinition
+        {
+            Lifetime = ServiceLifetime.Singleton,
+            ImplementationType = typeof(DefaultUnauthorizedHandler),
+            ServiceType = typeof(IUnauthorizedHandler)
+        };
 
-        public Type TerminalBehaviourType { get; set; }
+        public ServiceDefinition TerminalBehaviourService { get; } = new ServiceDefinition
+        {
+            Lifetime = ServiceLifetime.Singleton,
+            ImplementationType = typeof(DefaultTerminalBehaviour),
+            ServiceType = typeof(ITerminalBehaviour)
+        };
 
-        public Type FileStorageType { get; set; }
+        public ServiceDefinition FileStorageService { get; } = new ServiceDefinition
+        {
+            Lifetime = ServiceLifetime.Singleton,
+            ImplementationType = typeof(DefaultFileStorage),
+            ServiceType = typeof(IFileStorage)
+        };
 
-        public Type AuthorizationHandlerType { get; set; }
+        public ServiceDefinition AuthorizationHandlerService { get; } = new ServiceDefinition
+        {
+            Lifetime = ServiceLifetime.Singleton,
+            ImplementationType = typeof(DefaultAuthorizationHandler),
+            ServiceType = typeof(IAuthorizationHandler)
+        };
+
+        public ServiceDefinition CommandProviderService { get; } = new ServiceDefinition
+        {
+            Lifetime = ServiceLifetime.Singleton,
+            ImplementationType = typeof(DefaultCommandProvider),
+            ServiceType = typeof(ICommandProvider)
+        };
+
+        public ServiceDefinition RequestExecutorService { get; } = new ServiceDefinition
+        {
+            Lifetime = ServiceLifetime.Singleton,
+            ImplementationType = typeof(DefaultRequestExecutor),
+            ServiceType = typeof(IRequestExecutor)
+        };
+
+        public ServiceDefinition JobPoolService { get; } = new ServiceDefinition
+        {
+            Lifetime = ServiceLifetime.Singleton,
+            ImplementationType = typeof(DefaultJobPool),
+            ServiceType = typeof(IJobPool)
+        };
 
         public IReadOnlyDictionary<string, CommandDefinition> BuiltInCommands { get; }
 
@@ -31,8 +73,8 @@ namespace BeavisCli
 
             void Init<TWebCliCommand>() where TWebCliCommand : Command
             {
-                var info = CommandInfo.FromType(typeof(TWebCliCommand));
-                var definition = new CommandDefinition {Type = typeof(TWebCliCommand)};
+                var info = CommandInfo.ForType(typeof(TWebCliCommand));
+                var definition = new CommandDefinition { ImplementationType = typeof(TWebCliCommand) };
                 values[info.Name] = definition;
             }
 

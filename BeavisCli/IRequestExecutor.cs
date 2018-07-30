@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 
 namespace BeavisCli
 {

@@ -2,24 +2,26 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BeavisCli.Internal
+namespace BeavisCli
 {
-    internal static class KeyProvider
-    {
-        public static string Create()
+    public static class KeyProvider
+    {   
+        public static string Create(Func<string, bool> valueChecker)
         {
-            string value = Guid.NewGuid().ToString().Substring(0, 8);
-            return value;
-        }
-
-        public static string Create(Func<string, bool> exists)
-        {
-            const int maxTryCount = 3;
-
-            for (int i = 0; i < maxTryCount; i++)
+            if (valueChecker == null)
             {
-                string value = Create();
-                if (!exists(value))
+                throw new ArgumentNullException(nameof(valueChecker));
+            }
+
+            const int maxTries = 3;
+
+            for (int i = 0; i < maxTries; i++)
+            {
+                string value = Guid.NewGuid().ToString().Substring(0, 8);
+
+                bool exists = valueChecker(value);
+
+                if (!exists)
                 {
                     return value;
                 }
@@ -28,19 +30,23 @@ namespace BeavisCli.Internal
             throw new InvalidOperationException("Failed to generate a new random key.");
         }
 
-        public static string Find(string candidate, Func<IEnumerable<string>> existing)
+        public static string Find(string candidate, Func<IEnumerable<string>> all)
         {
             if (string.IsNullOrEmpty(candidate))
             {
                 return null;
             }
+                     
+            if (all == null)
+            {
+                throw new ArgumentNullException(nameof(all));
+            }
 
-            string[] matches = existing().Where(x => x.StartsWith(candidate)).ToArray();
+            string[] matches = all().Where(x => x.StartsWith(candidate)).ToArray();
 
             if (matches.Length == 1)
             {
-                string value = matches[0];
-                return value;
+                return matches[0];
             }
 
             return null;

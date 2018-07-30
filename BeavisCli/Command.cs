@@ -1,5 +1,4 @@
-﻿using BeavisCli.Internal;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
@@ -12,8 +11,6 @@ namespace BeavisCli
     {
         private static readonly Assembly ThisAssembly = typeof(Command).Assembly;
 
-        // we can safely use a static dictionary cache here, because these values doesn't change during runtime
-        private static readonly ConcurrentDictionary<Type, CommandInfo> ResolvedInfo = new ConcurrentDictionary<Type, CommandInfo>();
 
         private const int ExitStatusCode = 2;
 
@@ -253,20 +250,7 @@ namespace BeavisCli
         /// <summary>
         /// Gets information about this command.
         /// </summary>
-        public CommandInfo Info
-        {
-            get
-            {
-                if (!ResolvedInfo.TryGetValue(GetType(), out CommandInfo value))
-                {
-                    if ((value = CommandInfo.FromType(GetType())) != null)
-                    {
-                        ResolvedInfo.TryAdd(GetType(), value);
-                    }
-                }
-                return value;
-            }
-        }
+        public CommandInfo Info => CommandInfo.ForType(GetType());
 
         /// <summary>
         /// Checks if this built-in command.

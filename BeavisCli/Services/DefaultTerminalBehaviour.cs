@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace BeavisCli.Services
 {
-    public class TerminalBehaviour : ITerminalBehaviour
+    public class DefaultTerminalBehaviour : ITerminalBehaviour
     {
         public virtual void OnInitialize(HttpContext context, Response response)
         {
@@ -165,7 +165,7 @@ namespace BeavisCli.Services
             }
 
             BeavisCliOptions options = context.RequestServices.GetRequiredService<IOptions<BeavisCliOptions>>().Value;
-            CommandInfo info = CommandInfo.FromType(typeof(Upload));
+            CommandInfo info = CommandInfo.ForType(typeof(Upload));
             CommandDefinition definition = options.BuiltInCommands[info.Name];
             return definition.IsEnabled;
         }

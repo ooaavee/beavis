@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace BeavisCli.Internal
+namespace BeavisCli
 {
     internal class ResponseMessageTextWriter : TextWriter
     {

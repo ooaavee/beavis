@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Services
 {
-    public class UnauthorizedHandler : IUnauthorizedHandler
+    public class DefaultUnauthorizedHandler : IUnauthorizedHandler
     {
         public virtual Task OnUnauthorizedAsync(Command cmd, CommandContext context)
         {

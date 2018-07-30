@@ -73,20 +73,20 @@ namespace BeavisCli
             }
         }
 
-        public static IEnumerable<string> FormatLines(IEnumerable<string> lines, bool indent = false)
-        {
-            if (lines == null)
-            {
-                throw new ArgumentNullException(nameof(lines));
-            }
+        ////public static IEnumerable<string> FormatLines(IEnumerable<string> lines, bool indent = false)
+        ////{
+        ////    if (lines == null)
+        ////    {
+        ////        throw new ArgumentNullException(nameof(lines));
+        ////    }
 
-            string leftPadding = indent ? ParagraphPadding : "";
+        ////    string leftPadding = indent ? ParagraphPadding : "";
 
-            foreach (string line in lines)
-            {
-                yield return $"{leftPadding}{line}";                
-            }        
-        }
+        ////    foreach (string line in lines)
+        ////    {
+        ////        yield return $"{leftPadding}{line}";                
+        ////    }        
+        ////}
 
         private static string Col(string text, int len)
         {
