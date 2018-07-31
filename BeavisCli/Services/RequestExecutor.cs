@@ -8,22 +8,22 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Services
 {
-    public class DefaultRequestExecutor : IRequestExecutor
+    public class RequestExecutor : IRequestExecutor
     {
-        private readonly ILogger<DefaultRequestExecutor> _logger;
+        private readonly ILogger<RequestExecutor> _logger;
         private readonly ICommandProvider _commands;
         private readonly IAuthorizationHandler _authorization;
         private readonly IUnauthorizedHandler _unauthorized;
         private readonly BeavisCliOptions _options;
 
-        public DefaultRequestExecutor(
+        public RequestExecutor(
             ILoggerFactory loggerFactory,
             ICommandProvider commands, 
             IAuthorizationHandler authorization,
             IUnauthorizedHandler unauthorized,
             IOptions<BeavisCliOptions> options)
         {
-            _logger = loggerFactory.CreateLogger<DefaultRequestExecutor>();
+            _logger = loggerFactory.CreateLogger<RequestExecutor>();
             _commands = commands;
             _authorization = authorization;
             _unauthorized = unauthorized;
@@ -139,7 +139,7 @@ namespace BeavisCli.Services
 
             bool authorized = _authorization.IsAuthorized(cmd, context);
 
-            bool externalHandler = !(_authorization is DefaultAuthorizationHandler);
+            bool externalHandler = !(_authorization is AuthorizationHandler);
 
             if (externalHandler)
             {

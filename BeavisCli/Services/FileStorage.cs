@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Services
 {
-    public class DefaultFileStorage : IFileStorage
+    public class FileStorage : IFileStorage
     {
-        private readonly ILogger<DefaultFileStorage> _logger;
+        private readonly ILogger<FileStorage> _logger;
 
         private readonly ConcurrentDictionary<string, FileContent> _files = new ConcurrentDictionary<string, FileContent>();
 
-        public DefaultFileStorage(ILoggerFactory loggerFactory)
+        public FileStorage(ILoggerFactory loggerFactory)
         {
-            _logger = loggerFactory.CreateLogger<DefaultFileStorage>();
+            _logger = loggerFactory.CreateLogger<FileStorage>();
         }
 
         public virtual Task<string> StoreAsync(FileContent file)

@@ -1,4 +1,5 @@
-﻿using BeavisCli.Commands;
+﻿using System;
+using BeavisCli.Commands;
 using BeavisCli.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
@@ -16,52 +17,73 @@ namespace BeavisCli
 
         public bool DisplayExceptions { get; set; }
 
+        /// <summary>
+        /// IUnauthorizedHandler
+        /// </summary>
         public ServiceDefinition UnauthorizedHandlerService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(DefaultUnauthorizedHandler),
+            ImplementationType = typeof(UnauthorizedHandler),
             ServiceType = typeof(IUnauthorizedHandler)
         };
 
+        /// <summary>
+        /// ITerminalBehaviour
+        /// </summary>
         public ServiceDefinition TerminalBehaviourService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(DefaultTerminalBehaviour),
+            ImplementationType = typeof(TerminalBehaviour),
             ServiceType = typeof(ITerminalBehaviour)
         };
 
+        /// <summary>
+        /// IFileStorage
+        /// </summary>
         public ServiceDefinition FileStorageService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(DefaultFileStorage),
+            ImplementationType = typeof(Services.FileStorage),
             ServiceType = typeof(IFileStorage)
         };
 
+        /// <summary>
+        /// IAuthorizationHandler
+        /// </summary>
         public ServiceDefinition AuthorizationHandlerService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(DefaultAuthorizationHandler),
+            ImplementationType = typeof(AuthorizationHandler),
             ServiceType = typeof(IAuthorizationHandler)
         };
 
+        /// <summary>
+        /// ICommandProvider
+        /// </summary>
         public ServiceDefinition CommandProviderService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(DefaultCommandProvider),
+            ImplementationType = typeof(CommandProvider),
             ServiceType = typeof(ICommandProvider)
         };
 
+        /// <summary>
+        /// IRequestExecutor
+        /// </summary>
         public ServiceDefinition RequestExecutorService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(DefaultRequestExecutor),
+            ImplementationType = typeof(RequestExecutor),
             ServiceType = typeof(IRequestExecutor)
         };
 
+        /// <summary>
+        /// IJobPool
+        /// </summary>
         public ServiceDefinition JobPoolService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(DefaultJobPool),
+            ImplementationType = typeof(JobPool),
             ServiceType = typeof(IJobPool)
         };
 
@@ -71,20 +93,18 @@ namespace BeavisCli
         {
             var values = new Dictionary<string, CommandDefinition>();
 
-            void Init<TWebCliCommand>() where TWebCliCommand : Command
+            void Add(Type type)
             {
-                var info = CommandInfo.ForType(typeof(TWebCliCommand));
-                var definition = new CommandDefinition { ImplementationType = typeof(TWebCliCommand) };
-                values[info.Name] = definition;
+                values[CommandInfo.ForType(type).Name] = new CommandDefinition { ImplementationType = type };
             }
 
-            Init<Help>();
-            Init<Clear>();
-            Init<Reset>();
-            Init<Shortcuts>();
-            Init<License>();
-            Init<Upload>();
-            Init<FileStorage>();
+            Add(typeof(Help));
+            Add(typeof(Clear));
+            Add(typeof(Reset));
+            Add(typeof(Shortcuts));
+            Add(typeof(License));
+            Add(typeof(Upload));
+            Add(typeof(Commands.FileStorage));
 
             return values;
         }

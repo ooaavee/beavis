@@ -2,7 +2,7 @@
 
 namespace BeavisCli.Services
 {
-    public class DefaultAuthorizationHandler : IAuthorizationHandler
+    public class AuthorizationHandler : IAuthorizationHandler
     {
         public virtual bool IsAuthorized(Command cmd, CommandContext context)
         {

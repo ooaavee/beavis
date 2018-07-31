@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace BeavisCli.Services
 {
-    public class DefaultTerminalBehaviour : ITerminalBehaviour
+    public class TerminalBehaviour : ITerminalBehaviour
     {
         public virtual void OnInitialize(HttpContext context, Response response)
         {

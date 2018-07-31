@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Services
 {
-    public class DefaultJobPool : IJobPool
+    public class JobPool : IJobPool
     {
         private readonly ConcurrentDictionary<string, IJob> _jobs = new ConcurrentDictionary<string, IJob>();
-        private readonly ILogger<DefaultJobPool> _logger;
+        private readonly ILogger<JobPool> _logger;
 
-        public DefaultJobPool(ILoggerFactory loggerFactory)
+        public JobPool(ILoggerFactory loggerFactory)
         {
-            _logger = loggerFactory.CreateLogger<DefaultJobPool>();
+            _logger = loggerFactory.CreateLogger<JobPool>();
         }
 
         /// <summary>
