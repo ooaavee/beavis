@@ -12,7 +12,7 @@
             _enabled = enabled;
         }
 
-        public string GetJavaScript()
+        public string GetCode()
         {
            return $"window[\"__upload_enabled\"] = {_enabled.ToString().ToLowerInvariant()};";
         }

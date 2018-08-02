@@ -8,17 +8,7 @@ namespace BeavisCli.Services
     public class CommandProvider : ICommandProvider
     {
         public virtual Command GetCommand(string name, HttpContext httpContext)
-        {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
-
-            if (httpContext == null)
-            {
-                throw new ArgumentNullException(nameof(httpContext));
-            }
-
+        {            
             int count = 0;
 
             Command result = null;
@@ -48,12 +38,7 @@ namespace BeavisCli.Services
         }
 
         public virtual IEnumerable<Command> GetCommands(HttpContext httpContext)
-        {
-            if (httpContext == null)
-            {
-                throw new ArgumentNullException(nameof(httpContext));
-            }
-
+        {            
             foreach (Command cmd in httpContext.RequestServices.GetServices<Command>())
             {
                 if (cmd.Info != null)

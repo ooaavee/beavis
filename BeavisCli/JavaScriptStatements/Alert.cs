@@ -20,7 +20,7 @@ namespace BeavisCli.JavaScriptStatements
             _message = JavaScriptEncoder.Default.Encode(message);
         }
 
-        public string GetJavaScript()
+        public string GetCode()
         {
             return $"alert('{_message}');";
         }

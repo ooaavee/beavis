@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -12,238 +13,198 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Middlewares
 {
-    internal class BeavisCliMiddleware
+    public class BeavisCliMiddleware
     {
         private const string DefaultPath = "/beaviscli";
 
         private readonly RequestDelegate _next;
         private readonly ILogger<BeavisCliMiddleware> _logger;
-        private readonly IRequestExecutor _executor;
-        private readonly IJobPool _jobs;
-        private readonly ITerminalBehaviour _behaviour;
-        private readonly IFileStorage _files;
         private readonly BeavisCliOptions _options;
 
-        public BeavisCliMiddleware(RequestDelegate next, 
-                                   ILoggerFactory loggerFactory,
-                                   IRequestExecutor executor,
-                                   IJobPool jobs, 
-                                   ITerminalBehaviour behaviour, 
-                                   IFileStorage files, 
-                                   IOptions<BeavisCliOptions> options)
+        public BeavisCliMiddleware(RequestDelegate next, ILoggerFactory loggerFactory, IOptions<BeavisCliOptions> options)
         {
             _next = next;
             _logger = loggerFactory.CreateLogger<BeavisCliMiddleware>();
-            _executor = executor;
-            _jobs = jobs;
-            _behaviour = behaviour;
-            _files = files;
             _options = options.Value;
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext httpContext)
         {
-            HttpRequest request = context.Request;
+            BeavisCliRequestTypes type = GetRequestType(httpContext.Request);
 
-            if (!IsPotentialMatch(request))
+            if (type == BeavisCliRequestTypes.None)
             {
-                await _next(context);
+                await _next(httpContext);
                 return;
             }
 
-            _logger.LogInformation($"Started to process a request for a path '{request.Path.ToString()}'.");
+            // all required services
+            ITerminalBehaviour behaviour = httpContext.RequestServices.GetRequiredService<ITerminalBehaviour>();
+            IJobPool jobs = httpContext.RequestServices.GetRequiredService<IJobPool>();
+            IFileStorage files = httpContext.RequestServices.GetRequiredService<IFileStorage>();
+            IRequestExecutor executor = httpContext.RequestServices.GetRequiredService<IRequestExecutor>();
 
-            // terminal HTML
-            if (Match(_options.Path, HttpMethods.Get, request))
+            bool accessible = behaviour.IsRequestHandlerAccessible(httpContext, type);
+            if (!accessible)
             {
-                await HandleGetTerminal(context);
+                await _next(httpContext);
                 return;
             }
 
-            // terminal CSS
-            if (Match($"{DefaultPath}/content/css", HttpMethods.Get, request))
-            {
-                await HandleGetTerminalCss(context);
-                return;
-            }
+            _logger.LogInformation($"Started to process a request for a path '{httpContext.Request.Path.ToString()}'.");
 
-            // terminal JS
-            if (Match($"{DefaultPath}/content/js", HttpMethods.Get, request))
-            {
-                await HandleGetTerminalJs(context);
-                return;
-            }
-
-            // initialize terminal
-            if (Match($"{DefaultPath}/api/initialize", HttpMethods.Post, request))
-            {
-                await HandleInitializeTerminal(context);
-                return;
-            }
-
-            // invoke job
-            if (Match($"{DefaultPath}/api/job", HttpMethods.Post, request))
-            {
-                await HandleInvokeJob(context);
-                return;
-            }
-
-            // invoke command
-            if (Match($"{DefaultPath}/api/request", HttpMethods.Post, request))
-            {
-                await HandleInvokeCommand(context);
-                return;
-            }
-
-            // file upload
-            if (Match($"{DefaultPath}/api/upload", HttpMethods.Post, request))
-            {
-                await HandleFileUpload(context);
-                return;
-            }
-
-            _logger.LogInformation($"Received a request for path '{request.Path.ToString()}', but unable to find a handler for it.");
-
-            await _next(context);
-        }
-
-        private bool IsPotentialMatch(HttpRequest request)
-        {
-            return request.Path.StartsWithSegments(_options.Path, StringComparison.InvariantCultureIgnoreCase) ||
-                   request.Path.StartsWithSegments(DefaultPath, StringComparison.InvariantCultureIgnoreCase);
-        }
-
-        private bool Match(string path, string method, HttpRequest request)
-        {
-            return request.Method == method &&
-                   request.Path.Equals(path, StringComparison.InvariantCultureIgnoreCase);
-        }
-
-        private async Task HandleGetTerminal(HttpContext httpContext)
-        {
             try
             {
-                await RenderHtmlAsync(httpContext);
+                switch (type)
+                {
+                    case BeavisCliRequestTypes.TerminalHtml:
+                        {
+                            await RenderHtmlAsync(httpContext);
+                            break;
+                        }
+
+                    case BeavisCliRequestTypes.TerminalCss:
+                        {
+                            await RenderCssAsync(httpContext);
+                            break;
+                        }
+
+                    case BeavisCliRequestTypes.TerminalJs:
+                        {
+                            await RenderJsAsync(httpContext);
+                            break;
+                        }
+
+                    case BeavisCliRequestTypes.Initialize:
+                        {
+                            Response response = new Response(httpContext);
+                            response.Messages.AddRange(behaviour.EnumInitMessages(httpContext));
+                            response.AddJavaScript(behaviour.EnumInitStatements(httpContext));
+                            await RenderResponseAsync(response, httpContext);
+                            break;
+                        }
+
+                    case BeavisCliRequestTypes.InvokeJob:
+                        {
+                            Response response = new Response(httpContext);
+                            string key = httpContext.Request.Query["key"];
+                            await jobs.RunAsync(key, httpContext, response);
+                            await RenderResponseAsync(response, httpContext);
+                            break;
+                        }
+
+                    case BeavisCliRequestTypes.InvokeCommand:
+                        {
+                            string body = await ReadBodyAsync(httpContext);
+                            Request request = JsonConvert.DeserializeObject<Request>(body);
+                            Response response = new Response(httpContext);
+                            await executor.ExecuteAsync(request, response, httpContext);
+                            await RenderResponseAsync(response, httpContext);
+                            break;
+                        }
+
+                    case BeavisCliRequestTypes.Upload:
+                        {
+                            if (!behaviour.IsUploadEnabled(httpContext))
+                            {
+                                throw new InvalidOperationException("File upload functionality is not currently enabled.");
+                            }
+                            string body = await ReadBodyAsync(httpContext);
+                            Response response = new Response(httpContext);
+                            FileContent file = JsonConvert.DeserializeObject<FileContent>(body);
+                            string id = await files.StoreAsync(file);
+                            response.WriteInformation("File upload completed, the file ID is:");
+                            response.WriteInformation(id);
+                            await RenderResponseAsync(response, httpContext);
+                            break;
+                        }
+                }
             }
             catch (Exception e)
             {
-                _logger.LogError("An error occurred while processing the get terminal html request.", e);
+                _logger.LogError($"An error occurred while processing the request type of '{type}'.", e);
                 await WriteErrorResponseAsync(e, httpContext);
+                return;
             }
+
+            _logger.LogInformation($"Processed a request for a path '{httpContext.Request.Path.ToString()}'.");
         }
 
-        private async Task HandleGetTerminalCss(HttpContext httpContext)
+        private BeavisCliRequestTypes GetRequestType(HttpRequest request)
         {
-            try
+            bool IsPotentialMatch()
             {
-                await RenderCssAsync(httpContext);
+                return request.Path.StartsWithSegments(_options.Path, StringComparison.InvariantCultureIgnoreCase) ||
+                       request.Path.StartsWithSegments(DefaultPath, StringComparison.InvariantCultureIgnoreCase);
             }
-            catch (Exception e)
-            {
-                _logger.LogError("An error occurred while processing the get terminal css request.", e);
-                await WriteErrorResponseAsync(e, httpContext);
-            }
-        }
 
-        private async Task HandleGetTerminalJs(HttpContext httpContext)
-        {
-            try
+            bool Match(string path, string method)
             {
-                await RenderJsAsync(httpContext);
+                return request.Method == method &&
+                       request.Path.Equals(path, StringComparison.InvariantCultureIgnoreCase);
             }
-            catch (Exception e)
-            {
-                _logger.LogError("An error occurred while processing the get terminal js request.", e);
-                await WriteErrorResponseAsync(e, httpContext);
-            }
-        }
 
-        private async Task HandleInitializeTerminal(HttpContext httpContext)
-        {
-            try
+            if (!IsPotentialMatch())
             {
-                Response response = new Response(httpContext);                
-                _behaviour.OnInitialize(httpContext, response);
-                await RenderResponseAsync(response, httpContext);
+                return BeavisCliRequestTypes.None;
             }
-            catch (Exception e)
-            {
-                _logger.LogError("An error occurred while processing the initialize terminal request.", e);
-                await WriteErrorResponseAsync(e, httpContext);
-            }
-        }
 
-        private async Task HandleInvokeJob(HttpContext httpContext)
-        {
-            try
+            if (Match(_options.Path, HttpMethods.Get))
             {
-                Response response = new Response(httpContext);
-                string key = httpContext.Request.Query["key"];
-                await _jobs.RunAsync(key, httpContext, response);
-                await RenderResponseAsync(response, httpContext);
+                return BeavisCliRequestTypes.TerminalHtml;
             }
-            catch (Exception e)
-            {
-                _logger.LogError("An error occurred while processing a job.", e);
-                await WriteErrorResponseAsync(e, httpContext);
-            }
-        }
 
-        private async Task HandleInvokeCommand(HttpContext httpContext)
-        {
-            try
+            if (Match($"{DefaultPath}/content/css", HttpMethods.Get))
             {
-                string body = await ReadBodyAsync(httpContext);
-                Request request = JsonConvert.DeserializeObject<Request>(body);
-                Response response = new Response(httpContext);
-                await _executor.ExecuteAsync(request, response, httpContext);
-                await RenderResponseAsync(response, httpContext);
+                return BeavisCliRequestTypes.TerminalCss;
             }
-            catch (Exception e)
-            {
-                _logger.LogError("An error occurred while processing the invoke command request.", e);
-                await WriteErrorResponseAsync(e, httpContext);
-            }
-        }
 
-        private async Task HandleFileUpload(HttpContext httpContext)
-        {
-            try
+            if (Match($"{DefaultPath}/content/js", HttpMethods.Get))
             {
-                string body = await ReadBodyAsync(httpContext);
-                Response response = new Response(httpContext);
-                FileContent file = JsonConvert.DeserializeObject<FileContent>(body);
-                string id = await _files.StoreAsync(file);
-                response.WriteInformation("File upload completed, the file ID is:");
-                response.WriteInformation(id);
-                await RenderResponseAsync(response, httpContext);
+                return BeavisCliRequestTypes.TerminalJs;
             }
-            catch (Exception e)
+
+            if (Match($"{DefaultPath}/api/initialize", HttpMethods.Post))
             {
-                _logger.LogError("An error occurred while processing the file upload request.", e);
-                await WriteErrorResponseAsync(e, httpContext);
+                return BeavisCliRequestTypes.Initialize;
             }
+
+            if (Match($"{DefaultPath}/api/job", HttpMethods.Post))
+            {
+                return BeavisCliRequestTypes.InvokeJob;
+            }
+
+            if (Match($"{DefaultPath}/api/request", HttpMethods.Post))
+            {
+                return BeavisCliRequestTypes.InvokeCommand;
+            }
+
+            if (Match($"{DefaultPath}/api/upload", HttpMethods.Post))
+            {
+                return BeavisCliRequestTypes.Upload;
+            }
+
+            return BeavisCliRequestTypes.None;
         }
 
         private async Task WriteErrorResponseAsync(Exception e, HttpContext httpContext)
         {
-            string text = _options.DisplayExceptions ? 
-                e.ToString() : 
+            string text = _options.DisplayExceptions ?
+                e.ToString() :
                 "An error occurred. Please check your application logs for more details.";
 
-            httpContext.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
+            httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             httpContext.Response.ContentType = "text/plain";
             await httpContext.Response.WriteAsync(text, Encoding.UTF8);
         }
 
         private static async Task<string> ReadBodyAsync(HttpContext httpContext)
         {
-            using (Stream stream = httpContext.Request.Body)
+            using (var stream = httpContext.Request.Body)
             {
-                using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
+                using (var reader = new StreamReader(stream, Encoding.UTF8))
                 {
-                    string body = await reader.ReadToEndAsync();
-                    return body;
+                    return await reader.ReadToEndAsync();
                 }
             }
         }
@@ -307,19 +268,19 @@ namespace BeavisCli.Middlewares
 
         private static async Task<string> ReadEmbeddedResourcesAsync(params string[] files)
         {
-            var text = new StringBuilder();
+            var buf = new StringBuilder();
             foreach (string file in files)
             {
-                using (Stream stream = Assembly.GetAssembly(typeof(BeavisCliMiddleware)).GetManifestResourceStream(file))
+                using (var stream = Assembly.GetAssembly(typeof(BeavisCliMiddleware)).GetManifestResourceStream(file))
                 {
-                    using (StreamReader reader = new StreamReader(stream))
+                    using (var reader = new StreamReader(stream))
                     {
-                        string tmp = await reader.ReadToEndAsync();
-                        text.AppendLine(tmp);
+                        var s = await reader.ReadToEndAsync();
+                        buf.AppendLine(s);
                     }
                 }
             }
-            return text.ToString();
+            return buf.ToString();
         }
     }
 }

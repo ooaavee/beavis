@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Concurrent;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -10,7 +9,6 @@ namespace BeavisCli
     public abstract class Command
     {
         private static readonly Assembly ThisAssembly = typeof(Command).Assembly;
-
 
         private const int ExitStatusCode = 2;
 
@@ -43,17 +41,7 @@ namespace BeavisCli
         public abstract Task ExecuteAsync(CommandContext context);
 
         protected async Task OnExecuteAsync(Func<Task<int>> invoke, CommandContext context)
-        {
-            if (invoke == null)
-            {
-                throw new ArgumentNullException(nameof(invoke));
-            }
-
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
+        {            
             // register invoke hook
             context.Processor.Invoke = () => invoke().Result;
 
@@ -75,55 +63,58 @@ namespace BeavisCli
         }
 
         protected Task<int> Exit(CommandContext context)
-        {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
+        {           
             _logger?.LogDebug($"Exiting '{GetType().FullName}'.");
             return Task.FromResult(ExitStatusCode);
         }
-
+     
         protected async Task<int> ExitAsync(CommandContext context)
         {
-            if (context == null)
+            int result = Exit(context).Result;
+            return await Task.FromResult(result);
+        }
+
+        protected Task<int> Exit(CommandContext context, string text, ResponseMessageTypes type)
+        {            
+            _logger?.LogDebug($"Exiting '{GetType().FullName}' with message type '{type}' and text '{text}'.");
+
+            switch (type)
             {
-                throw new ArgumentNullException(nameof(context));
+                case ResponseMessageTypes.Information:
+                    context.Response.WriteInformation(text);
+                    break;
+                case ResponseMessageTypes.Error:
+                    context.Response.WriteError(text);
+                    break;
+                case ResponseMessageTypes.Success:
+                    context.Response.WriteSuccess(text);
+                    break;
             }
-     
-            return await Task.FromResult(Exit(context).Result);
+
+            return Task.FromResult(ExitStatusCode);
+        }
+
+        protected async Task<int> ExitAsync(CommandContext context, string text, ResponseMessageTypes type)
+        {
+            int result = Exit(context, text, type).Result;
+            return await Task.FromResult(result);
         }
 
         protected Task<int> ExitWithHelp(CommandContext context)
-        {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            _logger?.LogDebug($"Exiting '{GetType().FullName}' with help.");            
+        {            
+            _logger?.LogDebug($"Exiting '{GetType().FullName}' with help.");              
             context.Processor.ShowHelp(Info.Name);
             return Task.FromResult(ExitStatusCode);
         }
 
         protected async Task<int> ExitWithHelpAsync(CommandContext context)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            return await Task.FromResult(ExitWithHelp(context).Result);
+            int result = ExitWithHelp(context).Result;
+            return await Task.FromResult(result);
         }
 
         protected Task<int> Unauthorized(CommandContext context)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
             _logger?.LogDebug($"Exiting '{GetType().FullName}' with unauthorized.");
             IUnauthorizedHandler handler = context.HttpContext.RequestServices.GetRequiredService<IUnauthorizedHandler>();
             handler.OnUnauthorizedAsync(this, context);
@@ -132,26 +123,12 @@ namespace BeavisCli
 
         protected async Task<int> UnauthorizedAsync(CommandContext context)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            return await Task.FromResult(Unauthorized(context).Result);
+            int result = Unauthorized(context).Result;
+            return await Task.FromResult(result);
         }
 
         protected Task<int> Error(CommandContext context, string text)
-        {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
+        {            
             _logger?.LogDebug($"Exiting '{GetType().FullName}' with error '{text}'.");
             context.Response.WriteError(text);
             return Task.FromResult(ExitStatusCode);
@@ -159,36 +136,12 @@ namespace BeavisCli
 
         protected async Task<int> ErrorAsync(CommandContext context, string text)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
-            return await Task.FromResult(Error(context, text).Result);
+            int result = Error(context, text).Result;
+            return await Task.FromResult(result);
         }
 
         protected Task<int> Error(CommandContext context, string text, Exception e)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
-            if (e == null)
-            {
-                throw new ArgumentNullException(nameof(e));
-            }
-
             _logger?.LogDebug($"Exiting '{GetType().FullName}' with error '{text}' and exception '{e}'.");
             context.Response.WriteError(text);
             context.Response.WriteError(e, true);
@@ -197,36 +150,12 @@ namespace BeavisCli
 
         protected async Task<int> ErrorAsync(CommandContext context, string text, Exception e)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
-            if (e == null)
-            {
-                throw new ArgumentNullException(nameof(e));
-            }
-
-            return await Task.FromResult(Error(context, text, e).Result);
+            int result = Error(context, text, e).Result;
+            return await Task.FromResult(result);
         }
 
         protected Task<int> Error(CommandContext context, Exception e)
-        {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            if (e == null)
-            {
-                throw new ArgumentNullException(nameof(e));
-            }
-
+        {           
             _logger?.LogDebug($"Exiting '{GetType().FullName}' with exception '{e}'.");
             context.Response.WriteError(e, true);
             return Task.FromResult(ExitStatusCode);
@@ -234,17 +163,8 @@ namespace BeavisCli
 
         protected async Task<int> ErrorAsync(CommandContext context, Exception e)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            if (e == null)
-            {
-                throw new ArgumentNullException(nameof(e));
-            }
-
-            return await Task.FromResult(Error(context, e).Result);
+            int result = Error(context, e).Result;
+            return await Task.FromResult(result);
         }
 
         /// <summary>

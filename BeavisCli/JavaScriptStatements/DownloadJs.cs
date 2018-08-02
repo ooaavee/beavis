@@ -24,7 +24,7 @@ namespace BeavisCli.JavaScriptStatements
             _mimeType = mimeType;
         }
 
-        public string GetJavaScript()
+        public string GetCode()
         {
             string base64 = Convert.ToBase64String(_data);
             string js = $"download(\"data:{JavaScriptEncoder.Default.Encode(_mimeType)};base64,{base64}\", \"{JavaScriptEncoder.Default.Encode(_fileName)}\", \"{JavaScriptEncoder.Default.Encode(_mimeType)}\");";

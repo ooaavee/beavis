@@ -18,12 +18,7 @@ namespace BeavisCli.Services
         }
 
         public virtual Task<string> StoreAsync(FileContent file)
-        {
-            if (file == null)
-            {
-                throw new ArgumentNullException(nameof(file));
-            }
-
+        {           
             // create id for the file
             string id = KeyProvider.Create(s => _files.ContainsKey(s));
 

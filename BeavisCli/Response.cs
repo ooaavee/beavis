@@ -154,9 +154,22 @@ namespace BeavisCli
                 throw new ArgumentNullException(nameof(js));
             }
 
-            string code = js.GetJavaScript();
+            string code = js.GetCode();
 
             Statements.Add(code);   
+        }
+
+        public void AddJavaScript(IEnumerable<IJavaScriptStatement> js)
+        {
+            if (js == null)
+            {
+                throw new ArgumentNullException(nameof(js));
+            }
+
+            foreach (IJavaScriptStatement j in js)
+            {
+                AddJavaScript(j);
+            }
         }
 
         public void WriteFile(byte[] data, string fileName, string mimeType)

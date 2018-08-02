@@ -5,7 +5,7 @@
     /// </summary>
     public sealed class ClearTerminalHistory : IJavaScriptStatement
     {
-        public string GetJavaScript()
+        public string GetCode()
         {
             return "terminal.history().clear();";
         }

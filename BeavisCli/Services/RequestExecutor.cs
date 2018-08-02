@@ -31,22 +31,7 @@ namespace BeavisCli.Services
         }
 
         public async Task ExecuteAsync(Request request, Response response, HttpContext httpContext)
-        {         
-            if (request == null)
-            {
-                throw new ArgumentNullException(nameof(request));
-            }
-
-            if (response == null)
-            {
-                throw new ArgumentNullException(nameof(response));
-            }
-
-            if (httpContext == null)
-            {
-                throw new ArgumentNullException(nameof(httpContext));
-            }
-
+        {                     
             try
             {
                 _logger.LogDebug($"Started to process a request with the input '{request.Input}'.");

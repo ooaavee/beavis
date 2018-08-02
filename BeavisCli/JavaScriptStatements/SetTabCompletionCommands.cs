@@ -23,7 +23,7 @@ namespace BeavisCli.JavaScriptStatements
             _names = names.ToArray();
         }
 
-        public string GetJavaScript()
+        public string GetCode()
         {
             var s  = new StringBuilder();
             s.Append("[");

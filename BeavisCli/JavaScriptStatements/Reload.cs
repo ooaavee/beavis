@@ -16,7 +16,7 @@
             _forceGet = forceGet;
         }
 
-        public string GetJavaScript()
+        public string GetCode()
         {
             return _forceGet ?
                 $"location.reload({_forceGet.ToString().ToLowerInvariant()});" :

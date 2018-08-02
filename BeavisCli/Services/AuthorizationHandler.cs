@@ -5,17 +5,7 @@ namespace BeavisCli.Services
     public class AuthorizationHandler : IAuthorizationHandler
     {
         public virtual bool IsAuthorized(Command cmd, CommandContext context)
-        {
-            if (cmd == null)
-            {
-                throw new ArgumentNullException(nameof(cmd));
-            }
-
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
+        {          
             // By default every command execution is authorized. If you want some custom 
             // authorization logic, you should
             // - write your own IAuthorizationHandler implementation and register it during the startup or/and

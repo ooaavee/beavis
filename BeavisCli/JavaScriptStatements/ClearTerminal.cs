@@ -5,7 +5,7 @@
     /// </summary>
     public sealed class ClearTerminal : IJavaScriptStatement
     {
-        public string GetJavaScript()
+        public string GetCode()
         {
             return "terminal.clear();";
         }

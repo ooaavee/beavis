@@ -15,7 +15,7 @@ namespace BeavisCli.JavaScriptStatements
             _key = key ?? throw new ArgumentNullException(nameof(key));
         }
 
-        public string GetJavaScript()
+        public string GetCode()
         {
             return $"$ctrl.beginJob('{JavaScriptEncoder.Default.Encode(_key)}', terminal);";
         }
