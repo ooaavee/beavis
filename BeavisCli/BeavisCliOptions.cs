@@ -1,7 +1,7 @@
-﻿using System;
-using BeavisCli.Commands;
+﻿using BeavisCli.Commands;
 using BeavisCli.Services;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 
 namespace BeavisCli
@@ -28,13 +28,13 @@ namespace BeavisCli
         };
 
         /// <summary>
-        /// ITerminalBehaviour
+        /// ITerminalInitializer
         /// </summary>
-        public ServiceDefinition TerminalBehaviourService { get; } = new ServiceDefinition
+        public ServiceDefinition TerminalInitializerService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(TerminalBehaviour),
-            ServiceType = typeof(ITerminalBehaviour)
+            ImplementationType = typeof(TerminalInitializer),
+            ServiceType = typeof(ITerminalInitializer)
         };
 
         /// <summary>

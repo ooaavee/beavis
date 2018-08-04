@@ -15,11 +15,6 @@ namespace BeavisCli.JavaScriptStatements
 
         public SetTabCompletionCommands(IEnumerable<string> names)
         {
-            if (names == null)
-            {
-                throw new ArgumentNullException(nameof(names));
-            }
-    
             _names = names.ToArray();
         }
 

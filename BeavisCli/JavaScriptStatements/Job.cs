@@ -6,18 +6,18 @@ namespace BeavisCli.JavaScriptStatements
     /// <summary>
     /// This statement begins a job.
     /// </summary>
-    public sealed class BeginJob : IJavaScriptStatement
+    public sealed class Job : IJavaScriptStatement
     {
         private readonly string _key;
 
-        public BeginJob(string key)
+        public Job(string key)
         {
-            _key = key ?? throw new ArgumentNullException(nameof(key));
+            _key = key;
         }
 
         public string GetCode()
         {
-            return $"$ctrl.beginJob('{JavaScriptEncoder.Default.Encode(_key)}', terminal);";
+            return $"$ctrl.job('{JavaScriptEncoder.Default.Encode(_key)}', terminal);";
         }
     }
 }

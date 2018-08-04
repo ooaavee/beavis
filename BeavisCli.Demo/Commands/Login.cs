@@ -11,12 +11,12 @@ namespace BeavisCli.Demo.Commands
     public class Login : Command
     {
         private readonly UserService _service;
-        private readonly ITerminalBehaviour _terminal;
+        private readonly ITerminalInitializer _initializer;
 
-        public Login(UserService service, ITerminalBehaviour terminal)
+        public Login(UserService service, ITerminalInitializer initializer)
         {
             _service = service;
-            _terminal = terminal;
+            _initializer = initializer;
         }
 
         public override async Task ExecuteAsync(CommandContext context)
@@ -36,13 +36,16 @@ namespace BeavisCli.Demo.Commands
                     return await ErrorAsync(context, "Please enter username and password.");
                 }
 
+                // find the user by using the UserService service
                 UserModel user = _service.GetUser(username.Value());
+
 
                 // check password
                 if (user == null || user.Password != password.Value())
                 {
                     return await ErrorAsync(context, "Invalid username or password.");
                 }
+
 
                 // sign-in!
                 ClaimsIdentity identity = new ClaimsIdentity("password");
@@ -51,9 +54,9 @@ namespace BeavisCli.Demo.Commands
                 await context.HttpContext.SignInAsync("Demo", principal);
                 context.HttpContext.User = principal;
 
-                // tell the terminal to evaluate JS statements provided by the ITerminalBehaviour service -> this way
-                // we can modify the terminal look-and-feel for authenticated users
-                context.Response.AddJavaScript(_terminal.EnumInitStatements(context.HttpContext));
+
+                _initializer.Initialize(context.Response, context.HttpContext, true);
+
 
                 return await ExitAsync(context, $"Hello {user.UserName}!", ResponseMessageTypes.Success);
             }, context);

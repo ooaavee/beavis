@@ -12,11 +12,6 @@ namespace BeavisCli.JavaScriptStatements
 
         public Alert(string message)
         {
-            if (message == null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
-
             _message = JavaScriptEncoder.Default.Encode(message);
         }
 

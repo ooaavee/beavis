@@ -15,8 +15,6 @@ namespace BeavisCli.Middlewares
 {
     public class BeavisCliMiddleware
     {
-        private const string DefaultPath = "/beaviscli";
-
         private readonly RequestDelegate _next;
         private readonly ILogger<BeavisCliMiddleware> _logger;
         private readonly BeavisCliOptions _options;
@@ -38,23 +36,25 @@ namespace BeavisCli.Middlewares
                 return;
             }
 
-            // all required services
-            ITerminalBehaviour behaviour = httpContext.RequestServices.GetRequiredService<ITerminalBehaviour>();
-            IJobPool jobs = httpContext.RequestServices.GetRequiredService<IJobPool>();
-            IFileStorage files = httpContext.RequestServices.GetRequiredService<IFileStorage>();
-            IRequestExecutor executor = httpContext.RequestServices.GetRequiredService<IRequestExecutor>();
-
-            bool accessible = behaviour.IsRequestHandlerAccessible(httpContext, type);
-            if (!accessible)
-            {
-                await _next(httpContext);
-                return;
-            }
-
-            _logger.LogInformation($"Started to process a request for a path '{httpContext.Request.Path.ToString()}'.");
-
             try
             {
+                _logger.LogInformation($"Started to process a request for a path '{httpContext.Request.Path.ToString()}'.");
+
+                // all required services
+                IAuthorizationHandler authorization = httpContext.RequestServices.GetRequiredService<IAuthorizationHandler>();
+                ITerminalInitializer initializer = httpContext.RequestServices.GetRequiredService<ITerminalInitializer>();
+                IJobPool jobs = httpContext.RequestServices.GetRequiredService<IJobPool>();
+                IFileStorage files = httpContext.RequestServices.GetRequiredService<IFileStorage>();
+                IRequestExecutor executor = httpContext.RequestServices.GetRequiredService<IRequestExecutor>();
+
+                bool known = authorization.IsKnownRequestType(type, httpContext);
+                if (!known)
+                {
+                    _logger.LogInformation($"Skipping the request type of '{type}'.");
+                    await _next(httpContext);
+                    return;
+                }
+
                 switch (type)
                 {
                     case BeavisCliRequestTypes.TerminalHtml:
@@ -78,8 +78,7 @@ namespace BeavisCli.Middlewares
                     case BeavisCliRequestTypes.Initialize:
                         {
                             Response response = new Response(httpContext);
-                            response.Messages.AddRange(behaviour.EnumInitMessages(httpContext));
-                            response.AddJavaScript(behaviour.EnumInitStatements(httpContext));
+                            initializer.Initialize(response, httpContext);
                             await RenderResponseAsync(response, httpContext);
                             break;
                         }
@@ -105,7 +104,7 @@ namespace BeavisCli.Middlewares
 
                     case BeavisCliRequestTypes.Upload:
                         {
-                            if (!behaviour.IsUploadEnabled(httpContext))
+                            if (!authorization.IsUploadEnabled(httpContext))
                             {
                                 throw new InvalidOperationException("File upload functionality is not currently enabled.");
                             }
@@ -132,16 +131,15 @@ namespace BeavisCli.Middlewares
 
         private BeavisCliRequestTypes GetRequestType(HttpRequest request)
         {
+            const string fixedPath = "/beaviscli-fixed-api-segment";
+
+            PathString requestPath = request.Path;
+            string requestMethod = request.Method;
+
             bool IsPotentialMatch()
             {
-                return request.Path.StartsWithSegments(_options.Path, StringComparison.InvariantCultureIgnoreCase) ||
-                       request.Path.StartsWithSegments(DefaultPath, StringComparison.InvariantCultureIgnoreCase);
-            }
-
-            bool Match(string path, string method)
-            {
-                return request.Method == method &&
-                       request.Path.Equals(path, StringComparison.InvariantCultureIgnoreCase);
+                return requestPath.StartsWithSegments(_options.Path, StringComparison.InvariantCultureIgnoreCase) ||
+                       requestPath.StartsWithSegments(fixedPath, StringComparison.InvariantCultureIgnoreCase);
             }
 
             if (!IsPotentialMatch())
@@ -149,37 +147,42 @@ namespace BeavisCli.Middlewares
                 return BeavisCliRequestTypes.None;
             }
 
+            bool Match(string path, string method)
+            {
+                return requestMethod == method && requestPath.Equals(path, StringComparison.InvariantCultureIgnoreCase);
+            }
+
             if (Match(_options.Path, HttpMethods.Get))
             {
                 return BeavisCliRequestTypes.TerminalHtml;
             }
 
-            if (Match($"{DefaultPath}/content/css", HttpMethods.Get))
+            if (Match($"{fixedPath}/css", HttpMethods.Get))
             {
                 return BeavisCliRequestTypes.TerminalCss;
             }
 
-            if (Match($"{DefaultPath}/content/js", HttpMethods.Get))
+            if (Match($"{fixedPath}/js", HttpMethods.Get))
             {
                 return BeavisCliRequestTypes.TerminalJs;
             }
 
-            if (Match($"{DefaultPath}/api/initialize", HttpMethods.Post))
+            if (Match($"{fixedPath}/initialize", HttpMethods.Post))
             {
                 return BeavisCliRequestTypes.Initialize;
             }
 
-            if (Match($"{DefaultPath}/api/job", HttpMethods.Post))
+            if (Match($"{fixedPath}/job", HttpMethods.Post))
             {
                 return BeavisCliRequestTypes.InvokeJob;
             }
 
-            if (Match($"{DefaultPath}/api/request", HttpMethods.Post))
+            if (Match($"{fixedPath}/request", HttpMethods.Post))
             {
                 return BeavisCliRequestTypes.InvokeCommand;
             }
 
-            if (Match($"{DefaultPath}/api/upload", HttpMethods.Post))
+            if (Match($"{fixedPath}/upload", HttpMethods.Post))
             {
                 return BeavisCliRequestTypes.Upload;
             }

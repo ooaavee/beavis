@@ -40,9 +40,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 options.UnauthorizedHandlerService.Lifetime));
 
             services.Add(ServiceDescriptor.Describe(
-                options.TerminalBehaviourService.ServiceType,
-                options.TerminalBehaviourService.ImplementationType,
-                options.TerminalBehaviourService.Lifetime));
+                options.TerminalInitializerService.ServiceType,
+                options.TerminalInitializerService.ImplementationType,
+                options.TerminalInitializerService.Lifetime));
 
             services.Add(ServiceDescriptor.Describe(
                 options.FileStorageService.ServiceType,

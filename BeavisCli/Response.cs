@@ -208,7 +208,7 @@ namespace BeavisCli
                 // begins the job on the client-side
                 IJobPool pool = _httpContext.RequestServices.GetRequiredService<IJobPool>();
                 string key = pool.Push(job);
-                IJavaScriptStatement js = new BeginJob(key);
+                IJavaScriptStatement js = new Job(key);
                 AddJavaScript(js);
             };
         }

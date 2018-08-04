@@ -9,12 +9,12 @@ namespace BeavisCli.Commands
     public class Help : Command
     {
         private readonly ICommandProvider _commands;
-        private readonly ITerminalBehaviour _behaviour;
+        private readonly IAuthorizationHandler _authorization;
 
-        public Help(ICommandProvider commands, ITerminalBehaviour behaviour)
+        public Help(ICommandProvider commands, IAuthorizationHandler authorization)
         {
             _commands = commands;
-            _behaviour = behaviour;
+            _authorization = authorization;
         }
 
         public override async Task ExecuteAsync(CommandContext context)
@@ -27,7 +27,7 @@ namespace BeavisCli.Commands
 
                 foreach (Command cmd in _commands.GetCommands(context.HttpContext))
                 {
-                    if (_behaviour.IsVisibleForHelp(cmd, context))
+                    if (_authorization.IsVisibleForHelp(cmd, context))
                     {
                         if (cmd.IsBuiltIn)
                         {

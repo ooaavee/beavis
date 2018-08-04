@@ -30,7 +30,7 @@ var BeavisCli;
                     callback(window["__terminal_completion"]);
                 }
             };
-            this.$http.post("/beaviscli/api/initialize", null, { headers: { 'Content-Type': "application/json" } })
+            this.$http.post("/beaviscli-fixed-api-segment/initialize", null, { headers: { 'Content-Type': "application/json" } })
                 .success(function (data) {
                 _this.handleResponse(data, _this.terminal, _this);
             }).error(function (data, status) {
@@ -43,7 +43,7 @@ var BeavisCli;
                 this.uploader.input.click();
                 return;
             }
-            this.$http.post("/beaviscli/api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
+            this.$http.post("/beaviscli-fixed-api-segment/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
                 .success(function (data) {
                 _this.handleResponse(data, _this.terminal, _this);
             }).error(function (data, status) {
@@ -58,7 +58,7 @@ var BeavisCli;
             reader.readAsDataURL(file);
             reader.onload = function () {
                 _this.uploader.file.dataUrl = reader.result;
-                _this.$http.post("/beaviscli/api/upload", JSON.stringify(_this.uploader.file), { headers: { 'Content-Type': "application/json" } })
+                _this.$http.post("/beaviscli-fixed-api-segment/upload", JSON.stringify(_this.uploader.file), { headers: { 'Content-Type': "application/json" } })
                     .success(function (data) {
                     _this.handleResponse(data, _this.terminal, _this);
                     $('#uploader').val('');
@@ -72,9 +72,9 @@ var BeavisCli;
                 _this.handleError(error, _this.terminal);
             };
         };
-        CliController.prototype.beginJob = function (key, terminal) {
+        CliController.prototype.job = function (key, terminal) {
             var _this = this;
-            this.$http.post("/beaviscli/api/job?key=" + encodeURIComponent(key), null, { headers: { 'Content-Type': "application/json" } })
+            this.$http.post("/beaviscli-fixed-api-segment/job?key=" + encodeURIComponent(key), null, { headers: { 'Content-Type': "application/json" } })
                 .success(function (data) {
                 _this.handleResponse(data, terminal, _this);
             }).error(function (data, status) {
