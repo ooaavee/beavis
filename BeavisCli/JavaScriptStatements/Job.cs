@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.Encodings.Web;
+﻿using System.Text.Encodings.Web;
 
 namespace BeavisCli.JavaScriptStatements
 {
@@ -8,16 +7,16 @@ namespace BeavisCli.JavaScriptStatements
     /// </summary>
     public sealed class Job : IJavaScriptStatement
     {
-        private readonly string _key;
+        private readonly string _js;
 
         public Job(string key)
         {
-            _key = key;
+            _js = $"$ctrl.job('{JavaScriptEncoder.Default.Encode(key)}', terminal);";
         }
 
         public string GetCode()
         {
-            return $"$ctrl.job('{JavaScriptEncoder.Default.Encode(_key)}', terminal);";
+            return _js;
         }
     }
 }

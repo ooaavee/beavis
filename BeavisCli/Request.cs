@@ -14,7 +14,7 @@ namespace BeavisCli
         /// <summary>
         /// Gets the command name.
         /// </summary>
-        public string GetCommandName()
+        public virtual string GetCommandName()
         {
             if (Input != null)
             {
@@ -36,7 +36,7 @@ namespace BeavisCli
         /// <summary>
         /// Gets command arguments.
         /// </summary>
-        public string[] GetCommandArgs()
+        public virtual string[] GetCommandArgs()
         {
             List<string> args = new List<string>();
 

@@ -1,6 +1,8 @@
-﻿using BeavisCli.JavaScriptStatements;
+﻿using BeavisCli.Commands;
+using BeavisCli.JavaScriptStatements;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -8,6 +10,13 @@ namespace BeavisCli.Services
 {
     public class TerminalInitializer : ITerminalInitializer
     {
+        private readonly BeavisCliOptions _options;
+
+        public TerminalInitializer(IOptions<BeavisCliOptions> options)
+        {
+            _options = options.Value;
+        }
+
         public virtual void Initialize(Response response, HttpContext httpContext, bool silent = false)
         {
             if (!silent)
@@ -35,20 +44,17 @@ namespace BeavisCli.Services
         protected virtual IEnumerable<IJavaScriptStatement> GetJavaScript(HttpContext httpContext)
         {
             yield return new SetTabCompletionCommands(GetTabCompletionCommands(httpContext));
-
-            IAuthorizationHandler a = httpContext.RequestServices.GetRequiredService<IAuthorizationHandler>();
-
-            yield return new SetUploadEnabled(a.IsUploadEnabled(httpContext));
+            yield return new SetUploadEnabled(IsUploadEnabled(httpContext));
         }
 
         protected virtual IEnumerable<string> GetTabCompletionCommands(HttpContext httpContext)
         {
             ICommandProvider commands = httpContext.RequestServices.GetRequiredService<ICommandProvider>();
-            IAuthorizationHandler authorization = httpContext.RequestServices.GetRequiredService<IAuthorizationHandler>();
+            ICommandExecutionEnvironment environment = httpContext.RequestServices.GetRequiredService<ICommandExecutionEnvironment>();
 
             foreach (Command cmd in commands.GetCommands(httpContext))
             {
-                bool enabled = authorization.IsTabCompletionEnabled(cmd, httpContext);
+                bool enabled = environment.IsTabCompletionEnabled(cmd, httpContext);
 
                 if (enabled)
                 {
@@ -56,5 +62,14 @@ namespace BeavisCli.Services
                 }
             }
         }
+
+        protected virtual bool IsUploadEnabled(HttpContext httpContext)
+        {
+            CommandInfo info = CommandInfo.ForType(typeof(Upload));
+            CommandDefinition definition = _options.BuiltInCommands[info.Name];
+            return definition.IsEnabled;
+        }
+
+
     }
 }

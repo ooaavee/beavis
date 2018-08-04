@@ -7,8 +7,8 @@
         TerminalCss,
         TerminalJs,
         Initialize,
-        InvokeJob,
-        InvokeCommand,
+        Job,
+        Command,
         Upload
     }
 }

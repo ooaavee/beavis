@@ -10,11 +10,9 @@ namespace BeavisCli
 {
     public class Response
     {
-        private readonly HttpContext _httpContext;
-
-        internal Response(HttpContext httpContext)
+        public Response(HttpContext httpContext)
         {
-            _httpContext = httpContext;
+            HttpContext = httpContext;
         }
 
         /// <summary>
@@ -23,10 +21,16 @@ namespace BeavisCli
         public event EventHandler Sending;
 
         /// <summary>
+        /// HTTP context
+        /// </summary>
+        [JsonIgnore]
+        public virtual HttpContext HttpContext { get; }
+
+        /// <summary>
         /// Response messages
         /// </summary>
         [JsonProperty("messages")]
-        public List<ResponseMessage> Messages { get; } = new List<ResponseMessage>();
+        public virtual List<ResponseMessage> Messages { get; } = new List<ResponseMessage>();
 
         /// <summary>
         /// JavaScript statements that will be evaluated on the client-side.
@@ -37,15 +41,15 @@ namespace BeavisCli
         /// <summary>
         /// Writes an empty line.
         /// </summary>
-        public void WriteEmptyLine()
+        public virtual void WriteEmptyLine()
         {
             Messages.Add(new InformationMessage(string.Empty));
         }
-              
+
         /// <summary>
         /// Writes an information message.
         /// </summary>
-        public void WriteInformation(string text)
+        public virtual void WriteInformation(string text)
         {
             if (text == null)
             {
@@ -58,7 +62,7 @@ namespace BeavisCli
         /// <summary>
         /// Writes an information message.
         /// </summary>
-        public void WriteInformation(IEnumerable<string> texts)
+        public virtual void WriteInformation(IEnumerable<string> texts)
         {
             if (texts == null)
             {
@@ -74,7 +78,7 @@ namespace BeavisCli
         /// <summary>
         /// Writes a success/ very positive message.
         /// </summary>
-        public void WriteSuccess(string text)
+        public virtual void WriteSuccess(string text)
         {
             if (text == null)
             {
@@ -87,7 +91,7 @@ namespace BeavisCli
         /// <summary>
         /// Writes a success/ very positive message.
         /// </summary>
-        public void WriteSuccess(IEnumerable<string> texts)
+        public virtual void WriteSuccess(IEnumerable<string> texts)
         {
             if (texts == null)
             {
@@ -103,7 +107,7 @@ namespace BeavisCli
         /// <summary>
         /// Writes an error message.
         /// </summary>
-        public void WriteError(Exception e, bool returnStackTrace = false)
+        public virtual void WriteError(Exception e, bool returnStackTrace = false)
         {
             if (e == null)
             {
@@ -118,7 +122,7 @@ namespace BeavisCli
         /// <summary>
         /// Writes an error message.
         /// </summary>
-        public void WriteError(string text)
+        public virtual void WriteError(string text)
         {
             if (text == null)
             {
@@ -131,7 +135,7 @@ namespace BeavisCli
         /// <summary>
         /// Writes an error message.
         /// </summary>
-        public void WriteError(IEnumerable<string> texts)
+        public virtual void WriteError(IEnumerable<string> texts)
         {
             if (texts == null)
             {
@@ -147,7 +151,7 @@ namespace BeavisCli
         /// <summary>
         /// Adds a JavaScript statement that will be invoked on the client-side.
         /// </summary>
-        public void AddJavaScript(IJavaScriptStatement js)
+        public virtual void AddJavaScript(IJavaScriptStatement js)
         {
             if (js == null)
             {
@@ -159,7 +163,7 @@ namespace BeavisCli
             Statements.Add(code);   
         }
 
-        public void AddJavaScript(IEnumerable<IJavaScriptStatement> js)
+        public virtual void AddJavaScript(IEnumerable<IJavaScriptStatement> js)
         {
             if (js == null)
             {
@@ -172,7 +176,7 @@ namespace BeavisCli
             }
         }
 
-        public void WriteFile(byte[] data, string fileName, string mimeType)
+        public virtual void WriteFile(byte[] data, string fileName, string mimeType)
         {
             if (data == null)
             {
@@ -194,7 +198,7 @@ namespace BeavisCli
             AddJob(job);
         }
 
-        public void AddJob(IJob job)
+        public virtual void AddJob(IJob job)
         {
             if (job == null)
             {
@@ -206,7 +210,7 @@ namespace BeavisCli
             {
                 // push a new job into the pool and add a JavaScript statement that
                 // begins the job on the client-side
-                IJobPool pool = _httpContext.RequestServices.GetRequiredService<IJobPool>();
+                IJobPool pool = HttpContext.RequestServices.GetRequiredService<IJobPool>();
                 string key = pool.Push(job);
                 IJavaScriptStatement js = new Job(key);
                 AddJavaScript(js);
@@ -216,7 +220,7 @@ namespace BeavisCli
         /// <summary>
         /// Raises the <see cref="Sending"/> event.
         /// </summary>
-        internal void OnSending()
+        protected internal virtual void OnSending()
         {
             EventHandler handler = Sending;
 

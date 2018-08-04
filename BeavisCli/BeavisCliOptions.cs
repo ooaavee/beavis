@@ -48,13 +48,13 @@ namespace BeavisCli
         };
 
         /// <summary>
-        /// IAuthorizationHandler
+        /// ICommandExecutionEnvironment
         /// </summary>
-        public ServiceDefinition AuthorizationHandlerService { get; } = new ServiceDefinition
+        public ServiceDefinition CommandExecutionEnvironmentService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(AuthorizationHandler),
-            ServiceType = typeof(IAuthorizationHandler)
+            ImplementationType = typeof(CommandExecutionEnvironment),
+            ServiceType = typeof(ICommandExecutionEnvironment)
         };
 
         /// <summary>
@@ -68,13 +68,13 @@ namespace BeavisCli
         };
 
         /// <summary>
-        /// IRequestExecutor
+        /// ICommandExecutor
         /// </summary>
-        public ServiceDefinition RequestExecutorService { get; } = new ServiceDefinition
+        public ServiceDefinition CommandExecutorService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(RequestExecutor),
-            ServiceType = typeof(IRequestExecutor)
+            ImplementationType = typeof(CommandExecutor),
+            ServiceType = typeof(ICommandExecutor)
         };
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace BeavisCli
 
             void Add(Type type)
             {
-                values[CommandInfo.ForType(type).Name] = new CommandDefinition { ImplementationType = type };
+                values[CommandInfo.ForType(type).Name] = new CommandDefinition(type);
             }
 
             Add(typeof(Help));

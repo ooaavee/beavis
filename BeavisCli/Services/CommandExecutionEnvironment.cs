@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using BeavisCli.Commands;
+﻿using BeavisCli.Commands;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace BeavisCli.Services
 {
-    public class AuthorizationHandler : IAuthorizationHandler
+    public class CommandExecutionEnvironment : ICommandExecutionEnvironment
     {
         private readonly BeavisCliOptions _options;
 
-        public AuthorizationHandler(IOptions<BeavisCliOptions> options)
+        public CommandExecutionEnvironment(IOptions<BeavisCliOptions> options)
         {
             _options = options.Value;
         }
@@ -22,11 +19,11 @@ namespace BeavisCli.Services
         }
 
         public virtual bool IsAuthorized(Command cmd, CommandContext context)
-        {          
+        {
             // By default every command execution is authorized. If you want some custom 
             // authorization logic, you should
-            // - write your own IAuthorizationHandler implementation and register it during the startup or/and
-            // - override WebCliCommand.IsAuthorized method
+            // - write your own ICommandExecutionEnvironment implementation and register it during the startup or/and
+            // - override Command.IsAuthorized method
 
             return true;
         }
@@ -56,13 +53,6 @@ namespace BeavisCli.Services
             }
 
             return true;
-        }
-
-        public virtual bool IsUploadEnabled(HttpContext httpContext)
-        {
-            CommandInfo info = CommandInfo.ForType(typeof(Upload));
-            CommandDefinition definition = _options.BuiltInCommands[info.Name];
-            return definition.IsEnabled;
         }
 
         public virtual bool IsTabCompletionEnabled(Command cmd, HttpContext httpContext)

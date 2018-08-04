@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,26 +9,21 @@ namespace BeavisCli.Commands
     [Command("help", "Displays help.")]
     public class Help : Command
     {
-        private readonly ICommandProvider _commands;
-        private readonly IAuthorizationHandler _authorization;
-
-        public Help(ICommandProvider commands, IAuthorizationHandler authorization)
-        {
-            _commands = commands;
-            _authorization = authorization;
-        }
-
         public override async Task ExecuteAsync(CommandContext context)
         {
             await OnExecuteAsync(() =>
             {
+                // required services
+                ICommandProvider commands = context.HttpContext.RequestServices.GetRequiredService<ICommandProvider>();
+                ICommandExecutionEnvironment environment = context.HttpContext.RequestServices.GetRequiredService<ICommandExecutionEnvironment>();
+
                 var defaults = new List<Command>();
 
                 var externals = new List<Command>();
 
-                foreach (Command cmd in _commands.GetCommands(context.HttpContext))
+                foreach (Command cmd in commands.GetCommands(context.HttpContext))
                 {
-                    if (_authorization.IsVisibleForHelp(cmd, context))
+                    if (environment.IsVisibleForHelp(cmd, context))
                     {
                         if (cmd.IsBuiltIn)
                         {

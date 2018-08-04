@@ -5,22 +5,16 @@
     /// </summary>
     public sealed class Reload : IJavaScriptStatement
     {
-        private readonly bool _forceGet;
-
-        public Reload() : this(false)
+        private readonly string _js;
+       
+        public Reload(bool forceGet = false)
         {
-        }
-
-        public Reload(bool forceGet)
-        {
-            _forceGet = forceGet;
+            _js = forceGet ? "location.reload(true);" : "location.reload();";
         }
 
         public string GetCode()
         {
-            return _forceGet ?
-                $"location.reload({_forceGet.ToString().ToLowerInvariant()});" :
-                "location.reload();";
+            return _js;
         }
     }
 }

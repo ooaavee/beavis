@@ -1,57 +1,61 @@
 ﻿using BeavisCli.Microsoft.Extensions.CommandLineUtils;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace BeavisCli.Services
 {
-    public class RequestExecutor : IRequestExecutor
+    public class CommandExecutor : ICommandExecutor
     {
-        private readonly ILogger<RequestExecutor> _logger;
-        private readonly ICommandProvider _commands;
-        private readonly IAuthorizationHandler _authorization;
-        private readonly IUnauthorizedHandler _unauthorized;
+        private readonly ILogger<CommandExecutor> _logger;
         private readonly BeavisCliOptions _options;
 
-        public RequestExecutor(
-            ILoggerFactory loggerFactory,
-            ICommandProvider commands, 
-            IAuthorizationHandler authorization,
-            IUnauthorizedHandler unauthorized,
-            IOptions<BeavisCliOptions> options)
+        public CommandExecutor(ILoggerFactory loggerFactory, IOptions<BeavisCliOptions> options)
         {
-            _logger = loggerFactory.CreateLogger<RequestExecutor>();
-            _commands = commands;
-            _authorization = authorization;
-            _unauthorized = unauthorized;
+            _logger = loggerFactory.CreateLogger<CommandExecutor>();
             _options = options.Value;
         }
 
-        public async Task ExecuteAsync(Request request, Response response, HttpContext httpContext)
-        {                     
+        public async Task<Response> ExecuteAsync(JObject requestBody, HttpContext httpContext)
+        {
+            // required services
+            ICommandProvider commands = httpContext.RequestServices.GetRequiredService<ICommandProvider>();
+            IUnauthorizedHandler unauthorized = httpContext.RequestServices.GetRequiredService<IUnauthorizedHandler>();
+
+            Response response = new Response(httpContext);
+
+            string requestBodyJson = null;
+
             try
             {
-                _logger.LogDebug($"Started to process a request with the input '{request.Input}'.");
+                requestBodyJson = requestBody.ToString();
+
+                _logger.LogDebug($"Started to process a request '{requestBodyJson}'.");
+
+                Request request = JsonConvert.DeserializeObject<Request>(requestBodyJson);
 
                 // command name entered by the user
                 string name = request.GetCommandName();
 
                 _logger.LogDebug($"Searching an command by the name '{name}'.");
 
-                // find the command
+                // find the command by using the ICommandProvider service
                 Command cmd;
                 try
                 {
-                    cmd = _commands.GetCommand(name, httpContext);
+                    cmd = commands.GetCommand(name, httpContext);
                 }
                 catch (Exception e)
                 {
                     _logger.LogDebug($"An error occurred while searching a command by using the input '{request.Input}'.", e);
                     response.WriteError(e);
-                    return;
+                    return response;
                 }
 
                 _logger.LogDebug($"Found a command '{cmd.GetType().FullName}' that matches the name '{name}'.");
@@ -84,17 +88,17 @@ namespace BeavisCli.Services
                 else
                 {
                     // handle unauthorized execution attempts
-                    await _unauthorized.OnUnauthorizedAsync(cmd, context);
+                    await unauthorized.OnUnauthorizedAsync(cmd, context);
                 }
             }
             catch (CommandParsingException e)
             {
-                _logger.LogDebug($"An error occurred while parsing the input '{request.Input}'.", e);
+                _logger.LogDebug($"An error occurred while parsing the input '{requestBodyJson}'.", e);
                 response.WriteError(e);
             }
             catch (Exception e)
             {
-                _logger.LogError($"An error occurred while processing the request with the input '{request.Input}'.", e);
+                _logger.LogError($"An error occurred while processing the request with the input '{requestBodyJson}'.", e);
 
                 if (_options.DisplayExceptions)
                 {
@@ -105,6 +109,8 @@ namespace BeavisCli.Services
                     response.WriteError("An error occurred, please check your application logs for more details.");
                 }
             }
+
+            return response;
         }
 
         /// <summary>
@@ -112,23 +118,15 @@ namespace BeavisCli.Services
         /// </summary>
         protected virtual bool IsAuthorized(Command cmd, CommandContext context)
         {
-            if (cmd == null)
+            ICommandExecutionEnvironment environment = context.HttpContext.RequestServices.GetRequiredService<ICommandExecutionEnvironment>();
+
+            bool authorized = environment.IsAuthorized(cmd, context);
+
+            bool isExternal = environment.GetType() != typeof(CommandExecutionEnvironment);
+
+            if (isExternal)
             {
-                throw new ArgumentNullException(nameof(cmd));
-            }
-
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            bool authorized = _authorization.IsAuthorized(cmd, context);
-
-            bool externalHandler = !(_authorization is AuthorizationHandler);
-
-            if (externalHandler)
-            {
-                _logger.LogInformation($"The authorization status returned by the current {nameof(IAuthorizationHandler)} implementation '{_authorization.GetType().FullName}' is {authorized}.");
+                _logger.LogInformation($"The authorization status returned by the current {nameof(ICommandExecutionEnvironment)} implementation '{environment.GetType().FullName}' is {authorized}.");
             }
 
             if (authorized)
@@ -141,16 +139,11 @@ namespace BeavisCli.Services
                 }
             }
 
-            if (!cmd.IsBuiltIn || externalHandler)
+            if (!cmd.IsBuiltIn || isExternal)
             {
-                if (authorized)
-                {
-                    _logger.LogInformation($"The command '{cmd.GetType().FullName}' execution is authorized.");
-                }
-                else
-                {
-                    _logger.LogInformation($"The command '{cmd.GetType().FullName}' execution is unauthorized.");
-                }
+                _logger.LogInformation(authorized
+                    ? $"The command '{cmd.GetType().FullName}' execution is authorized."
+                    : $"The command '{cmd.GetType().FullName}' execution is unauthorized.");
             }
 
             return authorized;

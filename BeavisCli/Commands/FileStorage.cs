@@ -1,4 +1,5 @@
 ﻿using BeavisCli.JavaScriptStatements;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,13 +10,6 @@ namespace BeavisCli.Commands
     [Command("filestorage", "A tool for managing files in the file storage")]
     public class FileStorage : Command
     {
-        private readonly IFileStorage _files;
-
-        public FileStorage(IFileStorage files)
-        {
-            _files = files;
-        }
-
         public override async Task ExecuteAsync(CommandContext context)
         {
             // options
@@ -72,9 +66,11 @@ namespace BeavisCli.Commands
         /// </summary>
         private async Task ListFiles(CommandContext context)
         {
+            IFileStorage files = context.HttpContext.RequestServices.GetRequiredService<IFileStorage>();
+
             var items = new List<Tuple<string, string, string>>();
 
-            foreach (Tuple<string, FileContent> item in await _files.GetAllAsync())
+            foreach (Tuple<string, FileContent> item in await files.GetAllAsync())
             {
                 items.Add(new Tuple<string, string, string>(item.Item1, item.Item2.Type, item.Item2.Name));
             }
@@ -99,7 +95,9 @@ namespace BeavisCli.Commands
         /// </summary>
         private async Task Remove(CommandContext context, string id)
         {
-            FileContent file = await _files.RemoveAsync(id);
+            IFileStorage files = context.HttpContext.RequestServices.GetRequiredService<IFileStorage>();
+
+            FileContent file = await files.RemoveAsync(id);
 
             if (file != null)
             {
@@ -116,7 +114,9 @@ namespace BeavisCli.Commands
         /// </summary>
         private async Task RemoveAll(CommandContext context)
         {
-            int count = await _files.RemoveAllAsync();
+            IFileStorage files = context.HttpContext.RequestServices.GetRequiredService<IFileStorage>();
+
+            int count = await files.RemoveAllAsync();
 
             if (count == 0)
             {
@@ -133,7 +133,9 @@ namespace BeavisCli.Commands
         /// </summary>
         private async Task Download(CommandContext context, string id)
         {
-            FileContent file = await _files.GetAsync(id);
+            IFileStorage files = context.HttpContext.RequestServices.GetRequiredService<IFileStorage>();
+
+            FileContent file = await files.GetAsync(id);
 
             if (file != null)
             {
