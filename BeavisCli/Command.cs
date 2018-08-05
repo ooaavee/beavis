@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -102,7 +103,13 @@ namespace BeavisCli
 
         protected Task<int> ExitWithHelp(CommandContext context)
         {            
-            _logger?.LogDebug($"Exiting '{GetType().FullName}' with help.");              
+            _logger?.LogDebug($"Exiting '{GetType().FullName}' with help.");
+
+            if (context.Response.Messages.Any())
+            {
+                context.Response.WriteEmptyLine();
+            }
+
             context.Processor.ShowHelp(Info.Name);
             return Task.FromResult(ExitStatusCode);
         }

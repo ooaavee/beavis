@@ -29,7 +29,7 @@ namespace BeavisCli.Demo
             services.AddScopedCommand<Login>();
 
 
-            services.AddScoped<UserService>();
+            services.AddScoped<DemoUserRepository>();
 
         }
 

@@ -6,16 +6,19 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Demo.Commands
 {
-    [Command("login", "Proceed login")]
-    [CommandDescription("Use this....")]
+    [Command("login", "This demo command is used for login.")]
+    [CommandDescription("Use this command to authenticate yourself. You can use username \"Beavis\" and password \"Cornholio\" to login.")]
     public class Login : Command
     {
-        private readonly UserService _service;
+        // this is our user repository in this demo
+        private readonly DemoUserRepository _repository;
+
+        // we use this service to initilize the terminal after successful login
         private readonly ITerminalInitializer _initializer;
 
-        public Login(UserService service, ITerminalInitializer initializer)
+        public Login(DemoUserRepository repository, ITerminalInitializer initializer)
         {
-            _service = service;
+            _repository = repository;
             _initializer = initializer;
         }
 
@@ -26,26 +29,19 @@ namespace BeavisCli.Demo.Commands
 
             await OnExecuteAsync(async () =>
             {
-                if (context.HttpContext.User.Identity.IsAuthenticated)
-                {
-                    return await ErrorAsync(context, "You are already autheticated, logout first.");
-                }
-
                 if (!(username.HasValue() && password.HasValue()))
                 {
-                    return await ErrorAsync(context, "Please enter username and password.");
+                    return await ExitWithHelp(context);
                 }
 
                 // find the user by using the UserService service
-                UserModel user = _service.GetUser(username.Value());
-
+                UserModel user = _repository.GetUser(username.Value());
 
                 // check password
                 if (user == null || user.Password != password.Value())
                 {
                     return await ErrorAsync(context, "Invalid username or password.");
                 }
-
 
                 // sign-in!
                 ClaimsIdentity identity = new ClaimsIdentity("password");
@@ -54,11 +50,12 @@ namespace BeavisCli.Demo.Commands
                 await context.HttpContext.SignInAsync("Demo", principal);
                 context.HttpContext.User = principal;
 
-
+                // initializer terminal after successful login
                 _initializer.Initialize(context.Response, context.HttpContext, true);
 
-
-                return await ExitAsync(context, $"Hello {user.UserName}!", ResponseMessageTypes.Success);
+                // exit and show simple message
+                string message = $"Hello {user.UserName}!";
+                return await ExitAsync(context, message, ResponseMessageTypes.Success);
             }, context);
         }
     }
