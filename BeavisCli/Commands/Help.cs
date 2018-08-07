@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,19 +34,16 @@ namespace BeavisCli.Commands
                         }
                     }
                 }
-             
-                var lines = new List<Tuple<string, string>>();
 
-                foreach (Command cmd in defaults.Concat(externals))
-                {
-                    lines.Add(new Tuple<string, string>(cmd.Info.Name, cmd.Info.FullName));
-                }
+                List<CommandInfo> items = defaults.Concat(externals).Select(cmd => cmd.Info).ToList();
 
                 context.Response.WriteInformation("Default commands:");
 
                 int lineCount = 0;
 
-                foreach (string line in ResponseRenderer.FormatLines(lines, true))
+                string[] lines = ResponseRenderer.AsLines(items, x => x.Name, x => x.FullName, true);
+
+                foreach (string line in lines)
                 {
                     lineCount++;
                     context.Response.WriteInformation(line);

@@ -54,8 +54,9 @@ namespace BeavisCli.Demo.Commands
                 _initializer.Initialize(context.Response, context.HttpContext, true);
 
                 // exit and show simple message
-                string message = $"Hello {user.UserName}!";
-                return await ExitAsync(context, message, ResponseMessageTypes.Success);
+                return await ExitAsync(context,
+                                       $"Hello {user.UserName}!", 
+                                       ResponseMessageTypes.Success);
             }, context);
         }
     }

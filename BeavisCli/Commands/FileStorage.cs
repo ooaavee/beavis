@@ -68,18 +68,30 @@ namespace BeavisCli.Commands
         {
             IFileStorage files = context.HttpContext.RequestServices.GetRequiredService<IFileStorage>();
 
-            var items = new List<Tuple<string, string, string>>();
+            var items = new List<ListFilesModel>();
 
             foreach (Tuple<string, FileContent> item in await files.GetAllAsync())
             {
-                items.Add(new Tuple<string, string, string>(item.Item1, item.Item2.Type, item.Item2.Name));
+                items.Add(new ListFilesModel
+                {
+                    FileId = item.Item1,
+                    Type = item.Item2.Type,
+                    Name = item.Item2.Name
+                });
             }
 
             if (items.Any())
             {
-                items.Insert(0, new Tuple<string, string, string>("FILE ID", "TYPE", "NAME"));
+                items.Insert(0, new ListFilesModel
+                {
+                    FileId = "FILE ID",
+                    Type = "TYPE",
+                    Name = "NAME"
+                });
 
-                foreach (string line in ResponseRenderer.FormatLines(items, true))
+                string[] lines = ResponseRenderer.AsLines(items, x => x.FileId, x => x.Type, x => x.Name, true);
+
+                foreach (string line in lines)
                 {
                     context.Response.WriteInformation(line);
                 }
@@ -146,6 +158,13 @@ namespace BeavisCli.Commands
             {
                 context.Response.WriteError($"Unable to find a file to download by using the id '{id}'.");
             }
+        }
+
+        private class ListFilesModel
+        {
+            public string FileId { get; set; }
+            public string Type { get; set; }
+            public string Name { get; set; }
         }
     }
 }
