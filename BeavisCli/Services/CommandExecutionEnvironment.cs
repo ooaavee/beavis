@@ -18,7 +18,7 @@ namespace BeavisCli.Services
             return true;
         }
 
-        public virtual bool IsAuthorized(Command cmd, CommandContext context)
+        public virtual bool IsAuthorized(CommandContext context)
         {
             // By default every command execution is authorized. If you want some custom 
             // authorization logic, you should
@@ -28,17 +28,14 @@ namespace BeavisCli.Services
             return true;
         }
 
-        public virtual bool IsVisibleForHelp(Command cmd, CommandContext context)
+        public virtual bool IsVisibleForHelp(ICommand cmd, HttpContext httpContext)
         {
-            if (cmd.GetType() == typeof(Help))
-            {
-                // ignore 'help'
-                return false;
-            }
+            bool isBuiltIn = cmd.GetType().Assembly.Equals(typeof(ICommand).Assembly);
 
-            if (cmd.IsBuiltIn)
+            if (isBuiltIn)
             {
-                CommandDefinition definition = _options.BuiltInCommands[cmd.Info.Name];
+                CommandInfo info = CommandInfo.Get(cmd);
+                CommandDefinition definition = _options.BuiltInCommands[info.Name];
                 if (!definition.IsVisibleForHelp)
                 {
                     // ignore non-browsable commands
@@ -46,35 +43,24 @@ namespace BeavisCli.Services
                 }
             }
 
-            if (!cmd.IsVisibleForHelp(context))
-            {
-                // ignore non-browsable commands
-                return false;
-            }
-
             return true;
         }
 
-        public virtual bool IsTabCompletionEnabled(Command cmd, HttpContext httpContext)
+        public virtual bool IsTabCompletionEnabled(ICommand cmd, HttpContext httpContext)
         {
-            if (cmd.IsBuiltIn)
-            {
-                CommandDefinition definition = _options.BuiltInCommands[cmd.Info.Name];
+            bool isBuiltInCommand = cmd.GetType().Assembly.Equals(typeof(ICommand).Assembly);
 
+            if (isBuiltInCommand)
+            {
+                CommandInfo info = CommandInfo.Get(cmd);
+                CommandDefinition definition = _options.BuiltInCommands[info.Name];
                 if (definition.IsEnabled && definition.IsTabCompletionEnabled)
                 {
                     return true;
                 }
             }
-            else
-            {
-                if (cmd.IsTabCompletionEnabled())
-                {
-                    return true;
-                }
-            }
 
-            return false;
+            return true;
         }
     }
 }

@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 namespace BeavisCli.Commands
 {
     [Command("license", "License information")]
-    public class License : Command
+    public class License : ICommand
     {
-        public override async Task ExecuteAsync(CommandContext context)
+        public async Task ExecuteAsync(CommandContext context)
         {
-            await OnExecuteAsync(async () =>
+            await context.OnExecuteAsync(async () =>
             {
                 const string licenseFileEmbeddedResource = "BeavisCli.Resources.license.all.txt";
 
@@ -25,8 +25,8 @@ namespace BeavisCli.Commands
 
                 context.Response.WriteInformation(text);
 
-                return await ExitAsync(context);
-            }, context);
+                return await context.ExitAsync();
+            });
         }
     }
 }

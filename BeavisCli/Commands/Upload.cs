@@ -3,14 +3,14 @@
 namespace BeavisCli.Commands
 {
     [Command("upload", "A tool for uploading files")]
-    public class Upload : Command
+    public class Upload : ICommand
     {
-        public override async Task ExecuteAsync(CommandContext context)
+        public async Task ExecuteAsync(CommandContext context)
         {
-            await OnExecuteAsync(() =>
+            await context.OnExecuteAsync(() =>
             {            
-                return Exit(context);
-            }, context);
+                return context.Exit();
+            });
         }
     }
 }

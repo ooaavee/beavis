@@ -5,8 +5,8 @@ namespace BeavisCli
 {
     public interface ICommandProvider
     {
-        Command GetCommand(string name, HttpContext httpContext);
+        ICommand GetCommand(string name, HttpContext httpContext);
 
-        IEnumerable<Command> GetCommands(HttpContext httpContext);
+        IEnumerable<ICommand> GetCommands(HttpContext httpContext);
     }
 }

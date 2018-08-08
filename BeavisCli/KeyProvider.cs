@@ -8,11 +8,6 @@ namespace BeavisCli
     {   
         public static string Create(Func<string, bool> valueChecker)
         {
-            if (valueChecker == null)
-            {
-                throw new ArgumentNullException(nameof(valueChecker));
-            }
-
             const int maxTries = 3;
 
             for (int i = 0; i < maxTries; i++)
@@ -32,23 +27,15 @@ namespace BeavisCli
 
         public static string Find(string candidate, Func<IEnumerable<string>> all)
         {
-            if (string.IsNullOrEmpty(candidate))
+            if (!string.IsNullOrEmpty(candidate))
             {
-                return null;
-            }
-                     
-            if (all == null)
-            {
-                throw new ArgumentNullException(nameof(all));
-            }
+                string[] matches = all().Where(x => x.StartsWith(candidate)).ToArray();
 
-            string[] matches = all().Where(x => x.StartsWith(candidate)).ToArray();
-
-            if (matches.Length == 1)
-            {
-                return matches[0];
+                if (matches.Length == 1)
+                {
+                    return matches[0];
+                }
             }
-
             return null;
         }
     }

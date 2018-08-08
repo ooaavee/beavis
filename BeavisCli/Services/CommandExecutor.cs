@@ -46,7 +46,7 @@ namespace BeavisCli.Services
                 _logger.LogDebug($"Searching an command by the name '{name}'.");
 
                 // find the command by using the ICommandProvider service
-                Command cmd;
+                ICommand cmd;
                 try
                 {
                     cmd = commands.GetCommand(name, httpContext);
@@ -65,20 +65,32 @@ namespace BeavisCli.Services
                 TextWriter outWriter = new ResponseMessageTextWriter(response.WriteInformation);
                 TextWriter errorWriter = new ResponseMessageTextWriter(response.WriteError);
 
+                CommandInfo info = CommandInfo.Get(cmd);
+
                 CommandLineApplication processor = new CommandLineApplication
                 {
-                    Name = cmd.Info.Name,
-                    FullName = cmd.Info.FullName,
-                    Description = cmd.Info.Description,
+                    Name = info.Name,
+                    FullName = info.FullName,
+                    Description = info.Description,
                     Out = outWriter,
                     Error = errorWriter
                 };
                 processor.HelpOption("-?|-h|--help");
 
-                CommandContext context = new CommandContext(processor, httpContext, request, response);
+                CommandContext context = new CommandContext
+                {
+                    Processor = processor,
+                    OutWriter = processor.Out,
+                    ErrorWriter = processor.Error,
+                    HttpContext = httpContext,
+                    Request = request,
+                    Response = response,
+                    Info = info,
+                    Command = cmd
+                };
 
                 // check authorization
-                bool authorized = IsAuthorized(cmd, context);
+                bool authorized = IsAuthorized(context);
 
                 if (authorized)
                 {
@@ -88,7 +100,7 @@ namespace BeavisCli.Services
                 else
                 {
                     // handle unauthorized execution attempts
-                    await unauthorized.OnUnauthorizedAsync(cmd, context);
+                    await unauthorized.OnUnauthorizedAsync(context);
                 }
             }
             catch (CommandParsingException e)
@@ -116,11 +128,11 @@ namespace BeavisCli.Services
         /// <summary>
         /// Checks if the command execution is authorized.
         /// </summary>
-        protected virtual bool IsAuthorized(Command cmd, CommandContext context)
+        protected virtual bool IsAuthorized(CommandContext context)
         {
             ICommandExecutionEnvironment environment = context.HttpContext.RequestServices.GetRequiredService<ICommandExecutionEnvironment>();
 
-            bool authorized = environment.IsAuthorized(cmd, context);
+            bool authorized = environment.IsAuthorized(context);
 
             bool isExternal = environment.GetType() != typeof(CommandExecutionEnvironment);
 
@@ -131,19 +143,17 @@ namespace BeavisCli.Services
 
             if (authorized)
             {
-                authorized = cmd.IsAuthorized(context);
-
-                if (!cmd.IsBuiltIn)
+                if (!context.IsBuiltInCommand())
                 {
-                    _logger.LogInformation($"The authorization status returned by the command '{cmd.GetType().FullName}' is {authorized}.");
+                    _logger.LogInformation($"The authorization status returned by the command '{context.Command.GetType().FullName}' is {authorized}.");
                 }
             }
 
-            if (!cmd.IsBuiltIn || isExternal)
+            if (!context.IsBuiltInCommand() || isExternal)
             {
                 _logger.LogInformation(authorized
-                    ? $"The command '{cmd.GetType().FullName}' execution is authorized."
-                    : $"The command '{cmd.GetType().FullName}' execution is unauthorized.");
+                    ? $"The command '{context.Command.GetType().FullName}' execution is authorized."
+                    : $"The command '{context.Command.GetType().FullName}' execution is unauthorized.");
             }
 
             return authorized;

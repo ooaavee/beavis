@@ -4,18 +4,18 @@ using BeavisCli.JavaScriptStatements;
 namespace BeavisCli.Commands
 {
     [Command("reset", "Reset terminal")]
-    public class Reset : Command
+    public class Reset : ICommand
     {
-        public override async Task ExecuteAsync(CommandContext context)
+        public async Task ExecuteAsync(CommandContext context)
         {
-            await OnExecuteAsync(() =>
+            await context.OnExecuteAsync(() =>
             {
                 context.Response.AddJavaScript(new ClearTerminal());
                 context.Response.AddJavaScript(new ClearTerminalHistory());
                 context.Response.AddJavaScript(new Reload(true));
 
-                return Exit(context);
-            }, context);
+                return context.Exit();
+            });
 
         }
     }

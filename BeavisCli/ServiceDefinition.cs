@@ -9,6 +9,6 @@ namespace BeavisCli
 
         public Type ImplementationType { get; set; }
 
-        internal Type ServiceType { get; set; }
+        public Type ServiceType { get; set; }
     }
 }

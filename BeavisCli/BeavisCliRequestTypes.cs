@@ -3,9 +3,9 @@
     public enum BeavisCliRequestTypes
     {
         None,
-        TerminalHtml,
-        TerminalCss,
-        TerminalJs,
+        Html,
+        Css,
+        Js,
         Initialize,
         Job,
         Command,

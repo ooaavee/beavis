@@ -1,5 +1,4 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace BeavisCli
 {
@@ -22,7 +21,7 @@ namespace BeavisCli
     {
         public ErrorMessage(string text)
         {
-            Text = text ?? throw new ArgumentNullException(nameof(text));
+            Text = text ?? string.Empty;
         }
 
         public override string Type => "error";
@@ -35,7 +34,7 @@ namespace BeavisCli
     {
         public InformationMessage(string text)
         {
-            Text = text ?? throw new ArgumentNullException(nameof(text));
+            Text = text ?? string.Empty;
         }
 
         public override string Type => "information";
@@ -48,7 +47,7 @@ namespace BeavisCli
     {
         public SuccessMessage(string text)
         {
-            Text = text ?? throw new ArgumentNullException(nameof(text));
+            Text = text ?? string.Empty;
         }
 
         public override string Type => "success";

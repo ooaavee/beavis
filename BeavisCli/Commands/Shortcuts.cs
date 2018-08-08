@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 namespace BeavisCli.Commands
 {
     [Command("shortcuts", "Keyboard shortcuts")]
-    public class Shortcuts : Command
+    public class Shortcuts : ICommand
     {
-        public override async Task ExecuteAsync(CommandContext context)
+        public async Task ExecuteAsync(CommandContext context)
         {
-            await OnExecuteAsync(() =>
+            await context.OnExecuteAsync(() =>
             {
                 var items = new List<ShortcutsModel>
                 {
@@ -39,15 +39,15 @@ namespace BeavisCli.Commands
 
                 context.Response.WriteInformation("Keyboard shortcuts:");
 
-                string[] lines = ResponseRenderer.AsLines(items, x => x.Keys, x => x.Description, true);
+                string[] lines = LineFormatter.FormatLines(items, x => x.Keys, x => x.Description, true);
 
                 foreach (string line in lines)
                 {
                     context.Response.WriteInformation(line);
                 }
 
-                return Exit(context);
-            }, context);
+                return context.Exit();
+            });
         }
 
         private class ShortcutsModel

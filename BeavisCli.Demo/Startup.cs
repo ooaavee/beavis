@@ -9,18 +9,18 @@ namespace BeavisCli.Demo
 {
     public class Startup
     {
+        
+
         public void ConfigureServices(IServiceCollection services)
         {
+
+
             services.AddAuthentication("Demo")
-                .AddCookie("Demo", options =>
-                {
-
-                });
-
+                .AddCookie("Demo");
 
             services.AddBeavisCli(options =>
             {
-                options.Path = "/beavis";
+                options.Path = "/terminal";
                 options.DisplayExceptions = true;
             });
 
@@ -30,7 +30,7 @@ namespace BeavisCli.Demo
             services.AddScopedCommand<Login>();
 
 
-            services.AddScoped<DemoUserRepository>();
+            services.AddScoped<IUserRepository, DemoUserRepository>();
 
         }
 

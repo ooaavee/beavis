@@ -9,7 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         internal static bool Flag;
 
-        private static readonly Type ServiceTypeForCommand = typeof(Command);
+        private static readonly Type ServiceTypeForCommand = typeof(ICommand);
 
         public static IServiceCollection AddBeavisCli(this IServiceCollection services)
         {
@@ -43,27 +43,46 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddScopedCommand<TWebCliCommand>(this IServiceCollection services) where TWebCliCommand : Command
+        public static IServiceCollection AddScopedCommand<TCommand>(this IServiceCollection services) where TCommand : ICommand
         {
-            Validate(typeof(TWebCliCommand));
-            return services.AddScoped<Command, TWebCliCommand>();
+            Validate(typeof(TCommand));
+
+            return services.Add(new ServiceDefinition
+            {
+                ServiceType = typeof(ICommand),
+                ImplementationType = typeof(TCommand),
+                Lifetime = ServiceLifetime.Scoped
+            });
         }
 
-        public static IServiceCollection AddSingletonCommand<TWebCliCommand>(this IServiceCollection services) where TWebCliCommand : Command
+        public static IServiceCollection AddSingletonCommand<TCommand>(this IServiceCollection services) where TCommand : ICommand
         {
-            Validate(typeof(TWebCliCommand));
-            return services.AddSingleton<Command, TWebCliCommand>();
+            Validate(typeof(TCommand));
+
+            return services.Add(new ServiceDefinition
+            {
+                ServiceType = typeof(ICommand),
+                ImplementationType = typeof(TCommand),
+                Lifetime = ServiceLifetime.Singleton
+            });
         }
 
-        public static IServiceCollection AddTransientCommand<TWebCliCommand>(this IServiceCollection services) where TWebCliCommand : Command
+        public static IServiceCollection AddTransientCommand<TCommand>(this IServiceCollection services) where TCommand : ICommand
         {
-            Validate(typeof(TWebCliCommand));
-            return services.AddTransient<Command, TWebCliCommand>();
+            Validate(typeof(TCommand));
+
+            return services.Add(new ServiceDefinition
+            {
+                ServiceType = typeof(ICommand),
+                ImplementationType = typeof(TCommand),
+                Lifetime = ServiceLifetime.Transient
+            });
         }
 
-        private static void Add(this IServiceCollection services, ServiceDefinition service)
+        private static IServiceCollection Add(this IServiceCollection services, ServiceDefinition service)
         {
             services.Add(ServiceDescriptor.Describe(service.ServiceType, service.ImplementationType, service.Lifetime));
+            return services;
         }
 
         /// <summary>
@@ -71,7 +90,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         private static void Validate(Type commandType)
         {
-            CommandInfo info = CommandInfo.ForType(commandType);
+            CommandInfo info = CommandInfo.Get(commandType);
 
             // CommandAttribute must be found
             if (info == null)

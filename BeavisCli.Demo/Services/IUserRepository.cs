@@ -5,7 +5,14 @@ using System.Linq;
 
 namespace BeavisCli.Demo.Services
 {
-    public class DemoUserRepository
+    public interface IUserRepository
+    {
+        UserModel GetUser(string username);
+
+        IEnumerable<UserModel> GetUsers();
+    }
+
+    public class DemoUserRepository : IUserRepository
     {
         private readonly List<UserModel> _db = new List<UserModel>();
 

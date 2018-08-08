@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Commands
 {
-    [Command("filestorage", "A tool for managing files in the file storage")]
-    public class FileStorage : Command
+    [Command("files", "A tool for managing files in the file storage")]
+    public class Files : ICommand
     {
-        public override async Task ExecuteAsync(CommandContext context)
+        public async Task ExecuteAsync(CommandContext context)
         {
             // options
             ICommandOption ls = context.Option("-ls", "Lists all files.", CommandOptionType.NoValue);
@@ -18,7 +18,7 @@ namespace BeavisCli.Commands
             ICommandOption removeAll = context.Option("-ra", "Removes all files.", CommandOptionType.NoValue);
             ICommandOption download = context.Option("-download", "Downloads a file by using the file id.", CommandOptionType.SingleValue);
 
-            await OnExecuteAsync(async () =>
+            await context.OnExecuteAsync(async () =>
             {
                 bool succeed = false;
 
@@ -54,11 +54,11 @@ namespace BeavisCli.Commands
 
                 if (!succeed)
                 {
-                    return await ExitWithHelpAsync(context);
+                    return await context.ExitWithHelpAsync();
                 }
 
-                return await ExitAsync(context);
-            }, context);
+                return await context.ExitAsync();
+            });
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace BeavisCli.Commands
                     Name = "NAME"
                 });
 
-                string[] lines = ResponseRenderer.AsLines(items, x => x.FileId, x => x.Type, x => x.Name, true);
+                string[] lines = LineFormatter.FormatLines(items, x => x.FileId, x => x.Type, x => x.Name, true);
 
                 foreach (string line in lines)
                 {

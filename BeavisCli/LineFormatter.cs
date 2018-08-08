@@ -6,11 +6,11 @@ using System.Text;
 
 namespace BeavisCli
 {
-    public static class ResponseRenderer
+    public static class LineFormatter
     {
         private const string ParagraphPadding = "   ";
 
-        public static string[] AsLines<TObj, TMember1, TMember2>(
+        public static string[] FormatLines<TObj, TMember1, TMember2>(
             IEnumerable<TObj> objects, 
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
@@ -31,7 +31,7 @@ namespace BeavisCli
             return MakeLines(rows, 2, indent);
         }
 
-        public static string[] AsLines<TObj, TMember1, TMember2, TMember3>(
+        public static string[] FormatLines<TObj, TMember1, TMember2, TMember3>(
             IEnumerable<TObj> objects,
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
@@ -54,7 +54,7 @@ namespace BeavisCli
             return MakeLines(rows, 3, indent);
         }
 
-        public static string[] AsLines<TObj, TMember1, TMember2, TMember3, TMember4>(
+        public static string[] FormatLines<TObj, TMember1, TMember2, TMember3, TMember4>(
             IEnumerable<TObj> objects,
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
@@ -79,7 +79,7 @@ namespace BeavisCli
             return MakeLines(rows, 4, indent);
         }
 
-        public static string[] AsLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5>(
+        public static string[] FormatLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5>(
             IEnumerable<TObj> objects,
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
@@ -106,7 +106,7 @@ namespace BeavisCli
             return MakeLines(rows, 5, indent);
         }
 
-        public static string[] AsLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6>(
+        public static string[] FormatLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6>(
             IEnumerable<TObj> objects,
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
@@ -135,7 +135,7 @@ namespace BeavisCli
             return MakeLines(rows, 6, indent);
         }
 
-        public static string[] AsLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7>(
+        public static string[] FormatLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7>(
             IEnumerable<TObj> objects,
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
@@ -166,7 +166,7 @@ namespace BeavisCli
             return MakeLines(rows, 7, indent);
         }
 
-        public static string[] AsLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7, TMember8>(
+        public static string[] FormatLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7, TMember8>(
             IEnumerable<TObj> objects,
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
@@ -199,7 +199,7 @@ namespace BeavisCli
             return MakeLines(rows, 8, indent);
         }
 
-        public static string[] AsLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7, TMember8, TMember9>(
+        public static string[] FormatLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7, TMember8, TMember9>(
             IEnumerable<TObj> objects,
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
@@ -234,7 +234,7 @@ namespace BeavisCli
             return MakeLines(rows, 9, indent);
         }
 
-        public static string[] AsLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7, TMember8, TMember9, TMember10>(
+        public static string[] FormatLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7, TMember8, TMember9, TMember10>(
             IEnumerable<TObj> objects,
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,

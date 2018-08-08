@@ -52,20 +52,20 @@ namespace BeavisCli.Services
             ICommandProvider commands = httpContext.RequestServices.GetRequiredService<ICommandProvider>();
             ICommandExecutionEnvironment environment = httpContext.RequestServices.GetRequiredService<ICommandExecutionEnvironment>();
 
-            foreach (Command cmd in commands.GetCommands(httpContext))
+            foreach (ICommand cmd in commands.GetCommands(httpContext))
             {
                 bool enabled = environment.IsTabCompletionEnabled(cmd, httpContext);
-
                 if (enabled)
                 {
-                    yield return cmd.Info.Name;
+                    CommandInfo info = CommandInfo.Get(cmd);
+                    yield return info.Name;
                 }
             }
         }
 
         protected virtual bool IsUploadEnabled(HttpContext httpContext)
         {
-            CommandInfo info = CommandInfo.ForType(typeof(Upload));
+            CommandInfo info = CommandInfo.Get(typeof(Upload));
             CommandDefinition definition = _options.BuiltInCommands[info.Name];
             return definition.IsEnabled;
         }

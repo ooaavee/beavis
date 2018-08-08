@@ -58,19 +58,19 @@ namespace BeavisCli.Middlewares
 
                 switch (type)
                 {
-                    case BeavisCliRequestTypes.TerminalHtml:
+                    case BeavisCliRequestTypes.Html:
                         {
                             await RenderHtmlAsync(httpContext);
                             break;
                         }
 
-                    case BeavisCliRequestTypes.TerminalCss:
+                    case BeavisCliRequestTypes.Css:
                         {
                             await RenderCssAsync(httpContext);
                             break;
                         }
 
-                    case BeavisCliRequestTypes.TerminalJs:
+                    case BeavisCliRequestTypes.Js:
                         {
                             await RenderJsAsync(httpContext);
                             break;
@@ -147,17 +147,17 @@ namespace BeavisCli.Middlewares
 
             if (Match(_options.Path, HttpMethods.Get))
             {
-                return BeavisCliRequestTypes.TerminalHtml;
+                return BeavisCliRequestTypes.Html;
             }
 
             if (Match($"{fixedPath}/css", HttpMethods.Get))
             {
-                return BeavisCliRequestTypes.TerminalCss;
+                return BeavisCliRequestTypes.Css;
             }
 
             if (Match($"{fixedPath}/js", HttpMethods.Get))
             {
-                return BeavisCliRequestTypes.TerminalJs;
+                return BeavisCliRequestTypes.Js;
             }
 
             if (Match($"{fixedPath}/initialize", HttpMethods.Post))

@@ -6,25 +6,28 @@ using System.Threading.Tasks;
 namespace BeavisCli.Commands
 {
     [Command("help", "Displays help.")]
-    public class Help : Command
+    public class Help : ICommand
     {
-        public override async Task ExecuteAsync(CommandContext context)
+        public async Task ExecuteAsync(CommandContext context)
         {
-            await OnExecuteAsync(() =>
+            await context.OnExecuteAsync(() =>
             {
                 // required services
                 ICommandProvider commands = context.HttpContext.RequestServices.GetRequiredService<ICommandProvider>();
                 ICommandExecutionEnvironment environment = context.HttpContext.RequestServices.GetRequiredService<ICommandExecutionEnvironment>();
 
-                var defaults = new List<Command>();
+                var defaults = new List<ICommand>();
+                var externals = new List<ICommand>();
 
-                var externals = new List<Command>();
+                List<CommandInfo> items = new List<CommandInfo>();
 
-                foreach (Command cmd in commands.GetCommands(context.HttpContext))
+                foreach (ICommand cmd in commands.GetCommands(context.HttpContext))
                 {
-                    if (environment.IsVisibleForHelp(cmd, context))
+                    if (environment.IsVisibleForHelp(cmd, context.HttpContext))
                     {
-                        if (cmd.IsBuiltIn)
+                        bool isBuiltInCommand = cmd.GetType().Assembly.Equals(typeof(ICommand).Assembly);
+
+                        if (isBuiltInCommand)
                         {
                             defaults.Add(cmd);
                         }
@@ -32,16 +35,16 @@ namespace BeavisCli.Commands
                         {
                             externals.Add(cmd);
                         }
+
+                        items.Add(CommandInfo.Get(cmd));
                     }
                 }
-
-                List<CommandInfo> items = defaults.Concat(externals).Select(cmd => cmd.Info).ToList();
 
                 context.Response.WriteInformation("Default commands:");
 
                 int lineCount = 0;
 
-                string[] lines = ResponseRenderer.AsLines(items, x => x.Name, x => x.FullName, true);
+                string[] lines = LineFormatter.FormatLines(items, x => x.Name, x => x.FullName, true);
 
                 foreach (string line in lines)
                 {
@@ -55,8 +58,8 @@ namespace BeavisCli.Commands
                     }
                 }
  
-                return Exit(context);
-            }, context);
+                return context.Exit();
+            });
         }
     }
 }

@@ -43,7 +43,7 @@ namespace BeavisCli
         public ServiceDefinition FileStorageService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(Services.FileStorage),
+            ImplementationType = typeof(FileStorage),
             ServiceType = typeof(IFileStorage)
         };
 
@@ -95,7 +95,7 @@ namespace BeavisCli
 
             void Add(Type type)
             {
-                values[CommandInfo.ForType(type).Name] = new CommandDefinition(type);
+                values[CommandInfo.Get(type).Name] = new CommandDefinition(type);
             }
 
             Add(typeof(Help));
@@ -104,7 +104,7 @@ namespace BeavisCli
             Add(typeof(Shortcuts));
             Add(typeof(License));
             Add(typeof(Upload));
-            Add(typeof(Commands.FileStorage));
+            Add(typeof(Files));
 
             return values;
         }

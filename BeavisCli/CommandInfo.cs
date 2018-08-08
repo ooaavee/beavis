@@ -29,37 +29,38 @@ namespace BeavisCli
         // we can safely use a static dictionary cache here, because these values doesn't change during runtime
         private static readonly ConcurrentDictionary<Type, CommandInfo> ResolvedInfo = new ConcurrentDictionary<Type, CommandInfo>();
 
-        public static CommandInfo ForType(Type type)
+        public static CommandInfo Get(ICommand cmd)
+        {
+            return Get(cmd.GetType());
+        }
+
+        public static CommandInfo Get(Type type)
         {
             if (type == null)
             {
                 throw new ArgumentNullException(nameof(type));
             }
 
-            CommandInfo value;
-
-            bool found = ResolvedInfo.TryGetValue(type, out value);
-
-            if (found)
+            if (!ResolvedInfo.TryGetValue(type, out CommandInfo info))
             {
-                return value;
-            }
-
-            if (type.GetCustomAttributes(typeof(CommandAttribute), true) is CommandAttribute[] attrs1 && attrs1.Any())
-            {
-                value = new CommandInfo();
-                value.Name = attrs1[0].Name;
-                value.FullName = attrs1[0].FullName;
-
-                if (type.GetCustomAttributes(typeof(CommandDescriptionAttribute), true) is CommandDescriptionAttribute[] attrs2 && attrs2.Any())
+                if (type.GetCustomAttributes(typeof(CommandAttribute), true) is CommandAttribute[] attrs1 && attrs1.Any())
                 {
-                    value.Description = attrs2[0].Description;
-                }
+                    info = new CommandInfo
+                    {
+                        Name = attrs1[0].Name,
+                        FullName = attrs1[0].FullName
+                    };
 
-                ResolvedInfo.TryAdd(type, value);
+                    if (type.GetCustomAttributes(typeof(CommandDescriptionAttribute), true) is CommandDescriptionAttribute[] attrs2 && attrs2.Any())
+                    {
+                        info.Description = attrs2[0].Description;
+                    }
+
+                    ResolvedInfo.TryAdd(type, info);
+                }
             }
 
-            return value;
+            return info;
         }
     }
 }
