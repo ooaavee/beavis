@@ -11,35 +11,32 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Services
 {
-    public class CommandExecutor : ICommandExecutor
+    public class RequestHandler : IRequestHandler
     {
-        private readonly ILogger<CommandExecutor> _logger;
+        private readonly ILogger<RequestHandler> _logger;
         private readonly BeavisCliOptions _options;
 
-        public CommandExecutor(ILoggerFactory loggerFactory, IOptions<BeavisCliOptions> options)
+        public RequestHandler(ILoggerFactory loggerFactory, IOptions<BeavisCliOptions> options)
         {
-            _logger = loggerFactory.CreateLogger<CommandExecutor>();
+            _logger = loggerFactory.CreateLogger<RequestHandler>();
             _options = options.Value;
         }
 
-        public async Task<Response> ExecuteAsync(JObject requestBody, HttpContext httpContext)
+        public async Task<Response> HandleAsync(Request request, HttpContext httpContext)
         {
             // required services
             ICommandProvider commands = httpContext.RequestServices.GetRequiredService<ICommandProvider>();
             IUnauthorizedHandler unauthorized = httpContext.RequestServices.GetRequiredService<IUnauthorizedHandler>();
 
+            // response
             Response response = new Response(httpContext);
 
-            string requestBodyJson = null;
+            CommandContext context = null;
 
             try
             {
-                requestBodyJson = requestBody.ToString();
-
-                _logger.LogDebug($"Started to process a request '{requestBodyJson}'.");
-
-                Request request = JsonConvert.DeserializeObject<Request>(requestBodyJson);
-
+                _logger.LogDebug($"Started to process a request '{request.Input}'.");
+            
                 // command name entered by the user
                 string name = request.GetCommandName();
 
@@ -54,18 +51,24 @@ namespace BeavisCli.Services
                 catch (Exception e)
                 {
                     _logger.LogDebug($"An error occurred while searching a command by using the input '{request.Input}'.", e);
-                    response.WriteError(e);
+                    response.Messages.Add(new ErrorMessage(e.Message));
                     return response;
                 }
 
                 _logger.LogDebug($"Found a command '{cmd.GetType().FullName}' that matches the name '{name}'.");
 
+                CommandInfo info = CommandInfo.Get(cmd);
+
                 // these TextWriters are for writing console out and error messages, just
                 // like Console.Out and Console.Error
-                TextWriter outWriter = new ResponseMessageTextWriter(response.WriteInformation);
-                TextWriter errorWriter = new ResponseMessageTextWriter(response.WriteError);
-
-                CommandInfo info = CommandInfo.Get(cmd);
+                TextWriter outWriter = new ResponseMessageTextWriter(delegate(string text)
+                {
+                    response.Messages.Add(new PlainMessage(text));
+                });
+                TextWriter errorWriter = new ResponseMessageTextWriter(delegate(string text)
+                {
+                    response.Messages.Add(new ErrorMessage(text));
+                });
 
                 CommandLineApplication processor = new CommandLineApplication
                 {
@@ -77,7 +80,7 @@ namespace BeavisCli.Services
                 };
                 processor.HelpOption("-?|-h|--help");
 
-                CommandContext context = new CommandContext
+                context = new CommandContext
                 {
                     Processor = processor,
                     OutWriter = processor.Out,
@@ -105,20 +108,28 @@ namespace BeavisCli.Services
             }
             catch (CommandParsingException e)
             {
-                _logger.LogDebug($"An error occurred while parsing the input '{requestBodyJson}'.", e);
-                response.WriteError(e);
+                _logger.LogDebug($"An error occurred while parsing the input '{request.Input}'.", e);
+
+                if (context != null)
+                {
+                    context.WriteError(e);
+                }
+
             }
             catch (Exception e)
             {
-                _logger.LogError($"An error occurred while processing the request with the input '{requestBodyJson}'.", e);
+                _logger.LogError($"An error occurred while processing the request with the input '{request.Input}'.", e);
 
-                if (_options.DisplayExceptions)
+                if (context != null)
                 {
-                    response.WriteError(e, true);
-                }
-                else
-                {
-                    response.WriteError("An error occurred, please check your application logs for more details.");
+                    if (_options.DisplayExceptions)
+                    {
+                        context.WriteError(e, true);
+                    }
+                    else
+                    {
+                        context.WriteError("An error occurred, please check your application logs for more details.");
+                    }
                 }
             }
 

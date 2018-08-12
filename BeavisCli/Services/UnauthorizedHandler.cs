@@ -7,7 +7,7 @@ namespace BeavisCli.Services
     {
         public virtual Task OnUnauthorizedAsync(CommandContext context)
         {
-            context.Response.WriteError("Unauthorized");
+            context.WriteError("Unauthorized");
             return Task.CompletedTask;
         }
     }

@@ -23,7 +23,7 @@ namespace BeavisCli.Commands
                     }
                 }
 
-                context.Response.WriteInformation(text);
+                context.WriteText(text);
 
                 return await context.ExitAsync();
             });

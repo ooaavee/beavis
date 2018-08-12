@@ -40,21 +40,21 @@ namespace BeavisCli.Commands
                     }
                 }
 
-                context.Response.WriteInformation("Default commands:");
+                context.WriteText("Default commands:");
 
                 int lineCount = 0;
 
-                string[] lines = LineFormatter.FormatLines(items, x => x.Name, x => x.FullName, true);
+                string[] lines = LineFormatter.FormatLines(items, x => x.Name, x => x.FullName, true, false);
 
                 foreach (string line in lines)
                 {
                     lineCount++;
-                    context.Response.WriteInformation(line);
+                    context.WriteText(line);
 
                     if (externals.Any() && lineCount == defaults.Count)
                     {
-                        context.Response.WriteEmptyLine();
-                        context.Response.WriteInformation("Custom commands:");
+                        context.WriteEmptyLine();
+                        context.WriteText("Custom commands:");
                     }
                 }
  

@@ -37,13 +37,13 @@ namespace BeavisCli.Commands
                     new ShortcutsModel("PAGE DOWN", "Scroll down (don't work in Chrome).")
                 };
 
-                context.Response.WriteInformation("Keyboard shortcuts:");
+                context.WriteText("Keyboard shortcuts:");
 
-                string[] lines = LineFormatter.FormatLines(items, x => x.Keys, x => x.Description, true);
+                string[] lines = LineFormatter.FormatLines(items, x => x.Keys, x => x.Description, true, true);
 
                 foreach (string line in lines)
                 {
-                    context.Response.WriteInformation(line);
+                    context.WriteText(line);
                 }
 
                 return context.Exit();

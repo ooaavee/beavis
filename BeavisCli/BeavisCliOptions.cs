@@ -68,13 +68,13 @@ namespace BeavisCli
         };
 
         /// <summary>
-        /// ICommandExecutor
+        /// IRequestHandler
         /// </summary>
-        public ServiceDefinition CommandExecutorService { get; } = new ServiceDefinition
+        public ServiceDefinition RequestHandlerService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(CommandExecutor),
-            ServiceType = typeof(ICommandExecutor)
+            ImplementationType = typeof(RequestHandler),
+            ServiceType = typeof(IRequestHandler)
         };
 
         /// <summary>

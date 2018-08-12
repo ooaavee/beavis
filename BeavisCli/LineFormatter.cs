@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace BeavisCli
 {
@@ -14,12 +15,23 @@ namespace BeavisCli
             IEnumerable<TObj> objects, 
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
-            bool indent = false)
+            bool indent, 
+            bool createHeader)
         {
             var rows = new List<Dictionary<int, string>>();
 
             foreach (TObj obj in objects)
             {
+                if (createHeader && !rows.Any())
+                {
+                    var header = new Dictionary<int, string>
+                    {
+                        [1] = GetName(obj, expression1),
+                        [2] = GetName(obj, expression2)
+                    };
+                    rows.Add(header);
+                }
+
                 var row = new Dictionary<int, string>
                 {
                     [1] = GetValue(obj, expression1),
@@ -36,12 +48,24 @@ namespace BeavisCli
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
             Expression<Func<TObj, TMember3>> expression3,
-            bool indent = false)
+            bool indent,
+            bool createHeader)
         {
             var rows = new List<Dictionary<int, string>>();
 
             foreach (TObj obj in objects)
             {
+                if (createHeader && !rows.Any())
+                {
+                    var header = new Dictionary<int, string>
+                    {
+                        [1] = GetName(obj, expression1),
+                        [2] = GetName(obj, expression2),
+                        [3] = GetName(obj, expression3)
+                    };
+                    rows.Add(header);
+                }
+
                 var row = new Dictionary<int, string>
                 {
                     [1] = GetValue(obj, expression1),
@@ -60,12 +84,25 @@ namespace BeavisCli
             Expression<Func<TObj, TMember2>> expression2,
             Expression<Func<TObj, TMember3>> expression3,
             Expression<Func<TObj, TMember4>> expression4,
-            bool indent = false)
+            bool indent,
+            bool createHeader)
         {
             var rows = new List<Dictionary<int, string>>();
 
             foreach (TObj obj in objects)
             {
+                if (createHeader && !rows.Any())
+                {
+                    var header = new Dictionary<int, string>
+                    {
+                        [1] = GetName(obj, expression1),
+                        [2] = GetName(obj, expression2),
+                        [3] = GetName(obj, expression3),
+                        [4] = GetName(obj, expression4)
+                    };
+                    rows.Add(header);
+                }
+
                 var row = new Dictionary<int, string>
                 {
                     [1] = GetValue(obj, expression1),
@@ -86,12 +123,26 @@ namespace BeavisCli
             Expression<Func<TObj, TMember3>> expression3,
             Expression<Func<TObj, TMember4>> expression4,
             Expression<Func<TObj, TMember5>> expression5,
-            bool indent = false)
+            bool indent,
+            bool createHeader)
         {
             var rows = new List<Dictionary<int, string>>();
 
             foreach (TObj obj in objects)
             {
+                if (createHeader && !rows.Any())
+                {
+                    var header = new Dictionary<int, string>
+                    {
+                        [1] = GetName(obj, expression1),
+                        [2] = GetName(obj, expression2),
+                        [3] = GetName(obj, expression3),
+                        [4] = GetName(obj, expression4),
+                        [5] = GetName(obj, expression5)
+                    };
+                    rows.Add(header);
+                }
+
                 var row = new Dictionary<int, string>
                 {
                     [1] = GetValue(obj, expression1),
@@ -114,12 +165,27 @@ namespace BeavisCli
             Expression<Func<TObj, TMember4>> expression4,
             Expression<Func<TObj, TMember5>> expression5,
             Expression<Func<TObj, TMember6>> expression6,
-            bool indent = false)
+            bool indent,
+            bool createHeader)
         {
             var rows = new List<Dictionary<int, string>>();
 
             foreach (TObj obj in objects)
             {
+                if (createHeader && !rows.Any())
+                {
+                    var header = new Dictionary<int, string>
+                    {
+                        [1] = GetName(obj, expression1),
+                        [2] = GetName(obj, expression2),
+                        [3] = GetName(obj, expression3),
+                        [4] = GetName(obj, expression4),
+                        [5] = GetName(obj, expression5),
+                        [6] = GetName(obj, expression6)
+                    };
+                    rows.Add(header);
+                }
+
                 var row = new Dictionary<int, string>
                 {
                     [1] = GetValue(obj, expression1),
@@ -144,12 +210,28 @@ namespace BeavisCli
             Expression<Func<TObj, TMember5>> expression5,
             Expression<Func<TObj, TMember6>> expression6,
             Expression<Func<TObj, TMember7>> expression7,
-            bool indent = false)
+            bool indent,
+            bool createHeader)
         {
             var rows = new List<Dictionary<int, string>>();
 
             foreach (TObj obj in objects)
             {
+                if (createHeader && !rows.Any())
+                {
+                    var header = new Dictionary<int, string>
+                    {
+                        [1] = GetName(obj, expression1),
+                        [2] = GetName(obj, expression2),
+                        [3] = GetName(obj, expression3),
+                        [4] = GetName(obj, expression4),
+                        [5] = GetName(obj, expression5),
+                        [6] = GetName(obj, expression6),
+                        [7] = GetName(obj, expression7)
+                    };
+                    rows.Add(header);
+                }
+
                 var row = new Dictionary<int, string>
                 {
                     [1] = GetValue(obj, expression1),
@@ -176,12 +258,29 @@ namespace BeavisCli
             Expression<Func<TObj, TMember6>> expression6,
             Expression<Func<TObj, TMember7>> expression7,
             Expression<Func<TObj, TMember8>> expression8,
-            bool indent = false)
+            bool indent,
+            bool createHeader)
         {
             var rows = new List<Dictionary<int, string>>();
 
             foreach (TObj obj in objects)
             {
+                if (createHeader && !rows.Any())
+                {
+                    var header = new Dictionary<int, string>
+                    {
+                        [1] = GetName(obj, expression1),
+                        [2] = GetName(obj, expression2),
+                        [3] = GetName(obj, expression3),
+                        [4] = GetName(obj, expression4),
+                        [5] = GetName(obj, expression5),
+                        [6] = GetName(obj, expression6),
+                        [7] = GetName(obj, expression7),
+                        [8] = GetName(obj, expression8)
+                    };
+                    rows.Add(header);
+                }
+
                 var row = new Dictionary<int, string>
                 {
                     [1] = GetValue(obj, expression1),
@@ -210,12 +309,30 @@ namespace BeavisCli
             Expression<Func<TObj, TMember7>> expression7,
             Expression<Func<TObj, TMember8>> expression8,
             Expression<Func<TObj, TMember9>> expression9,
-            bool indent = false)
+            bool indent,
+            bool createHeader)
         {
             var rows = new List<Dictionary<int, string>>();
 
             foreach (TObj obj in objects)
             {
+                if (createHeader && !rows.Any())
+                {
+                    var header = new Dictionary<int, string>
+                    {
+                        [1] = GetName(obj, expression1),
+                        [2] = GetName(obj, expression2),
+                        [3] = GetName(obj, expression3),
+                        [4] = GetName(obj, expression4),
+                        [5] = GetName(obj, expression5),
+                        [6] = GetName(obj, expression6),
+                        [7] = GetName(obj, expression7),
+                        [8] = GetName(obj, expression8),
+                        [9] = GetName(obj, expression9)
+                    };
+                    rows.Add(header);
+                }
+
                 var row = new Dictionary<int, string>
                 {
                     [1] = GetValue(obj, expression1),
@@ -246,12 +363,31 @@ namespace BeavisCli
             Expression<Func<TObj, TMember8>> expression8,
             Expression<Func<TObj, TMember9>> expression9,
             Expression<Func<TObj, TMember10>> expression10,
-            bool indent = false)
+            bool indent,
+            bool createHeader)
         {
             var rows = new List<Dictionary<int, string>>();
 
             foreach (TObj obj in objects)
             {
+                if (createHeader && !rows.Any())
+                {
+                    var header = new Dictionary<int, string>
+                    {
+                        [1] = GetName(obj, expression1),
+                        [2] = GetName(obj, expression2),
+                        [3] = GetName(obj, expression3),
+                        [4] = GetName(obj, expression4),
+                        [5] = GetName(obj, expression5),
+                        [6] = GetName(obj, expression6),
+                        [7] = GetName(obj, expression7),
+                        [8] = GetName(obj, expression8),
+                        [9] = GetName(obj, expression9),
+                        [10] = GetName(obj, expression10)
+                    };
+                    rows.Add(header);
+                }
+
                 var row = new Dictionary<int, string>
                 {
                     [1] = GetValue(obj, expression1),
@@ -275,19 +411,37 @@ namespace BeavisCli
         {
             Func<TObj, TMember> compiledDelegate = expression.Compile();
             TMember value = compiledDelegate(obj);
-            
-            string text = "";
 
-            if (value != null)
+            if (value == null)
             {
-                string tmp = value.ToString();
-                if (!string.IsNullOrEmpty(tmp))
-                {
-                    text = tmp;
-                }
+                return string.Empty;
             }
 
-            return text;
+            string text = value.ToString();
+            if (!string.IsNullOrEmpty(text))
+            {
+                return text;
+            }
+
+            return string.Empty;
+        }
+
+        private static string GetName<TObj, TMember>(TObj obj, Expression<Func<TObj, TMember>> expression)
+        {
+            MemberExpression memberExpr = (MemberExpression)expression.Body;
+            string memberName = memberExpr.Member.Name;
+
+            if (string.IsNullOrEmpty(memberName))
+            {
+                return string.Empty;
+            }
+
+            // insert spaces between words on a camel-cased token
+            string name = Regex.Replace(memberName, @"(\B[A-Z]+?(?=[A-Z][^A-Z])|\B[A-Z]+?(?=[^A-Z]))", " $1");
+
+            name = name.ToUpperInvariant();
+
+            return name;
         }
 
         private static string[] MakeLines(List<Dictionary<int, string>> rows, int colCount, bool indent)

@@ -120,7 +120,7 @@ var BeavisCli;
                                 text = "\n";
                             }
                             switch (messages[i].type) {
-                                case "information":
+                                case "plain":
                                     terminal.echo(text);
                                     break;
                                 case "success":

@@ -1,14 +1,14 @@
-﻿using BeavisCli.Microsoft.Extensions.CommandLineUtils;
+﻿using System;
+using BeavisCli.Microsoft.Extensions.CommandLineUtils;
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BeavisCli
 {
     public class CommandContext
     {
-        public Dictionary<string, object> Items { get; } = new Dictionary<string, object>();
-
         internal CommandLineApplication Processor { get; set; }
 
         /// <summary>
@@ -27,12 +27,12 @@ namespace BeavisCli
         public virtual Response Response { get; set; }
 
         /// <summary>
-        /// Writer for out message, like Console.Out
+        /// Text writer for out message, like Console.Out
         /// </summary>
         public virtual TextWriter OutWriter { get; set; }
 
         /// <summary>
-        /// Writer for error messages, like Console.Error
+        /// Text writer for error messages, like Console.Error
         /// </summary>
         public virtual TextWriter ErrorWriter { get; set; }
 
@@ -40,16 +40,28 @@ namespace BeavisCli
 
         public virtual ICommand Command { get; set; }
 
+        public virtual ITerminalInitializer TerminalInitializer
+        {
+            get
+            {
+                if (HttpContext == null)
+                {
+                    throw new InvalidOperationException("HttpContext is not available.");
+                }
+                return HttpContext.RequestServices.GetRequiredService<ITerminalInitializer>();
+            }
+        }
 
-        /*
-         *
-         *
-         * TODO:
-         * Tänne olioviittauksena ainakin IFileStorage ja ITerminalInitializer
-         *
-         *
-         *
-         */
-
+        public virtual IFileStorage FileStorage
+        {
+            get
+            {
+                if (HttpContext == null)
+                {
+                    throw new InvalidOperationException("HttpContext is not available.");
+                }
+                return HttpContext.RequestServices.GetRequiredService<IFileStorage>();
+            }
+        }
     }
 }

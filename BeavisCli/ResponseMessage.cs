@@ -28,16 +28,16 @@ namespace BeavisCli
     }
 
     /// <summary>
-    /// Information message
+    /// Plain message
     /// </summary>
-    public sealed class InformationMessage : ResponseMessage
+    public sealed class PlainMessage : ResponseMessage
     {
-        public InformationMessage(string text)
+        public PlainMessage(string text)
         {
             Text = text ?? string.Empty;
         }
 
-        public override string Type => "information";
+        public override string Type => "plain";
     }
 
     /// <summary>

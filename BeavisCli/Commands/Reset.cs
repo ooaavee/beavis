@@ -10,9 +10,9 @@ namespace BeavisCli.Commands
         {
             await context.OnExecuteAsync(() =>
             {
-                context.Response.AddJavaScript(new ClearTerminal());
-                context.Response.AddJavaScript(new ClearTerminalHistory());
-                context.Response.AddJavaScript(new Reload(true));
+                context.WriteJs(new ClearTerminal());
+                context.WriteJs(new ClearTerminalHistory());
+                context.WriteJs(new Reload(true));
 
                 return context.Exit();
             });

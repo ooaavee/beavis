@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             // register required services
             services.Add(options.CommandProviderService);
-            services.Add(options.CommandExecutorService);
+            services.Add(options.RequestHandlerService);
             services.Add(options.JobPoolService);
             services.Add(options.UnauthorizedHandlerService);
             services.Add(options.TerminalInitializerService);

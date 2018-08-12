@@ -198,7 +198,7 @@ namespace BeavisCli {
                         }
 
                         switch (messages[i].type) {
-                            case "information":
+                            case "plain":
                                 terminal.echo(text);
                                 break;
 

@@ -2,7 +2,7 @@
 {
     public enum ResponseMessageTypes
     {
-        Information,
+        Plain,
         Error,
         Success
     }

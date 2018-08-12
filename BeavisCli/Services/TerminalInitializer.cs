@@ -21,10 +21,17 @@ namespace BeavisCli.Services
         {
             if (!silent)
             {
-                response.Messages.AddRange(GetMessages(httpContext));
+                foreach (ResponseMessage message in GetMessages(httpContext))
+                {
+                    response.Messages.Add(message);
+                }
             }
 
-            response.AddJavaScript(GetJavaScript(httpContext));
+            foreach (IJavaScriptStatement js in GetJavaScript(httpContext))
+            {
+                string code = js.GetCode();
+                response.Statements.Add(code);
+            }
         }
 
         protected virtual IEnumerable<ResponseMessage> GetMessages(HttpContext httpContext)
@@ -69,7 +76,5 @@ namespace BeavisCli.Services
             CommandDefinition definition = _options.BuiltInCommands[info.Name];
             return definition.IsEnabled;
         }
-
-
     }
 }

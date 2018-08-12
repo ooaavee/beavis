@@ -81,24 +81,17 @@ namespace BeavisCli.Commands
             }
 
             if (items.Any())
-            {
-                items.Insert(0, new ListFilesModel
-                {
-                    FileId = "FILE ID",
-                    Type = "TYPE",
-                    Name = "NAME"
-                });
-
-                string[] lines = LineFormatter.FormatLines(items, x => x.FileId, x => x.Type, x => x.Name, true);
+            {               
+                string[] lines = LineFormatter.FormatLines(items, x => x.FileId, x => x.Type, x => x.Name, true, true);
 
                 foreach (string line in lines)
                 {
-                    context.Response.WriteInformation(line);
+                    context.WriteText(line);
                 }
             }
             else
             {
-                context.Response.WriteInformation("No files found.");
+                context.WriteText("No files found.");
             }
         }
 
@@ -113,11 +106,11 @@ namespace BeavisCli.Commands
 
             if (file != null)
             {
-                context.Response.WriteInformation("File removed.");
+                context.WriteText("File removed.");
             }
             else
             {
-                context.Response.WriteError($"Unable to find a file to remove by using the id '{id}'.");
+                context.WriteError($"Unable to find a file to remove by using the id '{id}'.");
             }
         }
 
@@ -132,11 +125,11 @@ namespace BeavisCli.Commands
 
             if (count == 0)
             {
-                context.Response.WriteError("Unable to find files to remove.");
+                context.WriteError("Unable to find files to remove.");
             }
             else
             {
-                context.Response.WriteInformation($"Removed {count} file(s).");
+                context.WriteText($"Removed {count} file(s).");
             }
         }
 
@@ -152,11 +145,11 @@ namespace BeavisCli.Commands
             if (file != null)
             {
                 IJavaScriptStatement js = new DownloadJs(file.GetBytes(), file.Name, file.Type);
-                context.Response.AddJavaScript(js);
+                context.WriteJs(js);
             }
             else
             {
-                context.Response.WriteError($"Unable to find a file to download by using the id '{id}'.");
+                context.WriteError($"Unable to find a file to download by using the id '{id}'.");
             }
         }
 
