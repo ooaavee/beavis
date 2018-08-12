@@ -4,6 +4,6 @@ namespace BeavisCli
 {
     public interface ITerminalInitializer
     {
-        void Initialize(HttpContext context, WebCliResponse response);
+        void Initialize(Response response, HttpContext httpContext, bool silent = false);
     }
 }

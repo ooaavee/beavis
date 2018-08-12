@@ -5,14 +5,14 @@
     "removeComments": true,
     "sourceMap": false,
     "target": "es5",
-    "outFile": "../Resources/js/beavis-cli.js"
+    "outFile": "../Resources/js/beaviscli.js"
   },
     "exclude": [
         "node_modules",
         "wwwroot"
     ],
     "files": [
-        "beavis-cli.ts"
+        "beaviscli.ts"
     ],
   "compileOnSave": true
 }

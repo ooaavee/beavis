@@ -3,10 +3,16 @@ using Microsoft.AspNetCore.Http;
 
 namespace BeavisCli
 {
-    public interface IJobPool
+    internal interface IJobPool
     {
-        Task ExecuteAsync(string key, HttpContext context, WebCliResponse response);
-
+        /// <summary>
+        /// Adds a job and returns its identifier. 
+        /// </summary>
         string Push(IJob job);
+
+        /// <summary>
+        /// Finds a job from the job pool by its identifier and removes it from the job pool.
+        /// </summary>
+        Task RunAsync(string key, HttpContext context, Response response);
     }
 }
