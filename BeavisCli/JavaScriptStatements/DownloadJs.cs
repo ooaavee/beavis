@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Text.Encodings.Web;
+using System.Text;
 
 namespace BeavisCli.JavaScriptStatements
 {
@@ -17,7 +17,14 @@ namespace BeavisCli.JavaScriptStatements
 
         public DownloadJs(byte[] data, string fileName, string mimeType)
         {
-            _js = $"download(\"data:{JavaScriptEncoder.Default.Encode(mimeType)};base64,{Convert.ToBase64String(data)}\", \"{JavaScriptEncoder.Default.Encode(fileName)}\", \"{JavaScriptEncoder.Default.Encode(mimeType)}\");";
+            var tmp = new StringBuilder();
+
+            tmp.Append($"var s = atob('{Convert.ToBase64String(data)}'); ");
+            tmp.Append("var arr = new Array(s.length); ");
+            tmp.Append("for (var i = 0; i < s.length; i++) arr[i] = s.charCodeAt(i); ");           
+            tmp.Append($"download(new Blob([new Uint8Array(arr)], {{type: \"{mimeType}\"}}), \"{fileName}\", \"{mimeType}\");");
+
+            _js = tmp.ToString();
         }
 
         public string GetCode()
