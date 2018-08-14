@@ -1,16 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace BeavisCli.Commands
 {
-    [Command("shortcuts", "Keyboard shortcuts")]
+    [Command("shortcuts", "Displays terminal keyboard shortcuts.")]
     public class Shortcuts : ICommand
     {
         public async Task ExecuteAsync(CommandContext context)
         {
             await context.OnExecuteAsync(() =>
             {
-                var items = new List<ShortcutsModel>
+                var items = new[]
                 {
                     new ShortcutsModel("TAB", "Tab completion is available or tab character."),
                     new ShortcutsModel("Shift+Enter", "Insert new line."),
@@ -37,14 +36,7 @@ namespace BeavisCli.Commands
                     new ShortcutsModel("PAGE DOWN", "Scroll down (don't work in Chrome).")
                 };
 
-                context.WriteText("Keyboard shortcuts:");
-
-                string[] lines = LineFormatter.FormatLines(items, x => x.Keys, x => x.Description, true, true);
-
-                foreach (string line in lines)
-                {
-                    context.WriteText(line);
-                }
+                context.WriteObjects(items, x => x.Keys, x => x.Description, true, true);
 
                 return context.Exit();
             });

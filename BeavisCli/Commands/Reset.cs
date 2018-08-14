@@ -3,7 +3,7 @@ using BeavisCli.JavaScriptStatements;
 
 namespace BeavisCli.Commands
 {
-    [Command("reset", "Reset terminal")]
+    [Command("reset", "Resets the terminal.")]
     public class Reset : ICommand
     {
         public async Task ExecuteAsync(CommandContext context)

@@ -1,12 +1,12 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using BeavisCli.JavaScriptStatements;
+using BeavisCli.Jobs;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using BeavisCli.JavaScriptStatements;
-using BeavisCli.Jobs;
 
 namespace BeavisCli
 {
@@ -117,6 +117,231 @@ namespace BeavisCli
 
             context.AddJob(job);
         }
+     
+        public static void WriteObjects<TObj, TMember1, TMember2>(
+            this CommandContext context,
+            IEnumerable<TObj> objects,
+            Expression<Func<TObj, TMember1>> expression1,
+            Expression<Func<TObj, TMember2>> expression2,
+            bool indent,
+            bool createHeader)
+        {
+            context.WriteText(
+                LineFormatter.CreateLines(
+                    objects,
+                    expression1,
+                    expression2,
+                    indent,
+                    createHeader));
+        }
+
+        public static void WriteObjects<TObj, TMember1, TMember2, TMember3>(
+            this CommandContext context,
+            IEnumerable<TObj> objects,
+            Expression<Func<TObj, TMember1>> expression1,
+            Expression<Func<TObj, TMember2>> expression2,
+            Expression<Func<TObj, TMember3>> expression3,
+            bool indent,
+            bool createHeader)
+        {
+            context.WriteText(
+                LineFormatter.CreateLines(
+                    objects,
+                    expression1,
+                    expression2,
+                    expression3,
+                    indent,
+                    createHeader));
+        }
+
+        public static void WriteObjects<TObj, TMember1, TMember2, TMember3, TMember4>(
+            this CommandContext context,
+            IEnumerable<TObj> objects,
+            Expression<Func<TObj, TMember1>> expression1,
+            Expression<Func<TObj, TMember2>> expression2,
+            Expression<Func<TObj, TMember3>> expression3,
+            Expression<Func<TObj, TMember4>> expression4,
+            bool indent,
+            bool createHeader)
+        {
+            context.WriteText(
+                LineFormatter.CreateLines(
+                    objects,
+                    expression1,
+                    expression2,
+                    expression3,
+                    expression4,
+                    indent,
+                    createHeader));
+        }
+
+        public static void WriteObjects<TObj, TMember1, TMember2, TMember3, TMember4, TMember5>(
+            this CommandContext context,
+            IEnumerable<TObj> objects,
+            Expression<Func<TObj, TMember1>> expression1,
+            Expression<Func<TObj, TMember2>> expression2,
+            Expression<Func<TObj, TMember3>> expression3,
+            Expression<Func<TObj, TMember4>> expression4,
+            Expression<Func<TObj, TMember5>> expression5,
+            bool indent,
+            bool createHeader)
+        {
+            context.WriteText(
+                LineFormatter.CreateLines(
+                    objects,
+                    expression1,
+                    expression2,
+                    expression3,
+                    expression4,
+                    expression5,
+                    indent,
+                    createHeader));
+        }
+
+        public static void WriteObjects<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6>(
+            this CommandContext context,
+            IEnumerable<TObj> objects,
+            Expression<Func<TObj, TMember1>> expression1,
+            Expression<Func<TObj, TMember2>> expression2,
+            Expression<Func<TObj, TMember3>> expression3,
+            Expression<Func<TObj, TMember4>> expression4,
+            Expression<Func<TObj, TMember5>> expression5,
+            Expression<Func<TObj, TMember6>> expression6,
+            bool indent,
+            bool createHeader)
+        {
+            context.WriteText(
+                LineFormatter.CreateLines(
+                    objects,
+                    expression1,
+                    expression2,
+                    expression3,
+                    expression4,
+                    expression5,
+                    expression6,
+                    indent,
+                    createHeader));
+        }
+
+        public static void WriteObjects<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7>(
+            this CommandContext context,
+            IEnumerable<TObj> objects,
+            Expression<Func<TObj, TMember1>> expression1,
+            Expression<Func<TObj, TMember2>> expression2,
+            Expression<Func<TObj, TMember3>> expression3,
+            Expression<Func<TObj, TMember4>> expression4,
+            Expression<Func<TObj, TMember5>> expression5,
+            Expression<Func<TObj, TMember6>> expression6,
+            Expression<Func<TObj, TMember7>> expression7,
+            bool indent,
+            bool createHeader)
+        {
+            context.WriteText(
+                LineFormatter.CreateLines(
+                    objects,
+                    expression1,
+                    expression2,
+                    expression3,
+                    expression4,
+                    expression5,
+                    expression6,
+                    expression7,
+                    indent,
+                    createHeader));
+        }
+
+        public static void WriteObjects<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7, TMember8>(
+            this CommandContext context,
+            IEnumerable<TObj> objects,
+            Expression<Func<TObj, TMember1>> expression1,
+            Expression<Func<TObj, TMember2>> expression2,
+            Expression<Func<TObj, TMember3>> expression3,
+            Expression<Func<TObj, TMember4>> expression4,
+            Expression<Func<TObj, TMember5>> expression5,
+            Expression<Func<TObj, TMember6>> expression6,
+            Expression<Func<TObj, TMember7>> expression7,
+            Expression<Func<TObj, TMember8>> expression8,
+            bool indent,
+            bool createHeader)
+        {
+            context.WriteText(
+                LineFormatter.CreateLines(
+                    objects,
+                    expression1,
+                    expression2,
+                    expression3,
+                    expression4,
+                    expression5,
+                    expression6,
+                    expression7,
+                    expression8,
+                    indent,
+                    createHeader));
+        }
+
+        public static void WriteObjects<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7, TMember8, TMember9>(
+            this CommandContext context,
+            IEnumerable<TObj> objects,
+            Expression<Func<TObj, TMember1>> expression1,
+            Expression<Func<TObj, TMember2>> expression2,
+            Expression<Func<TObj, TMember3>> expression3,
+            Expression<Func<TObj, TMember4>> expression4,
+            Expression<Func<TObj, TMember5>> expression5,
+            Expression<Func<TObj, TMember6>> expression6,
+            Expression<Func<TObj, TMember7>> expression7,
+            Expression<Func<TObj, TMember8>> expression8,
+            Expression<Func<TObj, TMember9>> expression9,
+            bool indent,
+            bool createHeader)
+        {
+            context.WriteText(
+                LineFormatter.CreateLines(
+                    objects,
+                    expression1,
+                    expression2,
+                    expression3,
+                    expression4,
+                    expression5,
+                    expression6,
+                    expression7,
+                    expression8,
+                    expression9,
+                    indent,
+                    createHeader));
+        }
+
+        public static void WriteObjects<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7, TMember8, TMember9, TMember10>(
+            this CommandContext context,
+            IEnumerable<TObj> objects,
+            Expression<Func<TObj, TMember1>> expression1,
+            Expression<Func<TObj, TMember2>> expression2,
+            Expression<Func<TObj, TMember3>> expression3,
+            Expression<Func<TObj, TMember4>> expression4,
+            Expression<Func<TObj, TMember5>> expression5,
+            Expression<Func<TObj, TMember6>> expression6,
+            Expression<Func<TObj, TMember7>> expression7,
+            Expression<Func<TObj, TMember8>> expression8,
+            Expression<Func<TObj, TMember9>> expression9,
+            Expression<Func<TObj, TMember10>> expression10,
+            bool indent,
+            bool createHeader)
+        {
+            context.WriteText(
+                LineFormatter.CreateLines(
+                    objects,
+                    expression1,
+                    expression2,
+                    expression3,
+                    expression4,
+                    expression5,
+                    expression6,
+                    expression7,
+                    expression8,
+                    expression9,
+                    expression10,
+                    indent,
+                    createHeader));
+        }
 
         /// <summary>
         /// Adds a job.
@@ -134,253 +359,6 @@ namespace BeavisCli
                 context.WriteJs(js);
             };
         }
-
-
-        /*
-         *
-         *
-         *  TODO: Tänne ne mitä on ReponseRenderer luokassa
-         *
-         *
-         */
-
-
-        #region X
-
-        public static void FormatLines<TObj, TMember1, TMember2>(
-            this CommandContext context,
-            IEnumerable<TObj> objects,
-            Expression<Func<TObj, TMember1>> expression1,
-            Expression<Func<TObj, TMember2>> expression2,
-            bool indent,
-            bool createHeader)
-        {
-            context.WriteText(
-                LineFormatter.FormatLines(
-                    objects,
-                    expression1,
-                    expression2,
-                    indent,
-                    createHeader));
-        }
-
-        public static void FormatLines<TObj, TMember1, TMember2, TMember3>(
-            this CommandContext context,
-            IEnumerable<TObj> objects,
-            Expression<Func<TObj, TMember1>> expression1,
-            Expression<Func<TObj, TMember2>> expression2,
-            Expression<Func<TObj, TMember3>> expression3,
-            bool indent,
-            bool createHeader)
-        {
-            context.WriteText(
-                LineFormatter.FormatLines(
-                    objects,
-                    expression1,
-                    expression2,
-                    expression3,
-                    indent,
-                    createHeader));
-        }
-
-        public static void FormatLines<TObj, TMember1, TMember2, TMember3, TMember4>(
-            this CommandContext context,
-            IEnumerable<TObj> objects,
-            Expression<Func<TObj, TMember1>> expression1,
-            Expression<Func<TObj, TMember2>> expression2,
-            Expression<Func<TObj, TMember3>> expression3,
-            Expression<Func<TObj, TMember4>> expression4,
-            bool indent,
-            bool createHeader)
-        {
-            context.WriteText(
-                LineFormatter.FormatLines(
-                    objects,
-                    expression1,
-                    expression2,
-                    expression3,
-                    expression4,
-                    indent,
-                    createHeader));
-        }
-
-        public static void FormatLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5>(
-            this CommandContext context,
-            IEnumerable<TObj> objects,
-            Expression<Func<TObj, TMember1>> expression1,
-            Expression<Func<TObj, TMember2>> expression2,
-            Expression<Func<TObj, TMember3>> expression3,
-            Expression<Func<TObj, TMember4>> expression4,
-            Expression<Func<TObj, TMember5>> expression5,
-            bool indent,
-            bool createHeader)
-        {
-            context.WriteText(
-                LineFormatter.FormatLines(
-                    objects,
-                    expression1,
-                    expression2,
-                    expression3,
-                    expression4,
-                    expression5,
-                    indent,
-                    createHeader));
-        }
-
-        public static void FormatLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6>(
-            this CommandContext context,
-            IEnumerable<TObj> objects,
-            Expression<Func<TObj, TMember1>> expression1,
-            Expression<Func<TObj, TMember2>> expression2,
-            Expression<Func<TObj, TMember3>> expression3,
-            Expression<Func<TObj, TMember4>> expression4,
-            Expression<Func<TObj, TMember5>> expression5,
-            Expression<Func<TObj, TMember6>> expression6,
-            bool indent,
-            bool createHeader)
-        {
-            context.WriteText(
-                LineFormatter.FormatLines(
-                    objects,
-                    expression1,
-                    expression2,
-                    expression3,
-                    expression4,
-                    expression5,
-                    expression6,
-                    indent,
-                    createHeader));
-        }
-
-        public static void FormatLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7>(
-            this CommandContext context,
-            IEnumerable<TObj> objects,
-            Expression<Func<TObj, TMember1>> expression1,
-            Expression<Func<TObj, TMember2>> expression2,
-            Expression<Func<TObj, TMember3>> expression3,
-            Expression<Func<TObj, TMember4>> expression4,
-            Expression<Func<TObj, TMember5>> expression5,
-            Expression<Func<TObj, TMember6>> expression6,
-            Expression<Func<TObj, TMember7>> expression7,
-            bool indent,
-            bool createHeader)
-        {
-            context.WriteText(
-                LineFormatter.FormatLines(
-                    objects,
-                    expression1,
-                    expression2,
-                    expression3,
-                    expression4,
-                    expression5,
-                    expression6,
-                    expression7,
-                    indent,
-                    createHeader));
-        }
-
-        public static void FormatLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7, TMember8>(
-            this CommandContext context,
-            IEnumerable<TObj> objects,
-            Expression<Func<TObj, TMember1>> expression1,
-            Expression<Func<TObj, TMember2>> expression2,
-            Expression<Func<TObj, TMember3>> expression3,
-            Expression<Func<TObj, TMember4>> expression4,
-            Expression<Func<TObj, TMember5>> expression5,
-            Expression<Func<TObj, TMember6>> expression6,
-            Expression<Func<TObj, TMember7>> expression7,
-            Expression<Func<TObj, TMember8>> expression8,
-            bool indent,
-            bool createHeader)
-        {
-            context.WriteText(
-                LineFormatter.FormatLines(
-                    objects,
-                    expression1,
-                    expression2,
-                    expression3,
-                    expression4,
-                    expression5,
-                    expression6,
-                    expression7,
-                    expression8,
-                    indent,
-                    createHeader));
-        }
-
-        public static void FormatLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7, TMember8, TMember9>(
-            this CommandContext context,
-            IEnumerable<TObj> objects,
-            Expression<Func<TObj, TMember1>> expression1,
-            Expression<Func<TObj, TMember2>> expression2,
-            Expression<Func<TObj, TMember3>> expression3,
-            Expression<Func<TObj, TMember4>> expression4,
-            Expression<Func<TObj, TMember5>> expression5,
-            Expression<Func<TObj, TMember6>> expression6,
-            Expression<Func<TObj, TMember7>> expression7,
-            Expression<Func<TObj, TMember8>> expression8,
-            Expression<Func<TObj, TMember9>> expression9,
-            bool indent,
-            bool createHeader)
-        {
-            context.WriteText(
-                LineFormatter.FormatLines(
-                    objects,
-                    expression1,
-                    expression2,
-                    expression3,
-                    expression4,
-                    expression5,
-                    expression6,
-                    expression7,
-                    expression8,
-                    expression9,
-                    indent,
-                    createHeader));
-        }
-
-        public static void FormatLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7, TMember8, TMember9, TMember10>(
-            this CommandContext context,
-            IEnumerable<TObj> objects,
-            Expression<Func<TObj, TMember1>> expression1,
-            Expression<Func<TObj, TMember2>> expression2,
-            Expression<Func<TObj, TMember3>> expression3,
-            Expression<Func<TObj, TMember4>> expression4,
-            Expression<Func<TObj, TMember5>> expression5,
-            Expression<Func<TObj, TMember6>> expression6,
-            Expression<Func<TObj, TMember7>> expression7,
-            Expression<Func<TObj, TMember8>> expression8,
-            Expression<Func<TObj, TMember9>> expression9,
-            Expression<Func<TObj, TMember10>> expression10,
-            bool indent,
-            bool createHeader)
-        {
-            context.WriteText(
-                LineFormatter.FormatLines(
-                    objects,
-                    expression1,
-                    expression2,
-                    expression3,
-                    expression4,
-                    expression5,
-                    expression6,
-                    expression7,
-                    expression8,
-                    expression9,
-                    expression10,
-                    indent,
-                    createHeader));
-        }
-
-        #endregion
-
-
-
-
-
-
-
-
 
         public static async Task OnExecuteAsync(this CommandContext context, Func<Task<CommandResult>> invoke)
         {
@@ -564,17 +542,17 @@ namespace BeavisCli
             return context.Command.GetType().Assembly.Equals(typeof(ICommand).Assembly);
         }
 
-        public static ILogger<CommandContext> Logger(this CommandContext context)
+        private static ILogger Logger(this CommandContext context)
         {
             const string key = "__BeavisCli.CommandContext.Logger";
 
             if (context.HttpContext.Items.TryGetValue(key, out var tmp))
             {
-                return (ILogger<CommandContext>)tmp;
+                return (ILogger) tmp;
             }
 
             ILoggerFactory loggerFactory = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
-            ILogger<CommandContext> logger = loggerFactory.CreateLogger<CommandContext>();
+            ILogger logger = loggerFactory.CreateLogger<CommandContext>();
             context.HttpContext.Items[key] = logger;
             return logger;
         }

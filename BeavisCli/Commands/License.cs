@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Commands
 {
-    [Command("license", "License information")]
+    [Command("license", "Displays license information.")]
     public class License : ICommand
     {
         public async Task ExecuteAsync(CommandContext context)

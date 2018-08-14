@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Commands
 {
-    [Command("files", "A tool for managing files in the file storage")]
+    [Command("files", "A tool for managing files in the file storage.")]
     public class Files : ICommand
     {
         public async Task ExecuteAsync(CommandContext context)
@@ -82,12 +82,7 @@ namespace BeavisCli.Commands
 
             if (items.Any())
             {               
-                string[] lines = LineFormatter.FormatLines(items, x => x.FileId, x => x.Type, x => x.Name, true, true);
-
-                foreach (string line in lines)
-                {
-                    context.WriteText(line);
-                }
+                context.WriteObjects(items, x => x.FileId, x => x.Type, x => x.Name, true, true);
             }
             else
             {

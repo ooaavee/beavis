@@ -11,7 +11,7 @@ namespace BeavisCli
     {
         private const string ParagraphPadding = "   ";
 
-        public static string[] FormatLines<TObj, TMember1, TMember2>(
+        public static string[] CreateLines<TObj, TMember1, TMember2>(
             IEnumerable<TObj> objects, 
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
@@ -30,6 +30,7 @@ namespace BeavisCli
                         [2] = GetName(obj, expression2)
                     };
                     rows.Add(header);
+                    rows.Add(CreateHeaderSeparator(header));
                 }
 
                 var row = new Dictionary<int, string>
@@ -42,8 +43,8 @@ namespace BeavisCli
 
             return MakeLines(rows, 2, indent);
         }
-
-        public static string[] FormatLines<TObj, TMember1, TMember2, TMember3>(
+       
+        public static string[] CreateLines<TObj, TMember1, TMember2, TMember3>(
             IEnumerable<TObj> objects,
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
@@ -64,6 +65,7 @@ namespace BeavisCli
                         [3] = GetName(obj, expression3)
                     };
                     rows.Add(header);
+                    rows.Add(CreateHeaderSeparator(header));
                 }
 
                 var row = new Dictionary<int, string>
@@ -78,7 +80,7 @@ namespace BeavisCli
             return MakeLines(rows, 3, indent);
         }
 
-        public static string[] FormatLines<TObj, TMember1, TMember2, TMember3, TMember4>(
+        public static string[] CreateLines<TObj, TMember1, TMember2, TMember3, TMember4>(
             IEnumerable<TObj> objects,
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
@@ -101,6 +103,7 @@ namespace BeavisCli
                         [4] = GetName(obj, expression4)
                     };
                     rows.Add(header);
+                    rows.Add(CreateHeaderSeparator(header));
                 }
 
                 var row = new Dictionary<int, string>
@@ -116,7 +119,7 @@ namespace BeavisCli
             return MakeLines(rows, 4, indent);
         }
 
-        public static string[] FormatLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5>(
+        public static string[] CreateLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5>(
             IEnumerable<TObj> objects,
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
@@ -141,6 +144,7 @@ namespace BeavisCli
                         [5] = GetName(obj, expression5)
                     };
                     rows.Add(header);
+                    rows.Add(CreateHeaderSeparator(header));
                 }
 
                 var row = new Dictionary<int, string>
@@ -157,7 +161,7 @@ namespace BeavisCli
             return MakeLines(rows, 5, indent);
         }
 
-        public static string[] FormatLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6>(
+        public static string[] CreateLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6>(
             IEnumerable<TObj> objects,
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
@@ -184,6 +188,7 @@ namespace BeavisCli
                         [6] = GetName(obj, expression6)
                     };
                     rows.Add(header);
+                    rows.Add(CreateHeaderSeparator(header));
                 }
 
                 var row = new Dictionary<int, string>
@@ -201,7 +206,7 @@ namespace BeavisCli
             return MakeLines(rows, 6, indent);
         }
 
-        public static string[] FormatLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7>(
+        public static string[] CreateLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7>(
             IEnumerable<TObj> objects,
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
@@ -230,6 +235,7 @@ namespace BeavisCli
                         [7] = GetName(obj, expression7)
                     };
                     rows.Add(header);
+                    rows.Add(CreateHeaderSeparator(header));
                 }
 
                 var row = new Dictionary<int, string>
@@ -248,7 +254,7 @@ namespace BeavisCli
             return MakeLines(rows, 7, indent);
         }
 
-        public static string[] FormatLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7, TMember8>(
+        public static string[] CreateLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7, TMember8>(
             IEnumerable<TObj> objects,
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
@@ -279,6 +285,7 @@ namespace BeavisCli
                         [8] = GetName(obj, expression8)
                     };
                     rows.Add(header);
+                    rows.Add(CreateHeaderSeparator(header));
                 }
 
                 var row = new Dictionary<int, string>
@@ -298,7 +305,7 @@ namespace BeavisCli
             return MakeLines(rows, 8, indent);
         }
 
-        public static string[] FormatLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7, TMember8, TMember9>(
+        public static string[] CreateLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7, TMember8, TMember9>(
             IEnumerable<TObj> objects,
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
@@ -331,6 +338,7 @@ namespace BeavisCli
                         [9] = GetName(obj, expression9)
                     };
                     rows.Add(header);
+                    rows.Add(CreateHeaderSeparator(header));
                 }
 
                 var row = new Dictionary<int, string>
@@ -351,7 +359,7 @@ namespace BeavisCli
             return MakeLines(rows, 9, indent);
         }
 
-        public static string[] FormatLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7, TMember8, TMember9, TMember10>(
+        public static string[] CreateLines<TObj, TMember1, TMember2, TMember3, TMember4, TMember5, TMember6, TMember7, TMember8, TMember9, TMember10>(
             IEnumerable<TObj> objects,
             Expression<Func<TObj, TMember1>> expression1,
             Expression<Func<TObj, TMember2>> expression2,
@@ -386,6 +394,7 @@ namespace BeavisCli
                         [10] = GetName(obj, expression10)
                     };
                     rows.Add(header);
+                    rows.Add(CreateHeaderSeparator(header));
                 }
 
                 var row = new Dictionary<int, string>
@@ -406,7 +415,27 @@ namespace BeavisCli
 
             return MakeLines(rows, 10, indent);
         }
-      
+
+        private static Dictionary<int, string> CreateHeaderSeparator(Dictionary<int, string> header)
+        {
+            var separator = new Dictionary<int, string>();
+
+            for (int i = 1; i <= 10; i++)
+            {
+                if (!header.TryGetValue(i, out string title))
+                {
+                    break;
+                }
+
+                int len = title.Length;
+                string line = len > 0 ? new string('-', len) : string.Empty;
+
+                separator[i] = line;
+            }
+
+            return separator;
+        }
+
         private static string GetValue<TObj, TMember>(TObj obj, Expression<Func<TObj, TMember>> expression)
         {
             Func<TObj, TMember> compiledDelegate = expression.Compile();

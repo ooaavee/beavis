@@ -2,7 +2,7 @@
 
 namespace BeavisCli.Commands
 {
-    [Command("clear", "Clear terminal")]
+    [Command("clear", "Clears the terminal.")]
     public class Clear : ICommand
     {
         public async Task ExecuteAsync(CommandContext context)

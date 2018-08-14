@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace BeavisCli.Commands
@@ -16,45 +15,52 @@ namespace BeavisCli.Commands
                 ICommandProvider commands = context.HttpContext.RequestServices.GetRequiredService<ICommandProvider>();
                 ICommandExecutionEnvironment environment = context.HttpContext.RequestServices.GetRequiredService<ICommandExecutionEnvironment>();
 
-                var defaults = new List<ICommand>();
-                var externals = new List<ICommand>();
+                int builtInCount = 0;
+                int externalCount = 0;
 
-                List<CommandInfo> items = new List<CommandInfo>();
+                var items = new List<CommandInfo>();
 
                 foreach (ICommand cmd in commands.GetCommands(context.HttpContext))
                 {
-                    if (environment.IsVisibleForHelp(cmd, context.HttpContext))
+                    if (cmd == this)
                     {
-                        bool isBuiltInCommand = cmd.GetType().Assembly.Equals(typeof(ICommand).Assembly);
-
-                        if (isBuiltInCommand)
-                        {
-                            defaults.Add(cmd);
-                        }
-                        else
-                        {
-                            externals.Add(cmd);
-                        }
-
-                        items.Add(CommandInfo.Get(cmd));
+                        continue;
                     }
+
+                    if (!environment.IsVisibleForHelp(cmd, context.HttpContext))
+                    {
+                        continue;
+                    }
+
+                    bool isBuiltInCommand = cmd.GetType().Assembly.Equals(typeof(ICommand).Assembly);
+
+                    if (isBuiltInCommand)
+                    {
+                        builtInCount++;
+                    }
+                    else
+                    {
+                        externalCount++;
+                    }
+
+                    items.Add(CommandInfo.Get(cmd));
                 }
 
-                context.WriteText("Default commands:");
+                context.WriteText("Built-in commands:");
 
                 int lineCount = 0;
 
-                string[] lines = LineFormatter.FormatLines(items, x => x.Name, x => x.FullName, true, false);
+                string[] lines = LineFormatter.CreateLines(items, x => x.Name, x => x.FullName, true, false);
 
                 foreach (string line in lines)
                 {
                     lineCount++;
                     context.WriteText(line);
 
-                    if (externals.Any() && lineCount == defaults.Count)
+                    if (externalCount > 0 && lineCount == builtInCount)
                     {
                         context.WriteEmptyLine();
-                        context.WriteText("Custom commands:");
+                        context.WriteText("Your custom commands:");
                     }
                 }
  
