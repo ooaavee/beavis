@@ -1,5 +1,4 @@
-﻿using BeavisCli.Commands;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
 namespace BeavisCli.Services
@@ -13,17 +12,11 @@ namespace BeavisCli.Services
             _options = options.Value;
         }
 
-        public virtual bool IsKnownRequestType(BeavisCliRequestTypes type, HttpContext httpContext)
-        {
-            return true;
-        }
-
         public virtual bool IsAuthorized(CommandContext context)
         {
-            // By default every command execution is authorized. If you want some custom 
-            // authorization logic, you should
-            // - write your own ICommandExecutionEnvironment implementation and register it during the startup or/and
-            // - override Command.IsAuthorized method
+            // By default every command execution is authorized.
+            // If you want some custom authorization logic, you should write your own
+            // ICommandExecutionEnvironment implementation and register it during the startup.
 
             return true;
         }

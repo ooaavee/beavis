@@ -1,5 +1,6 @@
 ﻿using BeavisCli.Commands;
 using BeavisCli.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -13,9 +14,9 @@ namespace BeavisCli
             BuiltInCommands = GetBuiltInCommands();
         }
 
-        public string Path { get; set; } = "/beaviscli";
+        public string Path { get; set; } = "/terminal";
 
-        public bool DisplayExceptions { get; set; }
+        public bool DisplayExceptions { get; set; } = true;
 
         /// <summary>
         /// IUnauthorizedHandler
@@ -87,7 +88,12 @@ namespace BeavisCli
             ServiceType = typeof(IJobPool)
         };
 
+        /// <summary>
+        /// Define built-in command behaviours.
+        /// </summary>
         public IReadOnlyDictionary<string, CommandDefinition> BuiltInCommands { get; }
+
+        public Func<BeavisCliRequestTypes, HttpContext, bool> IsRequestTypeBlocked { get; set; }
 
         private static IReadOnlyDictionary<string, CommandDefinition> GetBuiltInCommands()
         {

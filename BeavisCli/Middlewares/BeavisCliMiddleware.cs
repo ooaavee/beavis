@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Linq;
@@ -29,10 +28,18 @@ namespace BeavisCli.Middlewares
 
         public async Task InvokeAsync(HttpContext httpContext)
         {
-            BeavisCliRequestTypes type = GetRequestType(httpContext.Request);
+            BeavisCliRequestTypes requestType = GetRequestType(httpContext.Request);
 
-            if (type == BeavisCliRequestTypes.None)
+            if (requestType == BeavisCliRequestTypes.None)
             {
+                await _next(httpContext);
+                return;
+            }
+
+            Func<BeavisCliRequestTypes, HttpContext, bool> blocked = _options.IsRequestTypeBlocked;
+            if (blocked != null && blocked(requestType, httpContext))
+            {
+                _logger.LogInformation($"Skipping the request type of '{requestType}'.");
                 await _next(httpContext);
                 return;
             }
@@ -48,15 +55,7 @@ namespace BeavisCli.Middlewares
                 IFileStorage files = httpContext.RequestServices.GetRequiredService<IFileStorage>();
                 IRequestHandler executor = httpContext.RequestServices.GetRequiredService<IRequestHandler>();
 
-                bool known = environment.IsKnownRequestType(type, httpContext);
-                if (!known)
-                {
-                    _logger.LogInformation($"Skipping the request type of '{type}'.");
-                    await _next(httpContext);
-                    return;
-                }
-
-                switch (type)
+                switch (requestType)
                 {
                     case BeavisCliRequestTypes.Html:
                         {
@@ -121,7 +120,7 @@ namespace BeavisCli.Middlewares
             }
             catch (Exception e)
             {
-                _logger.LogError($"An error occurred while processing the request type of '{type}'.", e);
+                _logger.LogError($"An error occurred while processing the request type of '{requestType}'.", e);
                 await WriteErrorResponseAsync(e, httpContext);
                 return;
             }

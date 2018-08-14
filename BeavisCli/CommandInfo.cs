@@ -6,9 +6,10 @@ namespace BeavisCli
 {
     public sealed class CommandInfo
     {
-        private CommandInfo()
-        {
-        }
+        // we can safely use a static dictionary cache here, because these values doesn't change during runtime
+        private static readonly ConcurrentDictionary<Type, CommandInfo> Known = new ConcurrentDictionary<Type, CommandInfo>();
+
+        private CommandInfo() { }
 
         /// <summary>
         /// Command name
@@ -25,10 +26,6 @@ namespace BeavisCli
         /// </summary>
         public string Description { get; private set; }
 
-
-        // we can safely use a static dictionary cache here, because these values doesn't change during runtime
-        private static readonly ConcurrentDictionary<Type, CommandInfo> ResolvedInfo = new ConcurrentDictionary<Type, CommandInfo>();
-
         public static CommandInfo Get(ICommand cmd)
         {
             return Get(cmd.GetType());
@@ -36,12 +33,7 @@ namespace BeavisCli
 
         public static CommandInfo Get(Type type)
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
-            if (!ResolvedInfo.TryGetValue(type, out CommandInfo info))
+            if (!Known.TryGetValue(type, out CommandInfo info))
             {
                 if (type.GetCustomAttributes(typeof(CommandAttribute), true) is CommandAttribute[] attrs1 && attrs1.Any())
                 {
@@ -56,7 +48,7 @@ namespace BeavisCli
                         info.Description = attrs2[0].Description;
                     }
 
-                    ResolvedInfo.TryAdd(type, info);
+                    Known.TryAdd(type, info);
                 }
             }
 

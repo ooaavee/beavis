@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Security;
-using System.Text;
-
-namespace BeavisCli
+﻿namespace BeavisCli
 {
-    public class CommandResult
+    public struct CommandResult
     {
-        public static readonly CommandResult Default = new CommandResult();
+        public static readonly CommandResult Default = new CommandResult { StatusCode = 2 };
 
-        private const int ExitStatusCode = 2;
-
-        public virtual int StatusCode { get; } = ExitStatusCode;
+        public int StatusCode { get; set; }
     }
 }

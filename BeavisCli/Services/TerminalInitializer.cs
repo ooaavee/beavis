@@ -61,8 +61,7 @@ namespace BeavisCli.Services
 
             foreach (ICommand cmd in commands.GetCommands(httpContext))
             {
-                bool enabled = environment.IsTabCompletionEnabled(cmd, httpContext);
-                if (enabled)
+                if (environment.IsTabCompletionEnabled(cmd, httpContext))
                 {
                     CommandInfo info = CommandInfo.Get(cmd);
                     yield return info.Name;

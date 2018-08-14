@@ -1,9 +1,8 @@
-﻿using System;
-using BeavisCli.Microsoft.Extensions.CommandLineUtils;
+﻿using BeavisCli.Microsoft.Extensions.CommandLineUtils;
 using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
-using System.IO;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.IO;
 
 namespace BeavisCli
 {
@@ -36,10 +35,19 @@ namespace BeavisCli
         /// </summary>
         public virtual TextWriter ErrorWriter { get; set; }
 
+        /// <summary>
+        /// Information about the current command
+        /// </summary>
         public virtual CommandInfo Info { get; set; }
 
+        /// <summary>
+        /// Current command
+        /// </summary>
         public virtual ICommand Command { get; set; }
 
+        /// <summary>
+        /// ITerminalInitializer service for the current command
+        /// </summary>
         public virtual ITerminalInitializer TerminalInitializer
         {
             get
@@ -52,6 +60,9 @@ namespace BeavisCli
             }
         }
 
+        /// <summary>
+        /// IFileStorage service for the current command
+        /// </summary>
         public virtual IFileStorage FileStorage
         {
             get

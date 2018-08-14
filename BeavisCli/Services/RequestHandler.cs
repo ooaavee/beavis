@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -78,6 +76,7 @@ namespace BeavisCli.Services
                     Out = outWriter,
                     Error = errorWriter
                 };
+
                 processor.HelpOption("-?|-h|--help");
 
                 context = new CommandContext
@@ -114,7 +113,6 @@ namespace BeavisCli.Services
                 {
                     context.WriteError(e);
                 }
-
             }
             catch (Exception e)
             {
