@@ -130,7 +130,7 @@ namespace BeavisCli.Middlewares
 
         private BeavisCliRequestTypes GetRequestType(HttpRequest request)
         {
-            const string fixedPath = "/beaviscli-fixed-api-segment";
+            const string fixedPath = "/beaviscli-api";
 
             bool IsPotentialMatch()
             {
