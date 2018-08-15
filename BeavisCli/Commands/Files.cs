@@ -1,5 +1,4 @@
-﻿using BeavisCli.JavaScriptStatements;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,15 +63,15 @@ namespace BeavisCli.Commands
         /// <summary>
         /// Lists all files.
         /// </summary>
-        private async Task ListFiles(CommandContext context)
+        private static async Task ListFiles(CommandContext context)
         {
             IFileStorage files = context.HttpContext.RequestServices.GetRequiredService<IFileStorage>();
 
-            var items = new List<ListFilesModel>();
+            var items = new List<FileListModel>();
 
             foreach (Tuple<string, FileContent> item in await files.GetAllAsync())
             {
-                items.Add(new ListFilesModel
+                items.Add(new FileListModel
                 {
                     FileId = item.Item1,
                     Type = item.Item2.Type,
@@ -81,8 +80,8 @@ namespace BeavisCli.Commands
             }
 
             if (items.Any())
-            {               
-                context.WriteObjects(items, x => x.FileId, x => x.Type, x => x.Name, true, true);
+            {
+                context.WriteObjects(items, x => x.FileId, x => x.Type, x => x.Name, false, true);
             }
             else
             {
@@ -93,7 +92,7 @@ namespace BeavisCli.Commands
         /// <summary>
         /// Removes a file by using the file id.
         /// </summary>
-        private async Task Remove(CommandContext context, string id)
+        private static async Task Remove(CommandContext context, string id)
         {
             IFileStorage files = context.HttpContext.RequestServices.GetRequiredService<IFileStorage>();
 
@@ -112,7 +111,7 @@ namespace BeavisCli.Commands
         /// <summary>
         /// Removes all files.
         /// </summary>
-        private async Task RemoveAll(CommandContext context)
+        private static async Task RemoveAll(CommandContext context)
         {
             IFileStorage files = context.HttpContext.RequestServices.GetRequiredService<IFileStorage>();
 
@@ -131,7 +130,7 @@ namespace BeavisCli.Commands
         /// <summary>
         /// Downloads a file by using the file id.
         /// </summary>
-        private async Task Download(CommandContext context, string id)
+        private static async Task Download(CommandContext context, string id)
         {
             IFileStorage files = context.HttpContext.RequestServices.GetRequiredService<IFileStorage>();
 
@@ -139,8 +138,7 @@ namespace BeavisCli.Commands
 
             if (file != null)
             {
-                IJavaScriptStatement js = new DownloadJs(file.GetBytes(), file.Name, file.Type);
-                context.WriteJs(js);
+                context.WriteFile(file.GetBytes(), file.Name, file.Type);
             }
             else
             {
@@ -148,7 +146,7 @@ namespace BeavisCli.Commands
             }
         }
 
-        private class ListFilesModel
+        private class FileListModel
         {
             public string FileId { get; set; }
             public string Type { get; set; }

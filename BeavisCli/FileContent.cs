@@ -1,10 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace BeavisCli
 {
@@ -13,6 +9,8 @@ namespace BeavisCli
     /// </summary>
     public class FileContent
     {
+        private const string DefaultType = "application/octet-stream";
+        
         /// <summary>
         /// File name
         /// </summary>
@@ -71,8 +69,6 @@ namespace BeavisCli
             }
             return type ?? (type = DefaultType);
         }
-
-        private const string DefaultType = "application/octet-stream";
 
         private static void Find(string value, Action<string> callback)
         {

@@ -111,9 +111,9 @@ namespace BeavisCli
         /// <summary>
         /// Writes a file.
         /// </summary>
-        public static void WriteFile(this CommandContext context, byte[] data, string fileName, string mimeType)
+        public static void WriteFile(this CommandContext context, byte[] content, string fileName, string mimeType)
         {
-            IJob job = new WriteFileJob(data, fileName, mimeType);
+            IJob job = new WriteFileJob(content, fileName, mimeType);
 
             context.AddJob(job);
         }

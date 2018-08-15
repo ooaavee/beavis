@@ -11,32 +11,32 @@ namespace BeavisCli.Commands
             {
                 var items = new[]
                 {
-                    new ShortcutsModel("TAB", "Tab completion is available or tab character."),
+                    new ShortcutsModel("Tab", "Tab completion is available or tab character."),
                     new ShortcutsModel("Shift+Enter", "Insert new line."),
-                    new ShortcutsModel("Up Arrow/CTRL+P", "Show previous command from history."),
-                    new ShortcutsModel("Down Arrow/CTRL+N", "Show next command from history."),
-                    new ShortcutsModel("CTRL+R", "Reverse Search through command line history."),
-                    new ShortcutsModel("CTRL+G", "Cancel Reverse Search."),
-                    new ShortcutsModel("CTRL+L", "Clear terminal."),
-                    new ShortcutsModel("CTRL+Y", "Paste text from kill area."),
+                    new ShortcutsModel("Up Arrow/Ctrl+P", "Show previous command from history."),
+                    new ShortcutsModel("Down Arrow/Ctrl+N", "Show next command from history."),
+                    new ShortcutsModel("Ctrl+R", "Reverse Search through command line history."),
+                    new ShortcutsModel("Ctrl+G", "Cancel Reverse Search."),
+                    new ShortcutsModel("Ctrl+L", "Clear terminal."),
+                    new ShortcutsModel("Ctrl+Y", "Paste text from kill area."),
                     new ShortcutsModel("Delete/backspace", "Remove one character from right/left to the cursor."),
-                    new ShortcutsModel("Left Arrow/CTRL+B", "Move left."),
-                    new ShortcutsModel("Right Arrow/CTRL+F", "Move right."),
-                    new ShortcutsModel("CTRL+Left Arrow", "Move one word to the left."),
-                    new ShortcutsModel("CTRL+Right Arrow", "Move one word to the right."),
-                    new ShortcutsModel("CTRL+A/Home", "Move to beginning of the line."),
-                    new ShortcutsModel("CTRL+E/End", "Move to end of the line."),
-                    new ShortcutsModel("CTRL+K", "Remove the text after the cursor and save it in kill area."),
-                    new ShortcutsModel("CTRL+U", "Remove the text before the cursor and save it in kill area."),
-                    new ShortcutsModel("CTRL+V/SHIFT+Insert", "Insert text from system clipboard."),
-                    new ShortcutsModel("CTRL+W", "Remove text to the begining of the word (don't work in Chrome)."),
-                    new ShortcutsModel("CTRL+H", "Remove text to the end of the line."),
-                    new ShortcutsModel("ALT+D", "Remove one word after the cursor (don't work in IE)."),
-                    new ShortcutsModel("PAGE UP", "Scroll up (don't work in Chrome)."),
-                    new ShortcutsModel("PAGE DOWN", "Scroll down (don't work in Chrome).")
+                    new ShortcutsModel("Left Arrow/Ctrl+B", "Move left."),
+                    new ShortcutsModel("Right Arrow/Ctrl+F", "Move right."),
+                    new ShortcutsModel("Ctrl+Left Arrow", "Move one word to the left."),
+                    new ShortcutsModel("Ctrl+Right Arrow", "Move one word to the right."),
+                    new ShortcutsModel("Ctrl+A/Home", "Move to beginning of the line."),
+                    new ShortcutsModel("Ctrl+E/End", "Move to end of the line."),
+                    new ShortcutsModel("Ctrl+K", "Remove the text after the cursor and save it in kill area."),
+                    new ShortcutsModel("Ctrl+U", "Remove the text before the cursor and save it in kill area."),
+                    new ShortcutsModel("Ctrl+V/Shift+Insert", "Insert text from system clipboard."),
+                    new ShortcutsModel("Ctrl+W", "Remove text to the begining of the word (don't work in Chrome)."),
+                    new ShortcutsModel("Ctrl+H", "Remove text to the end of the line."),
+                    new ShortcutsModel("Alt+D", "Remove one word after the cursor (don't work in IE)."),
+                    new ShortcutsModel("Page Up", "Scroll up (don't work in Chrome)."),
+                    new ShortcutsModel("Page Down", "Scroll down (don't work in Chrome).")
                 };
 
-                context.WriteObjects(items, x => x.Keys, x => x.Description, true, true);
+                context.WriteObjects(items, x => x.Keys, x => x.Description, false, true);
 
                 return context.Exit();
             });
