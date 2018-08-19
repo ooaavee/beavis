@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
@@ -21,7 +20,7 @@ namespace BeavisCli.Services
         /// </summary>
         public string Push(IJob job)
         {
-            string key = KeyProvider.Create(s => _jobs.ContainsKey(s));
+            string key = KeyUtil.GenerateKey(s => _jobs.ContainsKey(s));
 
             if (!_jobs.TryAdd(key, job))
             {
@@ -33,14 +32,12 @@ namespace BeavisCli.Services
         }
 
         /// <summary>
-        /// Finds a job from the job pool by its identifier and removes it from the job pool.
+        /// Runs the job.
         /// </summary>
-        public async Task RunAsync(string key, HttpContext context, Response response)
+        public async Task RunAsync(string key, JobContext context)
         {
-            IJob job;
-
-            // find the job and remove it from the memory
-            if (!_jobs.TryRemove(key, out job))
+            // find the job and remove it from the pool
+            if (!_jobs.TryRemove(key, out IJob job))
             {
                 _logger.LogError($"Unable to find a job by using the key '{key}'.");
                 throw new InvalidOperationException($"Unable to find a job by using the key '{key}'.");
@@ -50,7 +47,7 @@ namespace BeavisCli.Services
             try
             {
                 _logger.LogDebug($"Executing a job by using the key '{key}'.");
-                await job.RunAsync(context, response);
+                await job.RunAsync(context);
                 _logger.LogDebug($"Completing a job execution by using the key '{key}'.");
             }
             catch (Exception e)

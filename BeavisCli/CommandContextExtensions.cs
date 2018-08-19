@@ -12,12 +12,75 @@ namespace BeavisCli
 {
     public static class CommandContextExtensions
     {
+        public static async Task OnExecuteAsync(this CommandContext context, Func<Task<CommandResult>> invoke)
+        {
+            // invoke hook
+            context.Processor.Invoke = delegate
+            {
+                CommandResult result = invoke().Result;
+                return result.StatusCode;
+            };
+
+            // get arguments for the command
+            string[] args = context.Request.GetCommandArgs();
+
+            context.Logger().LogDebug($"Started to execute '{context.Command.GetType().FullName}' with arguments '{string.Join(" ", args)}'.");
+
+            // execute the command
+            int statusCode = context.Processor.Execute(args);
+
+            context.Logger().LogDebug($"'{context.Command.GetType().FullName}' execution completed with status code {statusCode}.");
+
+            await Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// Creates a new command options.
+        /// </summary>
+        public static ICommandOption Option(this CommandContext context, string template, string description, CommandOptionType optionType)
+        {
+            Microsoft.Extensions.CommandLineUtils.CommandOptionType o;
+
+            switch (optionType)
+            {
+                case CommandOptionType.MultipleValue:
+                    o = Microsoft.Extensions.CommandLineUtils.CommandOptionType.MultipleValue;
+                    break;
+                case CommandOptionType.SingleValue:
+                    o = Microsoft.Extensions.CommandLineUtils.CommandOptionType.SingleValue;
+                    break;
+                case CommandOptionType.NoValue:
+                    o = Microsoft.Extensions.CommandLineUtils.CommandOptionType.NoValue;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(optionType), optionType, null);
+            }
+
+            return new CommandOption(context.Processor.Option(template, description, o));
+        }
+
+        /// <summary>
+        /// Creates a new command argument.
+        /// </summary>
+        public static ICommandArgument Argument(this CommandContext context, string name, string description, bool multipleValues = false)
+        {
+            return new CommandArgument(context.Processor.Argument(name, description, multipleValues));
+        }
+
+        /// <summary>
+        /// Checks if the command is built-in.
+        /// </summary>
+        public static bool IsBuiltInCommand(this CommandContext context)
+        {
+            return context.Command.GetType().Assembly.Equals(typeof(ICommand).Assembly);
+        }
+
         /// <summary>
         /// Writes an empty line.
         /// </summary>
         public static void WriteEmptyLine(this CommandContext context)
         {
-            context.Response.Messages.Add(new PlainMessage(string.Empty));
+            context.Response.Messages.Add(ResponseMessage.Plain(string.Empty));
         }
 
         /// <summary>
@@ -25,7 +88,7 @@ namespace BeavisCli
         /// </summary>
         public static void WriteText(this CommandContext context, string text)
         {
-            context.Response.Messages.Add(new PlainMessage(text));
+            context.Response.Messages.Add(ResponseMessage.Plain(text));
         }
 
         /// <summary>
@@ -44,7 +107,7 @@ namespace BeavisCli
         /// </summary>
         public static void WriteSuccess(this CommandContext context, string text)
         {
-            context.Response.Messages.Add(new SuccessMessage(text));
+            context.Response.Messages.Add(ResponseMessage.Success(text));
         }
 
         /// <summary>
@@ -73,7 +136,7 @@ namespace BeavisCli
         /// </summary>
         public static void WriteError(this CommandContext context, string text)
         {
-            context.Response.Messages.Add(new ErrorMessage(text));
+            context.Response.Messages.Add(ResponseMessage.Error(text));
         }
 
         /// <summary>
@@ -343,83 +406,6 @@ namespace BeavisCli
                     createHeader));
         }
 
-        /// <summary>
-        /// Adds a job.
-        /// </summary>
-        public static void AddJob(this CommandContext context, IJob job)
-        {
-            // this will be invoked just before we are sending the response
-            context.Response.Sending += (sender, args) =>
-            {
-                // push a new job into the pool and add a JavaScript statement that
-                // begins the job on the client-side
-                IJobPool pool = context.HttpContext.RequestServices.GetRequiredService<IJobPool>();
-                string key = pool.Push(job);
-                IJavaScriptStatement js = new Job(key);
-                context.WriteJs(js);
-            };
-        }
-
-        public static async Task OnExecuteAsync(this CommandContext context, Func<Task<CommandResult>> invoke)
-        {
-            // invoke hook
-            context.Processor.Invoke = delegate
-            {
-                CommandResult result = invoke().Result;
-                return result.StatusCode;
-            };
-
-            // get arguments for the command
-            string[] args = context.Request.GetCommandArgs();
-
-            context.Logger().LogDebug($"Started to execute '{context.Command.GetType().FullName}' with arguments '{string.Join(" ", args)}'.");
-
-            // execute the command
-            int statusCode = context.Processor.Execute(args);
-
-            context.Logger().LogDebug($"'{context.Command.GetType().FullName}' execution completed with status code {statusCode}.");
-
-            await Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Creates a new command options.
-        /// </summary>
-        public static ICommandOption Option(this CommandContext context, string template, string description, CommandOptionType optionType)
-        {
-            Microsoft.Extensions.CommandLineUtils.CommandOptionType o;
-
-            switch (optionType)
-            {
-                case CommandOptionType.MultipleValue:
-                    o = Microsoft.Extensions.CommandLineUtils.CommandOptionType.MultipleValue;
-                    break;
-                case CommandOptionType.SingleValue:
-                    o = Microsoft.Extensions.CommandLineUtils.CommandOptionType.SingleValue;
-                    break;
-                case CommandOptionType.NoValue:
-                    o = Microsoft.Extensions.CommandLineUtils.CommandOptionType.NoValue;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(optionType), optionType, null);
-            }
-
-            return new CommandOption(context.Processor.Option(template, description, o));
-        }
-
-        /// <summary>
-        /// Creates a new command argument.
-        /// </summary>
-        public static ICommandArgument Argument(this CommandContext context, string name, string description, bool multipleValues = false)
-        {
-            return new CommandArgument(context.Processor.Argument(name, description, multipleValues));
-        }
-
-
-
-
-
-
         public static Task<CommandResult> Exit(this CommandContext context)
         {
             context.Logger().LogDebug($"Exiting '{context.Command.GetType().FullName}'.");
@@ -531,16 +517,66 @@ namespace BeavisCli
             return await Task.FromResult(result);
         }
 
+        public static Task<CommandResult> AskText(this CommandContext context, string question, CommandSegment next)
+        {
+            return AskQuestion(context, question, false, next);
+        }
 
+        public static Task<CommandResult> AskPassword(this CommandContext context, string question, CommandSegment next)
+        {
+            return AskQuestion(context, question, true, next);
+        }
 
+        private static Task<CommandResult> AskQuestion(CommandContext context, string question, bool mask, CommandSegment next)
+        {
+            context.Response.Sending += (sender, args) =>
+            {
+                IJobPool pool = context.HttpContext.RequestServices.GetRequiredService<IJobPool>();
+                IJob job = new ContinueCommandJob(context, next);
+                string key = pool.Push(job);
+
+                context.WriteText(question);
+
+                if (mask)
+                {
+                    context.WriteJs(new SetMask(true));
+                    context.WriteJs(new QueueJob(key, new SetMask(false)));
+                }
+                else
+                {
+                    context.WriteJs(new QueueJob(key));
+                }
+            };
+
+            return Task.FromResult(CommandResult.Default);
+        }
 
         /// <summary>
-        /// Checks if the command is built-in.
+        /// Adds a job.
         /// </summary>
-        public static bool IsBuiltInCommand(this CommandContext context)
+        public static void AddJob(this CommandContext context, IJob job)
         {
-            return context.Command.GetType().Assembly.Equals(typeof(ICommand).Assembly);
+            // this will be invoked just before we are sending the response
+            context.Response.Sending += (sender, args) =>
+            {
+                // push a new job into the pool and add a JavaScript statement that
+                // begins the job on the client-side
+                IJobPool pool = context.HttpContext.RequestServices.GetRequiredService<IJobPool>();
+                string key = pool.Push(job);
+                IJavaScriptStatement js = new BeginJob(key);
+                context.WriteJs(js);
+            };
         }
+
+
+
+
+
+
+
+
+
+
 
         private static ILogger Logger(this CommandContext context)
         {

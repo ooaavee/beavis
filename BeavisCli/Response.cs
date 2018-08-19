@@ -1,27 +1,15 @@
-﻿using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
 namespace BeavisCli
 {
     public class Response
-    {
-        public Response(HttpContext httpContext)
-        {
-            HttpContext = httpContext;
-        }
-
+    {       
         /// <summary>
         /// Occurs just before sending the response.
         /// </summary>
         public event EventHandler Sending;
-
-        /// <summary>
-        /// HTTP context
-        /// </summary>
-        [JsonIgnore]
-        public virtual HttpContext HttpContext { get; }
 
         /// <summary>
         /// Response messages
@@ -48,6 +36,12 @@ namespace BeavisCli
                     handler(this, EventArgs.Empty);
                 }
             }
+        }
+
+        public void Clear()
+        {
+            Messages.Clear();
+            Statements.Clear();
         }
     }
 }

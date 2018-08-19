@@ -3,53 +3,41 @@
 namespace BeavisCli
 {
     /// <summary>
-    /// Base class for all response messages
+    /// Response message
     /// </summary>
-    public abstract class ResponseMessage
+    public class ResponseMessage
     {
         [JsonProperty("text")]
         public virtual string Text { get; set; }
 
         [JsonProperty("type")]
         public virtual string Type { get; set; }
-    }
 
-    /// <summary>
-    /// Error message
-    /// </summary>
-    public sealed class ErrorMessage : ResponseMessage
-    {
-        public ErrorMessage(string text)
+        public static ResponseMessage Error(string text)
         {
-            Text = text ?? string.Empty;
+            return new ResponseMessage
+            {
+                Text = text ?? string.Empty,
+                Type = ResponseMessageTypes.Error.ToString()
+            };
         }
 
-        public override string Type => "error";
-    }
-
-    /// <summary>
-    /// Plain message
-    /// </summary>
-    public sealed class PlainMessage : ResponseMessage
-    {
-        public PlainMessage(string text)
+        public static ResponseMessage Plain(string text)
         {
-            Text = text ?? string.Empty;
+            return new ResponseMessage
+            {
+                Text = text ?? string.Empty,
+                Type = ResponseMessageTypes.Plain.ToString()
+            };
         }
 
-        public override string Type => "plain";
-    }
-
-    /// <summary>
-    /// Success message
-    /// </summary>
-    public sealed class SuccessMessage : ResponseMessage
-    {
-        public SuccessMessage(string text)
+        public static ResponseMessage Success(string text)
         {
-            Text = text ?? string.Empty;
+            return new ResponseMessage
+            {
+                Text = text ?? string.Empty,
+                Type = ResponseMessageTypes.Success.ToString()
+            };
         }
-
-        public override string Type => "success";
     }
 }

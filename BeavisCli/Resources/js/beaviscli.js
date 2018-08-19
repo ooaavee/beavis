@@ -6,6 +6,7 @@ var BeavisCli;
             var _this = this;
             this.$rootScope = $rootScope;
             this.$http = $http;
+            this.jobQueue = [];
             this.initUploader();
             this.$rootScope.$on("terminal.mounted", function (e, terminal) {
                 _this.onMount(terminal);
@@ -39,6 +40,14 @@ var BeavisCli;
         };
         CliController.prototype.processInput = function (input) {
             var _this = this;
+            var job = this.popJob();
+            if (job) {
+                this.beginQueuedJob(job, input, this.terminal);
+                return;
+            }
+            if (input.trim().length === 0) {
+                return;
+            }
             if (input === "upload" && window["__upload_enabled"]) {
                 this.uploader.input.click();
                 return;
@@ -72,9 +81,26 @@ var BeavisCli;
                 _this.handleError(error, _this.terminal);
             };
         };
-        CliController.prototype.job = function (key, terminal) {
+        CliController.prototype.queueJob = function (key, statement) {
+            this.jobQueue.push({ key: key, statement: statement });
+        };
+        CliController.prototype.popJob = function () {
+            var item = null;
+            if (this.jobQueue.length > 0) {
+                item = this.jobQueue[0];
+                this.jobQueue.splice(0, 1);
+            }
+            return item;
+        };
+        CliController.prototype.beginQueuedJob = function (job, content, terminal) {
+            this.beginJob(job.key, this.terminal, content);
+            if (job.statement) {
+                eval(job.statement);
+            }
+        };
+        CliController.prototype.beginJob = function (key, terminal, content) {
             var _this = this;
-            this.$http.post("/beaviscli-api/job?key=" + encodeURIComponent(key), null, { headers: { 'Content-Type': "application/json" } })
+            this.$http.post("/beaviscli-api/job?key=" + encodeURIComponent(key), content, { headers: { 'Content-Type': "application/json" } })
                 .success(function (data) {
                 _this.handleResponse(data, terminal, _this);
             }).error(function (data, status) {
@@ -83,8 +109,9 @@ var BeavisCli;
         };
         CliController.prototype.handleResponse = function (response, terminal, $ctrl) {
             this.$rootScope.$emit("terminal.output", response.messages);
-            for (var i = 0; i < response.statements.length; i++) {
-                eval(response.statements[i]);
+            for (var _i = 0, _a = response.statements; _i < _a.length; _i++) {
+                var js = _a[_i];
+                eval(js);
             }
         };
         CliController.prototype.handleError = function (error, terminal) {
@@ -100,10 +127,7 @@ var BeavisCli;
                 restrict: "A",
                 link: function (scope, element, attrs) {
                     var terminal = element.terminal(function (input, terminal) {
-                        var value = input.trim();
-                        if (value.length > 0) {
-                            $rootScope.$emit("terminal.input", input, terminal);
-                        }
+                        $rootScope.$emit("terminal.input", input, terminal);
                     }, {
                         greetings: attrs.greetings || "",
                         completion: function (command, callback) {
@@ -120,17 +144,17 @@ var BeavisCli;
                                 text = "\n";
                             }
                             switch (messages[i].type) {
-                                case "plain":
+                                case "Plain":
                                     terminal.echo(text);
                                     break;
-                                case "success":
+                                case "Success":
                                     terminal.echo(text, {
                                         finalize: function (div) {
                                             div.css("color", "#00ff00");
                                         }
                                     });
                                     break;
-                                case "error":
+                                case "Error":
                                     terminal.error(text);
                                     break;
                             }

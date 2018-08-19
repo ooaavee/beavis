@@ -24,11 +24,9 @@ namespace BeavisCli.Demo
                 options.DisplayExceptions = true;
             });
 
-            //services.AddSingletonCommand<Services>();
-            //services.AddSingletonCommand<Types>();
-
             services.AddScopedCommand<Login>();
 
+            services.AddScopedCommand<Test>();
 
             services.AddScoped<IUserRepository, DemoUserRepository>();
 

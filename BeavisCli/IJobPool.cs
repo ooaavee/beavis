@@ -11,8 +11,8 @@ namespace BeavisCli
         string Push(IJob job);
 
         /// <summary>
-        /// Finds a job from the job pool by its identifier and removes it from the job pool.
+        /// Runs the job.
         /// </summary>
-        Task RunAsync(string key, HttpContext context, Response response);
+        Task RunAsync(string key, JobContext context);
     }
 }

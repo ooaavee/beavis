@@ -77,7 +77,7 @@ namespace BeavisCli.Middlewares
 
                     case BeavisCliRequestTypes.Initialize:
                         {
-                            Response response = new Response(httpContext);
+                            Response response = new Response();
                             initializer.Initialize(response, httpContext);
                             await RenderResponseAsync(response, httpContext);
                             break;
@@ -85,9 +85,11 @@ namespace BeavisCli.Middlewares
 
                     case BeavisCliRequestTypes.Job:
                         {
-                            Response response = new Response(httpContext);
+                            Response response = new Response();
                             string key = httpContext.Request.Query["key"];
-                            await jobs.RunAsync(key, httpContext, response);
+                            string content = await ReadBodyAsync(httpContext);
+                            JobContext context = new JobContext(content, httpContext, response);
+                            await jobs.RunAsync(key, context);
                             await RenderResponseAsync(response, httpContext);
                             break;
                         }
@@ -104,15 +106,15 @@ namespace BeavisCli.Middlewares
                     case BeavisCliRequestTypes.Upload:
                         {
                             string body = await ReadBodyAsync(httpContext);
-                            Response response = new Response(httpContext);
+                            Response response = new Response();
                             FileContent file = JsonConvert.DeserializeObject<FileContent>(body);
                             if (string.IsNullOrEmpty(file.Type))
                             {
                                 file.Type = FileContent.ResolveType(file.Name);
                             }
                             string id = await files.StoreAsync(file);
-                            response.Messages.Add(new PlainMessage("File upload completed, the file ID is:"));
-                            response.Messages.Add(new PlainMessage(id));
+                            response.Messages.Add(ResponseMessage.Plain("File upload completed, the file ID is:"));
+                            response.Messages.Add(ResponseMessage.Plain(id));
                             await RenderResponseAsync(response, httpContext);
                             break;
                         }
@@ -247,7 +249,7 @@ namespace BeavisCli.Middlewares
         {
             if (response.Messages.Any())
             {
-                response.Messages.Add(new PlainMessage(string.Empty));
+                response.Messages.Add(ResponseMessage.Plain(string.Empty));
             }
 
             response.OnSending();
