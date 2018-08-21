@@ -10,16 +10,16 @@ using System.Threading.Tasks;
 
 namespace BeavisCli
 {
+    public delegate Task<CommandResult> StringAnswerHandler(string result, CommandContext context);
+
+    public delegate Task<CommandResult> BooleanAnswerHandler(bool result, CommandContext context);
+
     public static class CommandContextExtensions
     {
         public static async Task OnExecuteAsync(this CommandContext context, Func<Task<CommandResult>> invoke)
         {
             // invoke hook
-            context.Processor.Invoke = delegate
-            {
-                CommandResult result = invoke().Result;
-                return result.StatusCode;
-            };
+            context.Processor.Invoke = () => invoke().Result.StatusCode;
 
             // get arguments for the command
             string[] args = context.Request.GetCommandArgs();
@@ -74,15 +74,7 @@ namespace BeavisCli
         {
             return context.Command.GetType().Assembly.Equals(typeof(ICommand).Assembly);
         }
-
-        /// <summary>
-        /// Writes an empty line.
-        /// </summary>
-        public static void WriteEmptyLine(this CommandContext context)
-        {
-            context.Response.Messages.Add(ResponseMessage.Plain(string.Empty));
-        }
-
+       
         /// <summary>
         /// Writes a plain text message.
         /// </summary>
@@ -450,7 +442,7 @@ namespace BeavisCli
 
             if (context.Response.Messages.Any())
             {
-                context.WriteEmptyLine();
+                context.WriteText("");
             }
 
             context.Processor.ShowHelp(context.Info.Name);
@@ -517,29 +509,52 @@ namespace BeavisCli
             return await Task.FromResult(result);
         }
 
-        public static Task<CommandResult> AskText(this CommandContext context, string question, CommandSegment next)
+        public static Task<CommandResult> AskText(this CommandContext context, string question, StringAnswerHandler handler)
         {
-            return AskQuestion(context, question, false, next);
+            return AskQuestion(context, question, false, handler, null);
         }
 
-        public static Task<CommandResult> AskPassword(this CommandContext context, string question, CommandSegment next)
+        public static Task<CommandResult> AskPassword(this CommandContext context, string question, StringAnswerHandler handler)
         {
-            return AskQuestion(context, question, true, next);
+            return AskQuestion(context, question, true, handler, null);
         }
 
-        private static Task<CommandResult> AskQuestion(CommandContext context, string question, bool mask, CommandSegment next)
+        public static Task<CommandResult> AskConfirmation(this CommandContext context, string question, BooleanAnswerHandler handler)
         {
+            return AskQuestion(context, question, false, null, handler);
+        }
+
+        private static Task<CommandResult> AskQuestion(CommandContext context, string question, bool mask, StringAnswerHandler stringHandler, BooleanAnswerHandler booleanHandler)
+        {
+            // this will be invoked just before we are sending the response
             context.Response.Sending += (sender, args) =>
             {
                 IJobPool pool = context.HttpContext.RequestServices.GetRequiredService<IJobPool>();
-                IJob job = new ContinueCommandJob(context, next);
+
+                IJob job;
+                if (stringHandler != null)
+                {
+                     job = new HandleAnswerJob(context, stringHandler);
+                }
+                else if (booleanHandler != null)
+                {
+                    job = new HandleAnswerJob(context, booleanHandler);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"{nameof(StringAnswerHandler)} or {nameof(BooleanAnswerHandler)} must be set.");
+                }
+
                 string key = pool.Push(job);
 
                 context.WriteText(question);
 
+                context.WriteJs(new SetPrompt(""));
+
                 if (mask)
                 {
                     context.WriteJs(new SetMask(true));
+                    context.WriteJs(new SetHistory(false));
                     context.WriteJs(new QueueJob(key, new SetMask(false)));
                 }
                 else

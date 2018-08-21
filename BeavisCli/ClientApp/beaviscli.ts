@@ -78,11 +78,15 @@ namespace BeavisCli {
                 }
             };
 
+            this.freeze(terminal);
+
             this.$http.post<IResponse>("/beaviscli-api/initialize", null, { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
                     this.handleResponse(data, this.terminal, this);
                 }).error((data, status) => {
                     this.handleError(data, this.terminal);
+                }).finally(() => {
+                    this.awake(terminal);
                 });
         }
 
@@ -106,12 +110,16 @@ namespace BeavisCli {
                 return;
             }
 
+            this.freeze(this.terminal);
+
             // send server request
             this.$http.post<IResponse>("/beaviscli-api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
                     this.handleResponse(data, this.terminal, this);
                 }).error((data, status) => {
                     this.handleError(data, this.terminal);
+                }).finally(() => {
+                    this.awake(this.terminal);
                 });
         }
 
@@ -129,12 +137,16 @@ namespace BeavisCli {
             reader.onload = () => {
                 this.uploader.file.dataUrl = reader.result;
 
+                this.freeze(this.terminal);
+
                 this.$http.post<IResponse>("/beaviscli-api/upload", JSON.stringify(this.uploader.file), { headers: { 'Content-Type': "application/json" } })
                     .success((data: IResponse) => {
                         this.handleResponse(data, this.terminal, this);
                         $("#uploader").val("");
                     }).error((data, status) => {
                         this.handleError(data, this.terminal);
+                    }).finally(() => {
+                        this.awake(this.terminal);
                     });
 
                 this.uploader.file = null;
@@ -166,7 +178,7 @@ namespace BeavisCli {
             this.beginJob(job.key, this.terminal, content);
             
             if (job.statement) {
-                eval(job.statement);
+                this.eval(job.statement, terminal, this);
             }
         }
 
@@ -174,11 +186,15 @@ namespace BeavisCli {
          * Begins a new job
          **/
         private beginJob(key: string, terminal: any, content: any) {
+            this.freeze(terminal);
+
             this.$http.post<IResponse>(`/beaviscli-api/job?key=${encodeURIComponent(key)}`, content, { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
                     this.handleResponse(data, terminal, this);
                 }).error((data, status) => {
                     this.handleError(data, terminal);
+                }).finally(() => {
+                    this.awake(terminal);
                 });
         }
 
@@ -186,13 +202,23 @@ namespace BeavisCli {
          * Handles a response from the server
          **/
         private handleResponse(response: IResponse, terminal: any, $ctrl: CliController) {
-            // write terminal output messages
             this.$rootScope.$emit("terminal.output", response.messages);
 
-            // eval JavaScript statements
-            for (let js of response.statements) {
-                eval(js);
+            for (let statement of response.statements) {
+                this.eval(statement, terminal, $ctrl);
             }
+        }
+
+        private eval(statement: string, terminal: any, $ctrl: CliController) {
+            eval(statement);
+        }
+
+        private freeze(terminal: any) {
+            terminal.freeze(true);
+        }
+
+        private awake(terminal: any) {
+            terminal.freeze(false);
         }
 
         private handleError(error, terminal: any) {

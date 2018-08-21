@@ -49,6 +49,7 @@ namespace BeavisCli.Services
         {
             yield return new SetTabCompletionCommands(GetTabCompletionCommands(httpContext));
             yield return new SetUploadEnabled(IsUploadEnabled(httpContext));
+            yield return new SetPrompt(_options.Prompt);
         }
 
         protected virtual IEnumerable<string> GetTabCompletionCommands(HttpContext httpContext)

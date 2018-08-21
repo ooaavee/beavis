@@ -17,10 +17,10 @@ namespace BeavisCli.Demo.Commands
             });
         }
 
-        private Task<CommandResult> OnPasswordEntered(CommandSegmentInput input, CommandContext context)
+        private Task<CommandResult> OnPasswordEntered(string result, CommandContext context)
         {
-            string password = input.GetString();
 
+            context.WriteSuccess("Dudiin!!!!");
 
             return context.Exit();
         }

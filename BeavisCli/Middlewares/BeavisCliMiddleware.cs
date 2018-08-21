@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 using System;
 using System.IO;
@@ -26,108 +27,120 @@ namespace BeavisCli.Middlewares
             _options = options.Value;
         }
 
-        public async Task InvokeAsync(HttpContext httpContext)
+        public async Task InvokeAsync(HttpContext context)
         {
-            BeavisCliRequestTypes requestType = GetRequestType(httpContext.Request);
+            BeavisCliRequestTypes type = GetRequestType(context.Request);
 
-            if (requestType == BeavisCliRequestTypes.None)
+            if (type == BeavisCliRequestTypes.None)
             {
-                await _next(httpContext);
+                await _next(context);
                 return;
             }
 
-            Func<BeavisCliRequestTypes, HttpContext, bool> blocked = _options.IsRequestTypeBlocked;
-            if (blocked != null && blocked(requestType, httpContext))
+            Func<BeavisCliRequestTypes, HttpContext, bool> check = _options.IsRequestTypeBlocked;
+            if (check != null && check(type, context))
             {
-                _logger.LogInformation($"Skipping the request type of '{requestType}'.");
-                await _next(httpContext);
+                _logger.LogInformation($"Skipping the request type of '{type}'.");
+                await _next(context);
                 return;
             }
 
             try
             {
-                _logger.LogInformation($"Started to process a request for a path '{httpContext.Request.Path.ToString()}'.");
+                _logger.LogInformation($"Started to process a request for a path '{context.Request.Path.ToString()}'.");
 
-                // all required services
-                ICommandExecutionEnvironment environment = httpContext.RequestServices.GetRequiredService<ICommandExecutionEnvironment>();
-                ITerminalInitializer initializer = httpContext.RequestServices.GetRequiredService<ITerminalInitializer>();
-                IJobPool jobs = httpContext.RequestServices.GetRequiredService<IJobPool>();
-                IFileStorage files = httpContext.RequestServices.GetRequiredService<IFileStorage>();
-                IRequestHandler executor = httpContext.RequestServices.GetRequiredService<IRequestHandler>();
-
-                switch (requestType)
+                switch (type)
                 {
                     case BeavisCliRequestTypes.Html:
-                        {
-                            await RenderHtmlAsync(httpContext);
-                            break;
-                        }
-
+                        await HandleHtml(context);
+                        break;
                     case BeavisCliRequestTypes.Css:
-                        {
-                            await RenderCssAsync(httpContext);
-                            break;
-                        }
-
+                        await HandleCss(context);
+                        break;
                     case BeavisCliRequestTypes.Js:
-                        {
-                            await RenderJsAsync(httpContext);
-                            break;
-                        }
-
+                        await HandleJs(context);
+                        break;
                     case BeavisCliRequestTypes.Initialize:
-                        {
-                            Response response = new Response();
-                            initializer.Initialize(response, httpContext);
-                            await RenderResponseAsync(response, httpContext);
-                            break;
-                        }
-
+                        await HandleInitialize(context);
+                        break;
                     case BeavisCliRequestTypes.Job:
-                        {
-                            Response response = new Response();
-                            string key = httpContext.Request.Query["key"];
-                            string content = await ReadBodyAsync(httpContext);
-                            JobContext context = new JobContext(content, httpContext, response);
-                            await jobs.RunAsync(key, context);
-                            await RenderResponseAsync(response, httpContext);
-                            break;
-                        }
-
+                        await HandleJob(context);
+                        break;
                     case BeavisCliRequestTypes.Command:
-                        {
-                            string json = await ReadBodyAsync(httpContext);
-                            Request request = JsonConvert.DeserializeObject<Request>(json);
-                            Response response = await executor.HandleAsync(request, httpContext);
-                            await RenderResponseAsync(response, httpContext);
-                            break;
-                        }
-
+                        await HandleCommand(context);
+                        break;
                     case BeavisCliRequestTypes.Upload:
-                        {
-                            string body = await ReadBodyAsync(httpContext);
-                            Response response = new Response();
-                            FileContent file = JsonConvert.DeserializeObject<FileContent>(body);
-                            if (string.IsNullOrEmpty(file.Type))
-                            {
-                                file.Type = FileContent.ResolveType(file.Name);
-                            }
-                            string id = await files.StoreAsync(file);
-                            response.Messages.Add(ResponseMessage.Plain("File upload completed, the file ID is:"));
-                            response.Messages.Add(ResponseMessage.Plain(id));
-                            await RenderResponseAsync(response, httpContext);
-                            break;
-                        }
+                        await HandleUpload(context);
+                        break;
                 }
             }
             catch (Exception e)
             {
-                _logger.LogError($"An error occurred while processing the request type of '{requestType}'.", e);
-                await WriteErrorResponseAsync(e, httpContext);
+                _logger.LogError($"An error occurred while processing the request type of '{type}'.", e);
+                await WriteErrorResponseAsync(e, context);
                 return;
             }
 
-            _logger.LogInformation($"Processed a request for a path '{httpContext.Request.Path.ToString()}'.");
+            _logger.LogInformation($"Processed a request for a path '{context.Request.Path.ToString()}'.");
+        }
+
+        private static async Task HandleHtml(HttpContext context)
+        {
+            await RenderHtmlAsync(context);
+        }
+
+        private static async Task HandleCss(HttpContext context)
+        {
+            await RenderCssAsync(context);
+        }
+
+        private static async Task HandleJs(HttpContext context)
+        {
+            await RenderJsAsync(context);
+        }
+
+        private static async Task HandleInitialize(HttpContext context)
+        {
+            ITerminalInitializer initializer = context.RequestServices.GetRequiredService<ITerminalInitializer>();
+            Response response = new Response();
+            initializer.Initialize(response, context);
+            await RenderResponseAsync(response, context);
+        }
+
+        private static async Task HandleJob(HttpContext context)
+        {
+            IJobPool jobs = context.RequestServices.GetRequiredService<IJobPool>();
+            Response response = new Response();
+            StringValues key = context.Request.Query["key"];
+            string content = await ReadBodyAsync(context);
+            JobContext jc = new JobContext(content, context, response);
+            await jobs.RunAsync(key, jc);
+            await RenderResponseAsync(response, context);
+        }
+
+        private static async Task HandleCommand(HttpContext context)
+        {
+            IRequestHandler executor = context.RequestServices.GetRequiredService<IRequestHandler>();
+            string json = await ReadBodyAsync(context);
+            Request request = JsonConvert.DeserializeObject<Request>(json);
+            Response response = await executor.HandleAsync(request, context);
+            await RenderResponseAsync(response, context);
+        }
+
+        private static async Task HandleUpload(HttpContext context)
+        {
+            IFileStorage files = context.RequestServices.GetRequiredService<IFileStorage>();
+            string body = await ReadBodyAsync(context);
+            Response response = new Response();
+            FileContent file = JsonConvert.DeserializeObject<FileContent>(body);
+            if (string.IsNullOrEmpty(file.Type))
+            {
+                file.Type = FileContent.ResolveType(file.Name);
+            }
+            string id = await files.StoreAsync(file);
+            response.Messages.Add(ResponseMessage.Plain("File upload completed, the file ID is:"));
+            response.Messages.Add(ResponseMessage.Plain(id));
+            await RenderResponseAsync(response, context);
         }
 
         private BeavisCliRequestTypes GetRequestType(HttpRequest request)
@@ -188,64 +201,58 @@ namespace BeavisCli.Middlewares
             return BeavisCliRequestTypes.None;
         }
 
-        private async Task WriteErrorResponseAsync(Exception e, HttpContext httpContext)
+        private async Task WriteErrorResponseAsync(Exception e, HttpContext context)
         {
             string text = _options.DisplayExceptions ?
                 e.ToString() :
                 "An error occurred. Please check your application logs for more details.";
 
-            httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            httpContext.Response.ContentType = "text/plain";
-            await httpContext.Response.WriteAsync(text, Encoding.UTF8);
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            context.Response.ContentType = "text/plain";
+            await context.Response.WriteAsync(text, Encoding.UTF8);
         }
 
-        private static async Task<string> ReadBodyAsync(HttpContext httpContext)
+        private static async Task<string> ReadBodyAsync(HttpContext context)
         {
-            using (var stream = httpContext.Request.Body)
+            using (Stream stream = context.Request.Body)
             {
-                using (var reader = new StreamReader(stream, Encoding.UTF8))
+                using (StreamReader reader = new StreamReader(stream, Encoding.UTF8))
                 {
                     return await reader.ReadToEndAsync();
                 }
             }
         }
 
-        private static async Task RenderHtmlAsync(HttpContext httpContext)
+        private static async Task RenderHtmlAsync(HttpContext context)
         {
             string text = await ReadEmbeddedResourcesAsync("BeavisCli.Resources.html.index.html");
 
-            await WriteAsync(text, httpContext.Response, "text/html");
+            await WriteAsync(text, context.Response, "text/html");
         }
 
-        private static async Task RenderCssAsync(HttpContext httpContext)
+        private static async Task RenderCssAsync(HttpContext context)
         {
-            string[] files = {
+            string text = await ReadEmbeddedResourcesAsync(
                 "BeavisCli.Resources.css.jquery.terminal.min.css",
-                "BeavisCli.Resources.css.site.css"
-            };
+                "BeavisCli.Resources.css.site.css");
 
-            string text = await ReadEmbeddedResourcesAsync(files);
-
-            await WriteAsync(text, httpContext.Response, "text/css");
+            await WriteAsync(text, context.Response, "text/css");
         }
 
-        private static async Task RenderJsAsync(HttpContext httpContext)
+        private static async Task RenderJsAsync(HttpContext context)
         {
-            string[] files = {
+            string text = await ReadEmbeddedResourcesAsync(
                 "BeavisCli.Resources.js.jquery.min.js",
                 "BeavisCli.Resources.js.jquery.terminal.min.js",
                 "BeavisCli.Resources.js.jquery.mousewheel-min.js",
                 "BeavisCli.Resources.js.angular.min.js",
                 "BeavisCli.Resources.js.download.js",
-                "BeavisCli.Resources.js.beaviscli.js"
-            };
+                "BeavisCli.Resources.js.beaviscli.js");
 
-            string text = await ReadEmbeddedResourcesAsync(files);
-
-            await WriteAsync(text, httpContext.Response, "application/javascript");
+            await WriteAsync(text, context.Response, "application/javascript");
         }
 
-        private static async Task RenderResponseAsync(Response response, HttpContext httpContext)
+        private static async Task RenderResponseAsync(Response response, HttpContext context)
         {
             if (response.Messages.Any())
             {
@@ -256,7 +263,7 @@ namespace BeavisCli.Middlewares
 
             string text = JsonConvert.SerializeObject(response);
 
-            await WriteAsync(text, httpContext.Response, "application/json");
+            await WriteAsync(text, context.Response, "application/json");
         }
 
         private static async Task WriteAsync(string text, HttpResponse response, string contentType)
@@ -269,15 +276,15 @@ namespace BeavisCli.Middlewares
 
         private static async Task<string> ReadEmbeddedResourcesAsync(params string[] files)
         {
-            var buf = new StringBuilder();
+            StringBuilder buf = new StringBuilder();
             foreach (string file in files)
             {
-                using (var stream = Assembly.GetAssembly(typeof(BeavisCliMiddleware)).GetManifestResourceStream(file))
+                using (Stream stream = Assembly.GetAssembly(typeof(BeavisCliMiddleware)).GetManifestResourceStream(file))
                 {
-                    using (var reader = new StreamReader(stream))
+                    using (StreamReader reader = new StreamReader(stream))
                     {
-                        var s = await reader.ReadToEndAsync();
-                        buf.AppendLine(s);
+                        string s = await reader.ReadToEndAsync();
+                        buf.Append(s);
                     }
                 }
             }
