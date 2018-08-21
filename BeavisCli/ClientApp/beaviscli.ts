@@ -36,13 +36,19 @@ namespace BeavisCli {
 
     class CliController {
         private uploader: IUploader;
-        private terminal: any;
         private jobQueue: IQueuedJob[] = [];
 
         static $inject = ["$rootScope", "$http"];
 
         constructor(private $rootScope: ng.IRootScopeService, private $http: ng.IHttpService) {
-            this.initUploader();
+            window["$ctrl"] = this;
+
+            // initialize the file uploader
+            const input = document.querySelector("#uploader");
+            input.addEventListener("change", () => {
+                this.beginUpload();
+            });
+            this.uploader = { input: input, file: null };
 
             this.$rootScope.$on("terminal.mounted", (e, terminal) => {
                 this.onMount(terminal);
@@ -54,39 +60,26 @@ namespace BeavisCli {
         }
 
         /**
-         * Initializes the file uploader
-         **/
-        private initUploader() {
-            const input = document.querySelector("#uploader");
-
-            input.addEventListener("change", () => {
-                this.beginUpload();
-            });
-
-            this.uploader = { input: input, file: null };
-        }
-
-        /**
          * Occurs when the JQuery Terminal component has been mounted
          **/
         private onMount(terminal: any) {
-            this.terminal = terminal;
+            window["terminal"] = terminal;
 
-            this.terminal.completion = (terminal, command, callback) => {
+            window["terminal"].completion = (terminal, command, callback) => {
                 if (window["__terminal_completion"]) {
                     callback(window["__terminal_completion"]);
                 }
             };
 
-            this.freeze(terminal);
+            this.freeze();
 
             this.$http.post<IResponse>("/beaviscli-api/initialize", null, { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
-                    this.handleResponse(data, this.terminal, this);
+                    this.onResponse(data);
                 }).error((data, status) => {
-                    this.handleError(data, this.terminal);
+                    this.onError(data);
                 }).finally(() => {
-                    this.awake(terminal);
+                    this.awake();
                 });
         }
 
@@ -96,7 +89,7 @@ namespace BeavisCli {
         private processInput(input: string) {
             const job: IQueuedJob = this.popJob();
             if (job) {
-                this.beginQueuedJob(job, input, this.terminal);
+                this.beginQueuedJob(job, input);
                 return;
             }
 
@@ -110,16 +103,16 @@ namespace BeavisCli {
                 return;
             }
 
-            this.freeze(this.terminal);
+            this.freeze();
 
             // send server request
             this.$http.post<IResponse>("/beaviscli-api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
-                    this.handleResponse(data, this.terminal, this);
+                    this.onResponse(data);
                 }).error((data, status) => {
-                    this.handleError(data, this.terminal);
+                    this.onError(data);
                 }).finally(() => {
-                    this.awake(this.terminal);
+                    this.awake();
                 });
         }
 
@@ -137,16 +130,16 @@ namespace BeavisCli {
             reader.onload = () => {
                 this.uploader.file.dataUrl = reader.result;
 
-                this.freeze(this.terminal);
+                this.freeze();
 
                 this.$http.post<IResponse>("/beaviscli-api/upload", JSON.stringify(this.uploader.file), { headers: { 'Content-Type': "application/json" } })
                     .success((data: IResponse) => {
-                        this.handleResponse(data, this.terminal, this);
+                        this.onResponse(data);
                         $("#uploader").val("");
                     }).error((data, status) => {
-                        this.handleError(data, this.terminal);
+                        this.onError(data);
                     }).finally(() => {
-                        this.awake(this.terminal);
+                        this.awake();
                     });
 
                 this.uploader.file = null;
@@ -154,7 +147,7 @@ namespace BeavisCli {
 
             reader.onerror = error => {
                 this.uploader.file = null;
-                this.handleError(error, this.terminal);
+                this.onError(error);
             };
         }
 
@@ -165,6 +158,9 @@ namespace BeavisCli {
             this.jobQueue.push({ key: key, statement: statement });
         }
 
+        /**
+         * Pops a job from the queue
+         */
         private popJob(): IQueuedJob {
             let item: IQueuedJob = null;
             if (this.jobQueue.length > 0) {
@@ -174,56 +170,65 @@ namespace BeavisCli {
             return item;
         }
 
-        private beginQueuedJob(job: IQueuedJob, content: string, terminal: any) {
-            this.beginJob(job.key, this.terminal, content);
-            
+        /**
+         * Begins a queued job
+         */
+        private beginQueuedJob(job: IQueuedJob, content: string) {
+            this.beginJob(job.key, content);
+
             if (job.statement) {
-                this.eval(job.statement, terminal, this);
+                eval(job.statement);
             }
         }
 
         /**
          * Begins a new job
          **/
-        private beginJob(key: string, terminal: any, content: any) {
-            this.freeze(terminal);
+        private beginJob(key: string, content: any) {
+            this.freeze();
 
             this.$http.post<IResponse>(`/beaviscli-api/job?key=${encodeURIComponent(key)}`, content, { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
-                    this.handleResponse(data, terminal, this);
+                    this.onResponse(data);
                 }).error((data, status) => {
-                    this.handleError(data, terminal);
+                    this.onError(data);
                 }).finally(() => {
-                    this.awake(terminal);
+                    this.awake();
                 });
         }
 
         /**
-         * Handles a response from the server
+         * Handles responses from the server
          **/
-        private handleResponse(response: IResponse, terminal: any, $ctrl: CliController) {
+        private onResponse(response: IResponse) {
             this.$rootScope.$emit("terminal.output", response.messages);
 
             for (let statement of response.statements) {
-                this.eval(statement, terminal, $ctrl);
+                eval(statement);
             }
         }
 
-        private eval(statement: string, terminal: any, $ctrl: CliController) {
-            eval(statement);
-        }
-
-        private freeze(terminal: any) {
-            terminal.freeze(true);
-        }
-
-        private awake(terminal: any) {
-            terminal.freeze(false);
-        }
-
-        private handleError(error, terminal: any) {
+        /**
+         * Handles errors
+         */
+        private onError(error) {
+            alert(error);
             console.log(error);
-            terminal.error(error);
+            window["terminal"].error(error);
+        }
+
+        /**
+         * Freeze terminal
+         */
+        private freeze() {
+            window["terminal"].freeze(true);
+        }
+
+        /**
+         * Awake terminal
+         */
+        private awake() {
+            window["terminal"].freeze(false);
         }
     }
     app.controller("cli", CliController);
@@ -233,7 +238,7 @@ namespace BeavisCli {
             restrict: "A",
             link(scope, element, attrs) {
 
-                // Receive terminal input events and notify the CliController about that
+                // receive terminal input events and notify the CliController about that
                 const terminal = element.terminal((input, terminal) => {
                     $rootScope.$emit("terminal.input", input, terminal);
                 },
@@ -246,19 +251,19 @@ namespace BeavisCli {
                         }
                     });
 
-                // Notify CliController that we are ready to go!
+                // notify CliController that we are ready to go!
                 $rootScope.$emit("terminal.mounted", terminal);
 
-                // Receive terminal output evens from the CliController
+                // receive terminal output evens from the CliController
                 $rootScope.$on("terminal.output", (e, messages: IMessage[]) => {
-                    for (let i = 0; i < messages.length; i++) {
+                    for (let message of messages) {
+                        let text: string = message.text;
 
-                        let text: string = messages[i].text;
                         if (text === "") {
                             text = "\n";
                         }
 
-                        switch (messages[i].type) {
+                        switch (message.type) {
                             case "Plain":
                                 terminal.echo(text);
                                 break;
