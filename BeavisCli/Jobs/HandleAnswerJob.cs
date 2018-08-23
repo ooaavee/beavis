@@ -36,7 +36,10 @@ namespace BeavisCli.Jobs
 
             _context.OnRequestChanged(context.HttpContext, context.Response);
 
+            // restore terminal default prompt
             _context.WriteJs(new SetPrompt(_options.Prompt));
+
+            // set terminal history back to 'enabled'        
             _context.WriteJs(new SetHistory(true));
 
             switch (_type)
@@ -57,6 +60,10 @@ namespace BeavisCli.Jobs
 
         private static bool StringToBoolean(string answer)
         {
+            if (answer.ToLowerInvariant().Trim() == "y")
+            {
+                return true;
+            }
             return false;
         }
 

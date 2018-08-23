@@ -521,7 +521,7 @@ namespace BeavisCli
 
         public static Task<CommandResult> AskConfirmation(this CommandContext context, string question, BooleanAnswerHandler handler)
         {
-            return AskQuestion(context, question, false, null, handler);
+            return AskQuestion(context, $"{question} [y/n]", false, null, handler);
         }
 
         private static Task<CommandResult> AskQuestion(CommandContext context, string question, bool mask, StringAnswerHandler stringHandler, BooleanAnswerHandler booleanHandler)
@@ -549,12 +549,15 @@ namespace BeavisCli
 
                 context.WriteText(question);
 
+                // disable terminal prompt
                 context.WriteJs(new SetPrompt(""));
+
+                // disable terminal history -> this will set back to 'enabled' in HandleAnswerJob
+                context.WriteJs(new SetHistory(false));
 
                 if (mask)
                 {
                     context.WriteJs(new SetMask(true));
-                    context.WriteJs(new SetHistory(false));
                     context.WriteJs(new QueueJob(key, new SetMask(false)));
                 }
                 else
@@ -583,16 +586,6 @@ namespace BeavisCli
             };
         }
 
-
-
-
-
-
-
-
-
-
-
         private static ILogger Logger(this CommandContext context)
         {
             const string key = "__BeavisCli.CommandContext.Logger";
@@ -602,8 +595,8 @@ namespace BeavisCli
                 return (ILogger) tmp;
             }
 
-            ILoggerFactory loggerFactory = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
-            ILogger logger = loggerFactory.CreateLogger<CommandContext>();
+            var loggerFactory = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
+            var logger = loggerFactory.CreateLogger<CommandContext>();
             context.HttpContext.Items[key] = logger;
             return logger;
         }
