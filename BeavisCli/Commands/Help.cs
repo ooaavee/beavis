@@ -59,7 +59,7 @@ namespace BeavisCli.Commands
 
                     if (externalCount > 0 && lineCount == builtInCount)
                     {
-                        context.WriteEmptyLine();
+                        context.WriteText("");
                         context.WriteText("Your custom commands:");
                     }
                 }

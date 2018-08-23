@@ -18,6 +18,8 @@ namespace BeavisCli
 
         public bool DisplayExceptions { get; set; } = true;
 
+        public string Prompt { get; set; } = "> ";
+
         /// <summary>
         /// IUnauthorizedHandler
         /// </summary>

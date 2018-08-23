@@ -48,7 +48,7 @@ namespace BeavisCli.Demo.Commands
                 ClaimsPrincipal principal = new ClaimsPrincipal(identity);
                 await context.HttpContext.SignInAsync("Demo", principal);
                 context.HttpContext.User = principal;
-
+                
                 // initializer terminal after successful login
                 _initializer.Initialize(context.Response, context.HttpContext, true);
 

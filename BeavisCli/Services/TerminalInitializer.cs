@@ -41,17 +41,15 @@ namespace BeavisCli.Services
             AssemblyProductAttribute product = assembly.GetCustomAttribute<AssemblyProductAttribute>();
             AssemblyCopyrightAttribute copyright = assembly.GetCustomAttribute<AssemblyCopyrightAttribute>();
 
-            string message1 = $"{product.Product} {name.Version.Major}.{name.Version.Minor}.{name.Version.Build}";
-            yield return new SuccessMessage(message1);
-
-            string message2 = $"{copyright.Copyright}. Code released under the MIT License. Usage 'license' for more details.";
-            yield return new SuccessMessage(message2);
+            yield return ResponseMessage.Success($"{product.Product} {name.Version.Major}.{name.Version.Minor}.{name.Version.Build}");
+            yield return ResponseMessage.Success($"{copyright.Copyright}. Code released under the MIT License. Usage 'license' for more details.");
         }
 
         protected virtual IEnumerable<IJavaScriptStatement> GetJavaScript(HttpContext httpContext)
         {
             yield return new SetTabCompletionCommands(GetTabCompletionCommands(httpContext));
             yield return new SetUploadEnabled(IsUploadEnabled(httpContext));
+            yield return new SetPrompt(_options.Prompt);
         }
 
         protected virtual IEnumerable<string> GetTabCompletionCommands(HttpContext httpContext)

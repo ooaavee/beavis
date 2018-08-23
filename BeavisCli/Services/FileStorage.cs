@@ -20,7 +20,7 @@ namespace BeavisCli.Services
         public virtual Task<string> StoreAsync(FileContent file)
         {           
             // create id for the file
-            string id = KeyProvider.Create(s => _files.ContainsKey(s));
+            string id = KeyUtil.GenerateKey(s => _files.ContainsKey(s));
 
             // store file into memory
             bool succeed = _files.TryAdd(id, file);
@@ -45,7 +45,7 @@ namespace BeavisCli.Services
             FileContent file = null;
 
             // try to find the real id
-            string real = KeyProvider.Find(id, () =>
+            string real = KeyUtil.FindKey(id, () =>
             {
                 return _files.Keys;
             });
@@ -103,7 +103,7 @@ namespace BeavisCli.Services
             FileContent file = null;
 
             // try to find the real id
-            string real = KeyProvider.Find(id, () =>
+            string real = KeyUtil.FindKey(id, () =>
             {
                 return _files.Keys;
             });

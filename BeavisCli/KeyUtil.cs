@@ -4,9 +4,9 @@ using System.Linq;
 
 namespace BeavisCli
 {
-    public static class KeyProvider
+    public static class KeyUtil
     {   
-        public static string Create(Func<string, bool> valueChecker)
+        public static string GenerateKey(Func<string, bool> valueChecker)
         {
             const int maxTries = 3;
 
@@ -25,7 +25,7 @@ namespace BeavisCli
             throw new InvalidOperationException("Failed to generate a new random key.");
         }
 
-        public static string Find(string candidate, Func<IEnumerable<string>> all)
+        public static string FindKey(string candidate, Func<IEnumerable<string>> all)
         {
             if (!string.IsNullOrEmpty(candidate))
             {

@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace BeavisCli.Services
@@ -26,8 +25,7 @@ namespace BeavisCli.Services
             ICommandProvider commands = httpContext.RequestServices.GetRequiredService<ICommandProvider>();
             IUnauthorizedHandler unauthorized = httpContext.RequestServices.GetRequiredService<IUnauthorizedHandler>();
 
-            // response
-            Response response = new Response(httpContext);
+            Response response = new Response();
 
             CommandContext context = null;
 
@@ -38,7 +36,7 @@ namespace BeavisCli.Services
                 // command name entered by the user
                 string name = request.GetCommandName();
 
-                _logger.LogDebug($"Searching an command by the name '{name}'.");
+                _logger.LogDebug($"Searching a command by the name '{name}'.");
 
                 // find the command by using the ICommandProvider service
                 ICommand cmd;
@@ -49,7 +47,7 @@ namespace BeavisCli.Services
                 catch (Exception e)
                 {
                     _logger.LogDebug($"An error occurred while searching a command by using the input '{request.Input}'.", e);
-                    response.Messages.Add(new ErrorMessage(e.Message));
+                    response.Messages.Add(ResponseMessage.Error(e.Message));
                     return response;
                 }
 
@@ -57,39 +55,7 @@ namespace BeavisCli.Services
 
                 CommandInfo info = CommandInfo.Get(cmd);
 
-                // these TextWriters are for writing console out and error messages, just
-                // like Console.Out and Console.Error
-                TextWriter outWriter = new ResponseMessageTextWriter(delegate(string text)
-                {
-                    response.Messages.Add(new PlainMessage(text));
-                });
-                TextWriter errorWriter = new ResponseMessageTextWriter(delegate(string text)
-                {
-                    response.Messages.Add(new ErrorMessage(text));
-                });
-
-                CommandLineApplication processor = new CommandLineApplication
-                {
-                    Name = info.Name,
-                    FullName = info.FullName,
-                    Description = info.Description,
-                    Out = outWriter,
-                    Error = errorWriter
-                };
-
-                processor.HelpOption("-?|-h|--help");
-
-                context = new CommandContext
-                {
-                    Processor = processor,
-                    OutWriter = processor.Out,
-                    ErrorWriter = processor.Error,
-                    HttpContext = httpContext,
-                    Request = request,
-                    Response = response,
-                    Info = info,
-                    Command = cmd
-                };
+                context = new CommandContext(httpContext, request, response, info, cmd);
 
                 // check authorization
                 bool authorized = IsAuthorized(context);
@@ -143,27 +109,7 @@ namespace BeavisCli.Services
 
             bool authorized = environment.IsAuthorized(context);
 
-            bool isExternal = environment.GetType() != typeof(CommandExecutionEnvironment);
-
-            if (isExternal)
-            {
-                _logger.LogInformation($"The authorization status returned by the current {nameof(ICommandExecutionEnvironment)} implementation '{environment.GetType().FullName}' is {authorized}.");
-            }
-
-            if (authorized)
-            {
-                if (!context.IsBuiltInCommand())
-                {
-                    _logger.LogInformation($"The authorization status returned by the command '{context.Command.GetType().FullName}' is {authorized}.");
-                }
-            }
-
-            if (!context.IsBuiltInCommand() || isExternal)
-            {
-                _logger.LogInformation(authorized
-                    ? $"The command '{context.Command.GetType().FullName}' execution is authorized."
-                    : $"The command '{context.Command.GetType().FullName}' execution is unauthorized.");
-            }
+            _logger.LogInformation($"The authorization status for the command '{context.Command.GetType().FullName}' is {authorized}.");
 
             return authorized;
         }

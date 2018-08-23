@@ -1,5 +1,4 @@
 ﻿using BeavisCli.JavaScriptStatements;
-using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 
 namespace BeavisCli.Jobs
@@ -17,11 +16,11 @@ namespace BeavisCli.Jobs
             _mimeType = mimeType;
         }
 
-        public Task RunAsync(HttpContext context, Response response)
+        public Task RunAsync(JobContext context)
         {
             IJavaScriptStatement js = new DownloadJs(_content, _fileName, _mimeType);
             string code = js.GetCode();
-            response.Statements.Add(code);
+            context.Response.Statements.Add(code);
             return Task.CompletedTask;
         }
     }
