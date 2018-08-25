@@ -60,11 +60,9 @@ namespace BeavisCli.Jobs
 
         private static bool StringToBoolean(string answer)
         {
-            if (answer.ToLowerInvariant().Trim() == "y")
-            {
-                return true;
-            }
-            return false;
+            // Only 'yes' will be accepted to approve.
+            bool isYes = answer.ToLowerInvariant().Trim() == "yes";
+            return isYes;
         }
 
         private enum HandlerTypes

@@ -511,20 +511,26 @@ namespace BeavisCli
 
         public static Task<CommandResult> AskText(this CommandContext context, string question, StringAnswerHandler handler)
         {
-            return AskQuestion(context, question, false, handler, null);
+            return AskQuestion(context, new []{ question }, false, handler, null);
         }
 
         public static Task<CommandResult> AskPassword(this CommandContext context, string question, StringAnswerHandler handler)
         {
-            return AskQuestion(context, question, true, handler, null);
+            return AskQuestion(context, new[] { question }, true, handler, null);
         }
 
         public static Task<CommandResult> AskConfirmation(this CommandContext context, string question, BooleanAnswerHandler handler)
         {
-            return AskQuestion(context, $"{question} [y/n]", false, null, handler);
+            var questions = new[]
+            {
+                question,
+                "Only 'yes' will be accepted to approve."
+            };
+
+            return AskQuestion(context, questions, false, null, handler);
         }
 
-        private static Task<CommandResult> AskQuestion(CommandContext context, string question, bool mask, StringAnswerHandler stringHandler, BooleanAnswerHandler booleanHandler)
+        private static Task<CommandResult> AskQuestion(CommandContext context, string[] questions, bool useMask, StringAnswerHandler stringHandler, BooleanAnswerHandler booleanHandler)
         {
             // this will be invoked just before we are sending the response
             context.Response.Sending += (sender, args) =>
@@ -547,7 +553,10 @@ namespace BeavisCli
 
                 string key = pool.Push(job);
 
-                context.WriteText(question);
+                foreach (string question in questions)
+                {
+                    context.WriteText(question);
+                }
 
                 // disable terminal prompt
                 context.WriteJs(new SetPrompt(""));
@@ -555,7 +564,7 @@ namespace BeavisCli
                 // disable terminal history -> this will set back to 'enabled' in HandleAnswerJob
                 context.WriteJs(new SetHistory(false));
 
-                if (mask)
+                if (useMask)
                 {
                     context.WriteJs(new SetMask(true));
                     context.WriteJs(new QueueJob(key, new SetMask(false)));
