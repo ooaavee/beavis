@@ -1,39 +1,37 @@
-﻿using System;
-using System.Threading.Tasks;
-using BeavisCli.JavaScriptStatements;
+﻿using BeavisCli.JavaScriptStatements;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using System;
+using System.Threading.Tasks;
 
 namespace BeavisCli.Jobs
 {
     public class HandleAnswerJob : IJob
     {
+        private readonly AnswerType _type;
         private readonly BeavisCliOptions _options;
-        private readonly HandlerTypes _type;
+        private readonly StringAnswerHandler _stringAnswerHandler;
+        private readonly BooleanAnswerHandler _booleanAnswerHandler;
         private readonly CommandContext _context;
-        private readonly StringAnswerHandler _s;
-        private readonly BooleanAnswerHandler _b;
 
         public HandleAnswerJob(CommandContext context, StringAnswerHandler handler)
         {
+            _type = AnswerType.String;
             _options = context.HttpContext.RequestServices.GetRequiredService<IOptions<BeavisCliOptions>>().Value;
-            _type = HandlerTypes.String;
+            _stringAnswerHandler = handler;
             _context = context;
-            _s = handler;
         }
 
         public HandleAnswerJob(CommandContext context, BooleanAnswerHandler handler)
         {
+            _type = AnswerType.Boolean;
             _options = context.HttpContext.RequestServices.GetRequiredService<IOptions<BeavisCliOptions>>().Value;
-            _type = HandlerTypes.Boolean;
+            _booleanAnswerHandler = handler;
             _context = context;
-            _b = handler;
         }
 
         public async Task RunAsync(JobContext context)
         {
-            string answer = context.Content;
-
             _context.OnRequestChanged(context.HttpContext, context.Response);
 
             // restore terminal default prompt
@@ -44,13 +42,19 @@ namespace BeavisCli.Jobs
 
             switch (_type)
             {
-                case HandlerTypes.String:
-                    await _s(answer, _context);
-                    break;
+                case AnswerType.String:
+                    {
+                        string answer = context.Content;
+                        await _stringAnswerHandler(answer, _context);
+                        break;
+                    }
 
-                case HandlerTypes.Boolean:
-                    await _b(StringToBoolean(answer), _context);
-                    break;
+                case AnswerType.Boolean:
+                    {
+                        bool answer = ConvertToBoolean(context.Content);
+                        await _booleanAnswerHandler(answer, _context);
+                        break;
+                    }
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -58,16 +62,17 @@ namespace BeavisCli.Jobs
         }
 
 
-        private static bool StringToBoolean(string answer)
+        private static bool ConvertToBoolean(string answer)
         {
             // Only 'yes' will be accepted to approve.
             bool isYes = answer.ToLowerInvariant().Trim() == "yes";
             return isYes;
         }
 
-        private enum HandlerTypes
+        private enum AnswerType
         {
-            String, Boolean
+            String,
+            Boolean
         }
     }
 }

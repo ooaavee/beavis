@@ -29,8 +29,7 @@ namespace BeavisCli.Services
 
             foreach (IJavaScriptStatement js in GetJavaScript(httpContext))
             {
-                string code = js.GetCode();
-                response.Statements.Add(code);
+                response.Statements.Add(js);
             }
         }
 

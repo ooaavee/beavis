@@ -18,8 +18,8 @@ namespace BeavisCli.Jobs
 
         public Task RunAsync(JobContext context)
         {
-            IJavaScriptStatement js = new DownloadJs(_content, _fileName, _mimeType);
-            string code = js.GetCode();
+            var js = new DownloadJs(_content, _fileName, _mimeType);
+            var code = js.GetCode();
             context.Response.Statements.Add(code);
             return Task.CompletedTask;
         }

@@ -13,9 +13,7 @@ namespace BeavisCli.JavaScriptStatements
 
             foreach (IJavaScriptStatement statement in statements)
             {
-                var code = statement.GetCode();
-
-                js.Append(code);
+                js.Append(statement.GetCode());
                 js.Append(";");
             }
 

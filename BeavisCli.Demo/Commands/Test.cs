@@ -12,7 +12,6 @@ namespace BeavisCli.Demo.Commands
         {
             await context.OnExecuteAsync(() =>
             {
-
                 return context.AskPassword("Please enter your password:", OnPasswordEntered);
             });
         }

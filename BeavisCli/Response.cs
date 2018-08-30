@@ -21,7 +21,7 @@ namespace BeavisCli
         /// JavaScript statements that will be evaluated on the client-side.
         /// </summary>
         [JsonProperty("statements")]
-        public List<string> Statements { get; } = new List<string>();
+        public JavaScriptStatementCollection Statements { get; } = new JavaScriptStatementCollection();
 
         /// <summary>
         /// Raises the <see cref="Sending"/> event.
@@ -44,4 +44,15 @@ namespace BeavisCli
             Statements.Clear();
         }
     }
+
+
+    public class JavaScriptStatementCollection : List<string>
+    {
+        public virtual void Add(IJavaScriptStatement statement)
+        {
+            string code = statement.GetCode();
+            base.Add(code);
+        }
+    }
+
 }

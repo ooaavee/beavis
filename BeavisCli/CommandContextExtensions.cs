@@ -147,9 +147,7 @@ namespace BeavisCli
         /// </summary>
         public static void WriteJs(this CommandContext context, IJavaScriptStatement js)
         {
-            string code = js.GetCode();
-
-            context.Response.Statements.Add(code);
+            context.Response.Statements.Add(js);
         }
 
         /// <summary>
