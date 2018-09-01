@@ -1,13 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Threading.Tasks;
 
 namespace BeavisLogs.TestDataGenerator
 {
@@ -25,7 +22,7 @@ namespace BeavisLogs.TestDataGenerator
         {
             services.Configure<SerilogAzureTableStorageOptions>(Configuration);
 
-            services.AddTransient<Generator>();
+            services.AddTransient<LogEventGenerator>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -34,15 +31,11 @@ namespace BeavisLogs.TestDataGenerator
             app.Use(Middleware);
         }
 
-        private Task Middleware(HttpContext context, Func<Task> next)
+        private async Task Middleware(HttpContext context, Func<Task> next)
         {
-            Generator generator = context.RequestServices.GetRequiredService<Generator>();
-
-            context.Response.WriteAsync("Hello World!!!");
-
-
-            return Task.CompletedTask;
-
+            var service = context.RequestServices.GetRequiredService<LogEventGenerator>();
+            await service.GenerateLogEventsAsync();
+            await  context.Response.WriteAsync("done");
         }
     }
 }

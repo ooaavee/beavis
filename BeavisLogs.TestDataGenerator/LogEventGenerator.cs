@@ -6,15 +6,18 @@ using Microsoft.Extensions.Options;
 
 namespace BeavisLogs.TestDataGenerator
 {
-    public class Generator
+    public class LogEventGenerator
     {
         private readonly SerilogAzureTableStorageOptions _options;
 
-        public Generator(IOptions<SerilogAzureTableStorageOptions> options)
+        public LogEventGenerator(IOptions<SerilogAzureTableStorageOptions> options)
         {
             _options = options.Value;
         }
 
+        public async Task GenerateLogEventsAsync()
+        {
 
+        }
     }
 }

@@ -6,6 +6,11 @@ namespace BeavisLogs.Models.DataSources
     public class DataSource 
     {
         /// <summary>
+        /// Data source id
+        /// </summary>
+        public string Id { get; set; }
+
+        /// <summary>
         /// Data source name
         /// </summary>
         public string Name { get; set; }
@@ -16,9 +21,9 @@ namespace BeavisLogs.Models.DataSources
         public string DriverType { get; set; }
 
         /// <summary>
-        /// Data source properties
+        /// Driver properties
         /// </summary>
-        public DataSourceProperties Properties { get; set; }
+        public DriverProperties Properties { get; set; }
 
         /// <summary>
         /// Allowed users

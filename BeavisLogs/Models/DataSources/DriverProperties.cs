@@ -2,10 +2,10 @@
 
 namespace BeavisLogs.Models.DataSources
 {
-    public class DataSourceProperties
+    public class DriverProperties
     {
         /// <summary>
-        /// A key/value collection of data source properties
+        /// A key/value collection of driver properties
         /// </summary>
         public Dictionary<string, string> Values { get; set; } = new Dictionary<string, string>();
     }

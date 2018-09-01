@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using BeavisLogs.Models.Users;
 
-namespace BeavisLogs.Services
+namespace BeavisLogs.Services.Providers
 {
-    public interface IAccessProvider
+    public class AzureBlobStorageAccessProvider : IAccessProvider
     {
         /// <summary>
         /// Checks if the user has the specified role.
@@ -14,6 +14,9 @@ namespace BeavisLogs.Services
         /// <param name="user">user</param>
         /// <param name="role">role to check</param>
         /// <returns>true if the user has the specified role</returns>
-        Task<bool> HasRoleAsync(User user, UserRoles role);
+        public async Task<bool> HasRoleAsync(User user, UserRoles role)
+        {
+            return true;
+        }
     }
 }
