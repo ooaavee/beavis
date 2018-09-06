@@ -34,7 +34,7 @@ namespace BeavisLogs.TestDataGenerator
         private async Task Middleware(HttpContext context, Func<Task> next)
         {
             var service = context.RequestServices.GetRequiredService<LogEventGenerator>();
-            await service.GenerateLogEventsAsync();
+            service.GenerateLogEvents();
             await  context.Response.WriteAsync("done");
         }
     }
