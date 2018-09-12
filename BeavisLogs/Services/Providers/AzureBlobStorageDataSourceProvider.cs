@@ -3,11 +3,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BeavisLogs.Drivers.Serilog.AzureTableStorage;
+using Microsoft.Extensions.Configuration;
 
 namespace BeavisLogs.Services.Providers
 {
     public class AzureBlobStorageDataSourceProvider : IDataSourceProvider
     {
+        private readonly IConfiguration _configuration;
+
+        public AzureBlobStorageDataSourceProvider(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         /// <summary>
         /// Gets all data source available.
         /// </summary>
@@ -24,7 +33,11 @@ namespace BeavisLogs.Services.Providers
         /// <returns>found data source or null if not found</returns>
         public async Task<DataSource> FindAsync(string idOrName)
         {
-            throw  new NotImplementedException();
+            DataSource ds = new DataSource();
+            ds.DriverType = typeof(Drivers.Serilog.AzureTableStorage.Driver).FullName;
+            ds.DriverProperties.Values.Add(Driver.DriverPropertiesConnectionString, _configuration["DevConnectionString"]);
+            ds.DriverProperties.Values.Add(Driver.DriverPropertiesTableName, _configuration["DevTableName"]);           
+            return ds;
         }
 
         /// <summary>
@@ -53,3 +66,4 @@ namespace BeavisLogs.Services.Providers
 
     }
 }
+

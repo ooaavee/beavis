@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using BeavisLogs.Drivers;
 
 namespace BeavisLogs.Models.DataSources
 {
-    public class DataSource 
+    public sealed class DataSource 
     {
         /// <summary>
         /// Data source id
@@ -16,14 +15,14 @@ namespace BeavisLogs.Models.DataSources
         public string Name { get; set; }
 
         /// <summary>
-        /// <see cref="IDriver"/> implementation type name
+        /// <see cref="BeavisLogs.Drivers.IDriver"/> implementation type name
         /// </summary>
         public string DriverType { get; set; }
 
         /// <summary>
         /// Driver properties
         /// </summary>
-        public DriverProperties Properties { get; set; }
+        public DriverProperties DriverProperties { get; set; } = new DriverProperties();
 
         /// <summary>
         /// Allowed users

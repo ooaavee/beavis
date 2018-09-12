@@ -1,6 +1,6 @@
 ﻿namespace BeavisLogs.Models.DataSources
 {
-    public class DataSourceUserAccess
+    public sealed class DataSourceUserAccess
     {
         /// <summary>
         /// User's email address

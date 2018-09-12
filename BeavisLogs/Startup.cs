@@ -43,8 +43,15 @@ namespace BeavisLogs
             services.AddTransient<IAccessProvider, AzureBlobStorageAccessProvider>();
             services.AddTransient<IDataSourceProvider, AzureBlobStorageDataSourceProvider>();
 
+            services.AddSingleton<LogEventMapper>();
+            services.AddSingleton<QueryFilterBuilder>();
+
             // drivers
-            services.AddTransient<IDriver, SerilogAzureTableStorageDriver>();
+            services.AddTransient<IDriver, Driver>();
+
+
+
+            services.AddSingleton<IConfiguration>(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

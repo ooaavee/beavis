@@ -7,8 +7,8 @@ namespace BeavisLogs.Drivers
         /// <summary>
         /// Executes a query for fetching log data from the data source.
         /// </summary>
-        /// <param name="request">defines the actual query</param>
-        /// <returns>query result</returns>
-        Task<QueryResult> ExecuteQueryAsync(QueryRequest request);
+        /// <param name="context">defines the actual query</param>
+        /// <returns></returns>
+        Task ExecuteQueryAsync(QueryContext context);
     }
 }
