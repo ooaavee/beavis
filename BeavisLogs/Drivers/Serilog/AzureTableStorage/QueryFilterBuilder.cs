@@ -1,69 +1,142 @@
-﻿using System;
+﻿using BeavisLogs.Models.Logs;
+using Microsoft.Extensions.Logging;
+using Microsoft.WindowsAzure.Storage.Table;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using BeavisLogs.Models.Logs;
-using Microsoft.WindowsAzure.Storage.Table;
 
 namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
 {
     public sealed class QueryFilterBuilder
     {
+        private readonly LogEventMapper _mapper;
 
-        public QueryFilter Build(QueryParameters parameters)
+        public QueryFilterBuilder(LogEventMapper mapper)
         {
-            var filter = new QueryFilter();
-            filter.TableQuery = TableQuery(parameters);
-            filter.PostQueryFilters.AddRange(PostQueryFilters(parameters));
-            return filter;
+            _mapper = mapper;
         }
 
-        private TableQuery<LogEventTableEntity> TableQuery(QueryParameters parameters)
+        public QueryFilter Build(QueryContext context)
         {
-            var tableQuery = new TableQuery<LogEventTableEntity>();
-
-            // TODO: Tee päivämäärärajaus!
-
-            return tableQuery;
+            return new QueryFilter(Query(context.Parameters), Filters(context.Parameters));
         }
 
-        private IEnumerable<Predicate<ILogEvent>> PostQueryFilters(QueryParameters parameters)
+        private TableQuery<LogEventTableEntity> Query(QueryParameters parameters)
         {
-            // log levels
+            string partitionKeyFrom = _mapper.GetPartitionKey(parameters.From);
+            string partitionKeyUntil = _mapper.GetPartitionKey(parameters.Until);
+
+            string filterFrom = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, partitionKeyFrom);
+            string filterUntil = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.LessThanOrEqual, partitionKeyUntil);
+            string filter = TableQuery.CombineFilters(filterFrom, TableOperators.And, filterUntil);
+            
+            return new TableQuery<LogEventTableEntity>().Where(filter);
+        }
+
+        private IEnumerable<Predicate<ILogEvent>> Filters(QueryParameters parameters)
+        {
             if (parameters.Levels.Any())
             {
-                yield return delegate (ILogEvent e)
-                {
-                    return parameters.Levels.Contains(e.Level);
-                };
+                yield return LogLevelFilter(parameters.Levels);
             }
 
-            // regex for message and exception text
-            if (parameters.Regex != null)
+            if (parameters.MessageAndExceptionPattern != null)
             {
-                yield return delegate(ILogEvent e)
-                {
-                    if (e.Message != null)
-                    {
-                        if (Regex.IsMatch(e.Message, parameters.Regex))
-                        {
-                            return true;
-                        }
-                    }
-
-                    if (e.Exception != null)
-                    {
-                        if (Regex.IsMatch(e.Exception, parameters.Regex))
-                        {
-                            return true;
-                        }
-                    }
-
-                    return false;
-                };
+                yield return MessageAndExceptionFilter(parameters.MessageAndExceptionPattern);
             }
 
+            if (parameters.PropertyPattern.Any())
+            {
+                foreach (KeyValuePair<string, string> pp in parameters.PropertyPattern)
+                {
+                    yield return PropertyFilter(pp.Key, pp.Value);
+                }
+            }
+
+            yield return TimestampFilter(parameters.From, parameters.Until);
+        }
+
+        /// <summary>
+        /// Creates a filter for <see cref="ILogEvent.Level"/> property.
+        /// </summary>
+        private static Predicate<ILogEvent> LogLevelFilter(IEnumerable<LogLevel> levels)
+        {
+            return delegate (ILogEvent e)
+            {
+                return levels.Contains(e.Level);
+            };
+        }
+
+        /// <summary>
+        /// Creates a filter for <see cref="ILogEvent.Message"/> and <see cref="ILogEvent.Exception"/> properties.
+        /// </summary>
+        private static Predicate<ILogEvent> MessageAndExceptionFilter(string pattern)
+        {
+            return delegate (ILogEvent e)
+            {
+                if (Match(e.Message, pattern))
+                {
+                    return true;
+                }
+                if (Match(e.Exception, pattern))
+                {
+                    return true;
+                }                
+                return false;
+            };
+        }
+
+        /// <summary>
+        /// Creates a filter for 'named property'.
+        /// </summary>
+        private static Predicate<ILogEvent> PropertyFilter(string key, string pattern)
+        {
+            return delegate (ILogEvent e)
+            {
+                if (e.Properties.TryGetValue(key, out object value))
+                {
+                    if (Match(value, pattern))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            };
+        }
+
+        private static Predicate<ILogEvent> TimestampFilter(DateTimeOffset from, DateTimeOffset until)
+        {
+            return delegate (ILogEvent e)
+            {
+                long ticks = e.Timestamp.UtcTicks;
+                if (from.UtcTicks <= ticks && until.UtcTicks >= ticks)
+                {
+                    return true;
+                }
+                return false;
+            };
+        }
+
+        private static bool Match(string input, string pattern)
+        {
+            if (input != null)
+            {
+                if (Regex.IsMatch(input, pattern))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static bool Match(object input, string pattern)
+        {
+            if (input != null)
+            {
+                return Match(input.ToString(), pattern);
+            }
+            return false;
         }
     }
 }

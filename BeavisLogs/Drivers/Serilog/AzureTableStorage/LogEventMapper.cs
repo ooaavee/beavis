@@ -1,6 +1,8 @@
 ﻿using BeavisLogs.Models.Logs;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Table;
+using Serilog.Events;
+using Serilog.Sinks.AzureTableStorage.KeyGenerator;
 using System;
 using System.Collections.Generic;
 
@@ -8,12 +10,14 @@ namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
 {
     public sealed class LogEventMapper
     {
-        public ILogEvent Map(LogEventTableEntity entity, LogEventMappingContext mappingContext)
+        public bool TryMap(LogEventTableEntity entity, LogEventMappingContext mappingContext, out ILogEvent e)
         {
+            e = null;
+
             // Timestamp
             if (!TryParseTimestamp(entity, mappingContext, out DateTimeOffset timestamp))
             {
-                return null;
+                return false;
             }
 
             // Level
@@ -41,12 +45,12 @@ namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
                         level = LogLevel.Critical;
                         break;
                     default:
-                        return null;
+                        return false;
                 }
             }
             else
             {
-                return null;
+                return false;
             }
 
             // Message
@@ -93,11 +97,10 @@ namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
                 [nameof(ILogEvent.Properties)] = properties
             };
                   
-            ILogEvent e = entity;
-           
+            e = entity;           
             e.ReadLogEvent(values);
 
-            return e;
+            return true;
         }
         
         private bool TryParseTimestamp(LogEventTableEntity entity, LogEventMappingContext mappingContext, out DateTimeOffset timestamp)
@@ -111,6 +114,14 @@ namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
 
             timestamp = default(DateTimeOffset);
             return false;
+        }
+
+        public string GetPartitionKey(DateTimeOffset timestamp)
+        {
+            var keyGenerator = new DefaultKeyGenerator();
+            var dummyLogEvent = new LogEvent(timestamp, LogEventLevel.Debug, null, MessageTemplate.Empty, new LogEventProperty[0]);
+            var partitionKey = keyGenerator.GeneratePartitionKey(dummyLogEvent);
+            return partitionKey;
         }
     }
 }

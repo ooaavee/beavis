@@ -35,8 +35,8 @@ namespace BeavisLogs.Services.Providers
         {
             DataSource ds = new DataSource();
             ds.DriverType = typeof(Drivers.Serilog.AzureTableStorage.Driver).FullName;
-            ds.DriverProperties.Values.Add(Driver.DriverPropertiesConnectionString, _configuration["DevConnectionString"]);
-            ds.DriverProperties.Values.Add(Driver.DriverPropertiesTableName, _configuration["DevTableName"]);           
+            ds.DriverProperties.Values.Add(Driver.Properties.ConnectionString, _configuration["DevConnectionString"]);
+            ds.DriverProperties.Values.Add(Driver.Properties.TableName, _configuration["DevTableName"]);           
             return ds;
         }
 

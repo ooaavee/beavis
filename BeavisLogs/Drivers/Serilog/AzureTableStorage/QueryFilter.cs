@@ -1,20 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using BeavisLogs.Models.Logs;
+﻿using BeavisLogs.Models.Logs;
 using Microsoft.WindowsAzure.Storage.Table;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
 {
     public sealed class QueryFilter
     {
-        /// <summary>
-        /// Azure Table Storage query
-        /// </summary>
-        public TableQuery<LogEventTableEntity> TableQuery { get; set; }
+        private readonly Predicate<ILogEvent>[] _filters;
 
-        /// <summary>
-        /// Post query predicates
-        /// </summary>
-        public List<Predicate<ILogEvent>> PostQueryFilters { get; } = new List<Predicate<ILogEvent>>();
+        public QueryFilter(TableQuery<LogEventTableEntity> query, IEnumerable<Predicate<ILogEvent>> filters)
+        {
+            Query = query;
+            _filters = filters.ToArray();
+        }
+
+        public TableQuery<LogEventTableEntity> Query { get; }
+
+        public bool Success(ILogEvent e)
+        {
+            return _filters.All(filter => filter(e));
+        }
     }
 }
