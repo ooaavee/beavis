@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using BeavisLogs.Drivers.Serilog.AzureTableStorage;
 using Microsoft.Extensions.Configuration;
 
-namespace BeavisLogs.Services.Providers
+namespace BeavisLogs.Services
 {
     public class AzureBlobStorageDataSourceProvider : IDataSourceProvider
     {

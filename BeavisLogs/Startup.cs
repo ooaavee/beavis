@@ -2,7 +2,6 @@ using BeavisLogs.Commands.See;
 using BeavisLogs.Drivers;
 using BeavisLogs.Drivers.Serilog.AzureTableStorage;
 using BeavisLogs.Services;
-using BeavisLogs.Services.Providers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -36,22 +35,22 @@ namespace BeavisLogs
                 options.Title = "Log viewer powered by Beavis CLI";
             });
 
-            // our custom beavis cli commands
+            // commands
             services.AddTransientCommand<SeeCommand>();
-
-            // application services
-            services.AddTransient<IAccessProvider, AzureBlobStorageAccessProvider>();
-            services.AddTransient<IDataSourceProvider, AzureBlobStorageDataSourceProvider>();
-
-            services.AddSingleton<LogEventMapper>();
-            services.AddSingleton<QueryFilterBuilder>();
 
             // drivers
             services.AddTransient<IDriver, Driver>();
 
-
+            // application services
+            services.AddTransient<IAccessProvider, AzureBlobStorageAccessProvider>();
+            services.AddTransient<IDataSourceProvider, AzureBlobStorageDataSourceProvider>();
+            services.AddSingleton<LogEventTempStorage>();
+            services.AddSingleton<LogEventMapper>();
+            services.AddSingleton<QueryFilterBuilder>();
+            services.AddSingleton<QueryContextFactory>();
 
             services.AddSingleton<IConfiguration>(Configuration);
+            services.AddMemoryCache();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

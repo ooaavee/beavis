@@ -3,6 +3,7 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Threading.Tasks;
+using BeavisLogs.Models.DataSources;
 
 namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
 {
@@ -16,7 +17,7 @@ namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
             _mapper = mapper;
             _filterBuilder = filterBuilder;
         }
-        
+
         /// <summary>
         /// Executes a query for fetching log data from the data source.
         /// </summary>
@@ -73,7 +74,7 @@ namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
                             }
                         }
                     }
-                } while (continuationToken != null && !context.IsCanceled());
+                } while (continuationToken != null && context.IsAlive());
             }
             catch (DriverException ex)
             {
@@ -83,6 +84,8 @@ namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
             {
                 context.OnErrorOccurred(DriverException.FromException(ex));
             }
+
+            context.OnQueryCompleted();
         }
 
         public static class Properties

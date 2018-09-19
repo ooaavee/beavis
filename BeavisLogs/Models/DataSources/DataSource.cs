@@ -4,15 +4,7 @@ namespace BeavisLogs.Models.DataSources
 {
     public sealed class DataSource 
     {
-        /// <summary>
-        /// Data source id
-        /// </summary>
-        public string Id { get; set; }
-
-        /// <summary>
-        /// Data source name
-        /// </summary>
-        public string Name { get; set; }
+        public DataSourceInfo Info { get; set; }
 
         /// <summary>
         /// <see cref="BeavisLogs.Drivers.IDriver"/> implementation type name

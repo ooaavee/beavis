@@ -6,41 +6,44 @@ using BeavisLogs.Models.Logs;
 
 namespace BeavisLogs.Drivers
 {
-    public delegate void LogEventsFoundEventHandler(params ILogEvent[] events);
-    public delegate void LogEventQueryCompletedEventHandler();
-    public delegate void LogEventQueryErrorOccurredEventHandler(DriverException e);
-
     public sealed class QueryContext
     {
-        public event LogEventsFoundEventHandler Found;
-        public event LogEventQueryCompletedEventHandler QueryCompleted;
-        public event LogEventQueryErrorOccurredEventHandler ErrorOccurred;
+        public QueryContext(LogEventSlot slot, DriverProperties driverProperties)
+        {
+            Slot = slot;
+            DriverProperties = driverProperties;
+        }
 
-        public DriverProperties DriverProperties { get; set; }
+        private LogEventSlot Slot { get; }
 
+        /// <summary>
+        /// Parameters for the query
+        /// </summary>
         public QueryParameters Parameters { get; } = new QueryParameters();
+
+        /// <summary>
+        /// Driver properties
+        /// </summary>
+        public DriverProperties DriverProperties { get; }
 
         public void OnFound(params ILogEvent[] events)
         {
-            Found?.Invoke(events);
+            Slot.OnFound(events);
         }
 
         public void OnQueryCompleted()
         {
-            QueryCompleted?.Invoke();
+            Slot.OnQueryCompleted();
         }
 
-        public void OnErrorOccurred(DriverException e)
+        public void OnErrorOccurred(DriverException exception)
         {
-            ErrorOccurred?.Invoke(e);
+            Slot.OnErrorOccurred(exception);
         }
 
-        public bool IsCanceled()
+        public bool IsAlive()
         {
             return false;
-        }
-
-
-        
+        }        
     }
 }

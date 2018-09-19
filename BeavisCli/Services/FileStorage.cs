@@ -45,10 +45,7 @@ namespace BeavisCli.Services
             FileContent file = null;
 
             // try to find the real id
-            string real = KeyUtil.FindKey(id, () =>
-            {
-                return _files.Keys;
-            });
+            string real = KeyUtil.FindKey(id, () => _files.Keys);
 
             if (real != null)
             {
@@ -103,10 +100,7 @@ namespace BeavisCli.Services
             FileContent file = null;
 
             // try to find the real id
-            string real = KeyUtil.FindKey(id, () =>
-            {
-                return _files.Keys;
-            });
+            string real = KeyUtil.FindKey(id, () => _files.Keys);
 
             if (real != null)
             {

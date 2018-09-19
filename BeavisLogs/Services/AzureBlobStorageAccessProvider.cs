@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BeavisLogs.Models.Users;
 
-namespace BeavisLogs.Services.Providers
+namespace BeavisLogs.Services
 {
     public class AzureBlobStorageAccessProvider : IAccessProvider
     {
