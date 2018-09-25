@@ -9,13 +9,13 @@ namespace BeavisCli.Commands
     [Command("files", "A tool for managing files in the file storage.")]
     public class Files : ICommand
     {
-        public async Task ExecuteAsync(CommandContext context)
+        public async Task ExecuteAsync(CommandBuilder builder, CommandContext context)
         {
             // options
-            ICommandOption ls = context.Option("-ls", "Lists all files.", CommandOptionType.NoValue);
-            ICommandOption remove = context.Option("-rm", "Removes a file by using the file id.", CommandOptionType.SingleValue);
-            ICommandOption removeAll = context.Option("-ra", "Removes all files.", CommandOptionType.NoValue);
-            ICommandOption download = context.Option("-download", "Downloads a file by using the file id.", CommandOptionType.SingleValue);
+            IOption ls = builder.Option("-ls", "Lists all files.", OptionType.NoValue);
+            IOption remove = builder.Option("-rm", "Removes a file by using the file id.");
+            IOption removeAll = builder.Option("-ra", "Removes all files.", OptionType.NoValue);
+            IOption download = builder.Option("-download", "Downloads a file by using the file id.");
 
             await context.OnExecuteAsync(async () =>
             {

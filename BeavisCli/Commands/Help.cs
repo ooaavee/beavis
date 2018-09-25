@@ -7,7 +7,7 @@ namespace BeavisCli.Commands
     [Command("help", "Displays help.")]
     public class Help : ICommand
     {
-        public async Task ExecuteAsync(CommandContext context)
+        public async Task ExecuteAsync(CommandBuilder builder, CommandContext context)
         {
             await context.OnExecuteAsync(() =>
             {

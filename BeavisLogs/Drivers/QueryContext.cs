@@ -1,21 +1,20 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using BeavisLogs.Models.DataSources;
+﻿using BeavisLogs.Models.DataSources;
 using BeavisLogs.Models.Logs;
+using System;
 
 namespace BeavisLogs.Drivers
 {
     public sealed class QueryContext
     {
-        public QueryContext(LogEventSlot slot, DriverProperties driverProperties)
+        private readonly LogEventSlot _slot;
+        private readonly DataSource _source;
+
+        public QueryContext(LogEventSlot slot, DataSource source)
         {
-            Slot = slot;
-            DriverProperties = driverProperties;
+            _slot = slot;
+            _source = source;
         }
-
-        private LogEventSlot Slot { get; }
-
+       
         /// <summary>
         /// Parameters for the query
         /// </summary>
@@ -24,26 +23,26 @@ namespace BeavisLogs.Drivers
         /// <summary>
         /// Driver properties
         /// </summary>
-        public DriverProperties DriverProperties { get; }
+        public DriverProperties DriverProperties => _source.DriverProperties;
 
         public void OnFound(params ILogEvent[] events)
         {
-            Slot.OnFound(events);
+            _slot.OnFound(events);
         }
 
         public void OnQueryCompleted()
         {
-            Slot.OnQueryCompleted();
+            _slot.OnQueryCompleted();
         }
 
-        public void OnErrorOccurred(DriverException exception)
+        public void OnErrorOccurred(Exception ex)
         {
-            Slot.OnErrorOccurred(exception);
+            _slot.OnErrorOccurred(ex);
         }
 
         public bool IsAlive()
         {
-            return false;
-        }        
+            return !_slot.IsCompleted;
+        }
     }
 }

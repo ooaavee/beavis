@@ -57,13 +57,15 @@ namespace BeavisCli.Services
 
                 context = new CommandContext(httpContext, request, response, info, cmd);
 
+                CommandBuilder builder = new CommandBuilder(context);
+
                 // check authorization
                 bool authorized = IsAuthorized(context);
 
                 if (authorized)
                 {
                     // execute command
-                    await cmd.ExecuteAsync(context);
+                    await cmd.ExecuteAsync(builder, context);
                 }
                 else
                 {

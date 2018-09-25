@@ -10,6 +10,7 @@ namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
     public sealed class LogEventTableEntity : TableEntity, IDictionary<string, EntityProperty>, ILogEvent
     {
         private IDictionary<string, EntityProperty> _properties;
+        private IDictionary<string, object> _values;
 
         public LogEventTableEntity()
         {
@@ -141,8 +142,6 @@ namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
         }
 
         #region ILogEvent
-
-        private IDictionary<string, object> _values;
 
         DateTimeOffset ILogEvent.Timestamp => (DateTimeOffset)_values[nameof(ILogEvent.Timestamp)];
 

@@ -1,21 +1,25 @@
-﻿using BeavisLogs.Models.Logs;
-using Microsoft.WindowsAzure.Storage;
+﻿using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using BeavisLogs.Models.DataSources;
+using ILogEvent = BeavisLogs.Models.Logs.ILogEvent;
 
 namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
 {
     public sealed class Driver : IDriver
     {
-        private readonly LogEventMapper _mapper;
-        private readonly QueryFilterBuilder _filterBuilder;
+        public const string ConnectionString = "Azure.TableStorage.ConnectionString";
+        public const string TableName = "Azure.TableStorage.TableName";
 
-        public Driver(LogEventMapper mapper, QueryFilterBuilder filterBuilder)
+        private readonly LogEventMapper _mapper;
+        private readonly QueryBuilder _builder;
+
+        public Driver(LogEventMapper mapper, QueryBuilder builder)
         {
             _mapper = mapper;
-            _filterBuilder = filterBuilder;
+            _builder = builder;
         }
 
         /// <summary>
@@ -25,73 +29,98 @@ namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
         /// <returns></returns>
         public async Task ExecuteQueryAsync(QueryContext context)
         {
-            try
+            LogEventMappingContext mappingContext = new LogEventMappingContext(context.DriverProperties);
+
+            // Get all needed driver properties.
+            string connectionString = context.DriverProperties.Get(ConnectionString);
+            string tableName = context.DriverProperties.Get(TableName);
+
+            // Retrieve the storage account from the connection string.
+            if (!CloudStorageAccount.TryParse(connectionString, out CloudStorageAccount account))
             {
-                LogEventMappingContext mappingContext = new LogEventMappingContext(context.DriverProperties);
+                throw new DriverException("Invalid connection string format.");
+            }
 
-                // Get all needed driver properties.
-                string connectionString = context.DriverProperties.Get(Properties.ConnectionString);
-                string tableName = context.DriverProperties.Get(Properties.TableName);
+            // Create the table client.
+            CloudTableClient tableClient = account.CreateCloudTableClient();
 
-                // Retrieve the storage account from the connection string.
-                if (!CloudStorageAccount.TryParse(connectionString, out CloudStorageAccount account))
+            // Create the CloudTable that represents the table that contains the log event data.
+            CloudTable table = tableClient.GetTableReference(tableName);
+            if (!await table.ExistsAsync())
+            {
+                throw new DriverException($"Table '{tableName}' does not exist.");
+            }
+
+            // Build the filter for log events: this is our so called WHERE clause.
+            Query filter = _builder.Build(context);
+
+            // Initialize the continuation token to null to start from the beginning of the table.
+            TableContinuationToken continuationToken = null;
+
+            List<ILogEvent> events = new List<ILogEvent>();
+
+            do
+            {
+                // Retrieve a segment (up to 1,000 entities).
+                TableQuerySegment<LogEventTableEntity> tableQueryResult = await table.ExecuteQuerySegmentedAsync(filter.TableQuery, continuationToken);
+
+                // Assign the new continuation token to tell the service where to continue on the next
+                // iteration (or null if it has reached the end).
+                continuationToken = tableQueryResult.ContinuationToken;
+
+                foreach (LogEventTableEntity entity in tableQueryResult.Results)
                 {
-                    throw new DriverException("Invalid connection string format.");
-                }
+                    bool mapped = _mapper.TryMap(entity, mappingContext, out ILogEvent e);
 
-                // Create the table client.
-                CloudTableClient tableClient = account.CreateCloudTableClient();
-
-                // Create the CloudTable that represents the table that contains the log event data.
-                CloudTable table = tableClient.GetTableReference(tableName);
-                if (!await table.ExistsAsync())
-                {
-                    throw new DriverException($"Table '{tableName}' does not exist.");
-                }
-
-                // Build the filter for log events: this is our so called WHERE clause.
-                QueryFilter filter = _filterBuilder.Build(context);
-
-                // Initialize the continuation token to null to start from the beginning of the table.
-                TableContinuationToken continuationToken = null;
-               
-                do
-                {
-                    // Retrieve a segment (up to 1,000 entities).
-                    TableQuerySegment<LogEventTableEntity> tableQueryResult = await table.ExecuteQuerySegmentedAsync(filter.Query, continuationToken);
-
-                    // Assign the new continuation token to tell the service where to continue on the next
-                    // iteration (or null if it has reached the end).
-                    continuationToken = tableQueryResult.ContinuationToken;
-
-                    foreach (LogEventTableEntity entity in tableQueryResult.Results)
+                    if (mapped)
                     {
-                        if (_mapper.TryMap(entity, mappingContext, out ILogEvent e))
+                        bool pass = filter.Pass(e);
+
+                        if (pass)
                         {
-                            if (filter.Success(e))
-                            {
-                                context.OnFound(e);
-                            }
+                            Add(e, events, context);
                         }
                     }
-                } while (continuationToken != null && context.IsAlive());
-            }
-            catch (DriverException ex)
-            {
-                context.OnErrorOccurred(ex);
-            }
-            catch (Exception ex)
-            {
-                context.OnErrorOccurred(DriverException.FromException(ex));
-            }
+                }
 
-            context.OnQueryCompleted();
+            } while (continuationToken != null && context.IsAlive());
+
+            if (events.Any())
+            {
+                Flush(events, context);
+            }
         }
 
-        public static class Properties
+        private void Add(ILogEvent e, List<ILogEvent> events, QueryContext context)
         {
-            public const string ConnectionString = "Azure.TableStorage.ConnectionString";
-            public const string TableName = "Azure.TableStorage.TableName";
+            if (events.Any())
+            {
+                if (!BufferItem(e, events.Last()))
+                {
+                    Flush(events, context);
+                }
+            }
+            events.Add(e);
         }
+
+        private void Flush(List<ILogEvent> events, QueryContext context)
+        {
+            ILogEvent[] sorted = _mapper.SortByTimestamp(events);
+            events.Clear();
+            context.OnFound(sorted);
+        }
+
+        private static bool BufferItem(ILogEvent e, ILogEvent previous)
+        {
+            DateTimeOffset ts1 = e.Timestamp;
+            DateTimeOffset ts2 = previous.Timestamp;
+
+            return ts1.Year == ts2.Year &&
+                   ts1.DayOfYear == ts2.DayOfYear &&
+                   ts1.Hour == ts2.Hour &&
+                   ts1.Minute == ts2.Minute &&
+                   ts1.Second == ts2.Second;
+        }
+       
     }
 }

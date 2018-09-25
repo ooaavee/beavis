@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using BeavisLogs.Models.Users;
 
-namespace BeavisLogs.Services
+namespace BeavisLogs.Providers.AzureBlobStorage
 {
-    public class AzureBlobStorageAccessProvider : IAccessProvider
+    public class AccessProvider : IAccessProvider
     {
         /// <summary>
         /// Checks if the user has the specified role.

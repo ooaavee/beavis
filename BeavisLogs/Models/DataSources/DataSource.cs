@@ -4,6 +4,9 @@ namespace BeavisLogs.Models.DataSources
 {
     public sealed class DataSource 
     {
+        /// <summary>
+        /// Info
+        /// </summary>
         public DataSourceInfo Info { get; set; }
 
         /// <summary>

@@ -2,7 +2,7 @@
 
 namespace BeavisCli
 {
-    public interface ICommandArgument
+    public interface IArgument
     {
         List<string> Values { get; }
 
@@ -11,11 +11,11 @@ namespace BeavisCli
         string Value { get; }
     }
 
-    internal sealed class CommandArgument : ICommandArgument
+    internal sealed class Argument : IArgument
     {
         private readonly Microsoft.Extensions.CommandLineUtils.CommandArgument _target;
 
-        public CommandArgument(Microsoft.Extensions.CommandLineUtils.CommandArgument target)
+        public Argument(Microsoft.Extensions.CommandLineUtils.CommandArgument target)
         {
             _target = target;
         }

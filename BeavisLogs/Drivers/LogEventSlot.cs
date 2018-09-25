@@ -3,48 +3,62 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BeavisCli;
 using BeavisLogs.Models.Logs;
 
 namespace BeavisLogs.Drivers
 {
     public class LogEventSlot
     {
-        private bool _completed = false;
-        private readonly ConcurrentQueue<ILogEvent> _events = new ConcurrentQueue<ILogEvent>();
-        private readonly ConcurrentQueue<DriverException> _exceptions = new ConcurrentQueue<DriverException>();
+        private readonly object _lock = new object();
+
+        private readonly List<ILogEvent> _events = new List<ILogEvent>();
+        private readonly List<Exception> _exceptions = new List<Exception>();
+
+        public bool IsCompleted { get; private set; }
+
+        public LogEventSlot()
+        {
+            Key = KeyUtil.GenerateKey();
+        }
+
+
+        public string Key { get; }
 
         public void OnFound(ILogEvent[] events)
         {
-            if (_completed)
+            if (IsCompleted)
             {
                 throw new InvalidOperationException("Already completed.");
             }
 
-            foreach (var e in events)
+            lock (_lock)
             {
-                _events.Enqueue(e);
+                _events.AddRange(events);
             }
         }
 
-        public void OnErrorOccurred(DriverException exception)
+        public void OnErrorOccurred(Exception ex)
         {
-            if (_completed)
+            if (IsCompleted)
             {
                 throw new InvalidOperationException("Already completed.");
             }
 
-            _exceptions.Enqueue(exception);
+            lock (_lock)
+            {
+                _exceptions.Add(ex);
+            }
         }
 
         public void OnQueryCompleted()
         {
-            if (_completed)
+            lock (_lock)
             {
-                throw new InvalidOperationException("Already completed.");
+                IsCompleted = true;
             }
-
-            _completed = true;
         }
+
 
 
 

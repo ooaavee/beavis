@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using BeavisLogs.Models.Users;
 
-namespace BeavisLogs.Services
+namespace BeavisLogs.Providers
 {
     public interface IAccessProvider
     {

@@ -4,6 +4,6 @@ namespace BeavisCli
 {
     public interface ICommand
     {                 
-        Task ExecuteAsync(CommandContext context);           
+        Task ExecuteAsync(CommandBuilder builder, CommandContext context);           
     }
 }

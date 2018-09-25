@@ -1,6 +1,8 @@
 using BeavisLogs.Commands.See;
 using BeavisLogs.Drivers;
 using BeavisLogs.Drivers.Serilog.AzureTableStorage;
+using BeavisLogs.Providers;
+using BeavisLogs.Providers.AzureBlobStorage;
 using BeavisLogs.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -42,12 +44,11 @@ namespace BeavisLogs
             services.AddTransient<IDriver, Driver>();
 
             // application services
-            services.AddTransient<IAccessProvider, AzureBlobStorageAccessProvider>();
-            services.AddTransient<IDataSourceProvider, AzureBlobStorageDataSourceProvider>();
+            services.AddTransient<IAccessProvider, AccessProvider>();
+            services.AddTransient<IDataSourceProvider, DataSourceProvider>();
             services.AddSingleton<LogEventTempStorage>();
             services.AddSingleton<LogEventMapper>();
-            services.AddSingleton<QueryFilterBuilder>();
-            services.AddSingleton<QueryContextFactory>();
+            services.AddSingleton<QueryBuilder>();
 
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddMemoryCache();

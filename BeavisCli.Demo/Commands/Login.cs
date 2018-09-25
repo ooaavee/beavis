@@ -21,10 +21,10 @@ namespace BeavisCli.Demo.Commands
             _initializer = initializer;
         }
 
-        public async Task ExecuteAsync(CommandContext context)
+        public async Task ExecuteAsync(CommandBuilder builder, CommandContext context)
         {
-            ICommandOption username = context.Option("-u", "Username", CommandOptionType.SingleValue);
-            ICommandOption password = context.Option("-p", "Password", CommandOptionType.SingleValue);
+            IOption username = builder.Option("-u", "Username");
+            IOption password = builder.Option("-p", "Password");
 
             await context.OnExecuteAsync(async () =>
             {

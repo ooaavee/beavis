@@ -7,24 +7,9 @@ namespace BeavisLogs.Drivers
 {
     public sealed class QueryParameters
     {
-        public QueryParameters()
-        {
-            Levels.Add(LogLevel.Error);
-            Levels.Add(LogLevel.Critical);
-
-            //            MessageAndExceptionPattern = "(?i)hinweggeschwunden die die folgt läng";
-
-            PropertyPattern.Add("Exception", "DataException");
-
-
-            From = DateTimeOffset.Now.AddDays(-100);
-            Until = DateTimeOffset.Now;
-
-        }
-
         public DateTimeOffset From { get; set; }
 
-        public DateTimeOffset Until { get; set; }
+        public DateTimeOffset? Until { get; set; }
 
         /// <summary>
         /// Filter for <see cref="ILogEvent.Level"/>.
@@ -37,8 +22,19 @@ namespace BeavisLogs.Drivers
         public string MessageAndExceptionPattern { get; set; }
 
         /// <summary>
+        /// Filter for <see cref="ILogEvent.Message"/> and <see cref="ILogEvent.Exception"/> by using case-insensitive search.
+        /// </summary>
+        public string MessageAndExceptionText { get; set; }
+
+        /// <summary>
         /// Filter for <see cref="ILogEvent.Properties"/> by using regular expressions.
         /// </summary>
         public Dictionary<string, string> PropertyPattern { get; } = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Filter for <see cref="ILogEvent.Properties"/> by using case-insensitive search.
+        /// </summary>
+        public Dictionary<string, string> PropertyText { get; } = new Dictionary<string, string>();
+
     }
 }

@@ -9,6 +9,6 @@ namespace BeavisLogs.Models.Users
     {
         public string Id { get; set; }
 
-        //public List<string> Sinks
+        public List<string> Members { get; set; } = new List<string>();
     }
 }

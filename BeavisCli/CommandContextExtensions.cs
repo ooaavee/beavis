@@ -34,38 +34,38 @@ namespace BeavisCli
             await Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Creates a new command options.
-        /// </summary>
-        public static ICommandOption Option(this CommandContext context, string template, string description, CommandOptionType optionType)
-        {
-            Microsoft.Extensions.CommandLineUtils.CommandOptionType o;
+        /////// <summary>
+        /////// Creates a new command options.
+        /////// </summary>
+        ////public static ICommandOption Option(this CommandContext context, string template, string description, CommandOptionType optionType)
+        ////{
+        ////    Microsoft.Extensions.CommandLineUtils.CommandOptionType o;
 
-            switch (optionType)
-            {
-                case CommandOptionType.MultipleValue:
-                    o = Microsoft.Extensions.CommandLineUtils.CommandOptionType.MultipleValue;
-                    break;
-                case CommandOptionType.SingleValue:
-                    o = Microsoft.Extensions.CommandLineUtils.CommandOptionType.SingleValue;
-                    break;
-                case CommandOptionType.NoValue:
-                    o = Microsoft.Extensions.CommandLineUtils.CommandOptionType.NoValue;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(optionType), optionType, null);
-            }
+        ////    switch (optionType)
+        ////    {
+        ////        case CommandOptionType.MultipleValue:
+        ////            o = Microsoft.Extensions.CommandLineUtils.CommandOptionType.MultipleValue;
+        ////            break;
+        ////        case CommandOptionType.SingleValue:
+        ////            o = Microsoft.Extensions.CommandLineUtils.CommandOptionType.SingleValue;
+        ////            break;
+        ////        case CommandOptionType.NoValue:
+        ////            o = Microsoft.Extensions.CommandLineUtils.CommandOptionType.NoValue;
+        ////            break;
+        ////        default:
+        ////            throw new ArgumentOutOfRangeException(nameof(optionType), optionType, null);
+        ////    }
 
-            return new CommandOption(context.Processor.Option(template, description, o));
-        }
+        ////    return new CommandOption(context.Processor.Option(template, description, o));
+        ////}
 
-        /// <summary>
-        /// Creates a new command argument.
-        /// </summary>
-        public static ICommandArgument Argument(this CommandContext context, string name, string description, bool multipleValues = false)
-        {
-            return new CommandArgument(context.Processor.Argument(name, description, multipleValues));
-        }
+        /////// <summary>
+        /////// Creates a new command argument.
+        /////// </summary>
+        ////public static ICommandArgument Argument(this CommandContext context, string name, string description, bool multipleValues = false)
+        ////{
+        ////    return new CommandArgument(context.Processor.Argument(name, description, multipleValues));
+        ////}
 
         /// <summary>
         /// Checks if the command is built-in.

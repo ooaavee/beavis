@@ -2,7 +2,7 @@
 
 namespace BeavisCli
 {
-    public interface ICommandOption
+    public interface IOption
     {
         List<string> Values { get; }
 
@@ -11,18 +11,18 @@ namespace BeavisCli
         string Value();
     }
 
-    public enum CommandOptionType
+    public enum OptionType
     {
         MultipleValue,
         SingleValue,
         NoValue
     }
 
-    internal sealed class CommandOption : ICommandOption
+    internal sealed class Option : IOption
     {
         private readonly Microsoft.Extensions.CommandLineUtils.CommandOption _target;
 
-        public CommandOption(Microsoft.Extensions.CommandLineUtils.CommandOption target)
+        public Option(Microsoft.Extensions.CommandLineUtils.CommandOption target)
         {
             _target = target;
         }

@@ -10,6 +10,9 @@ namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
 {
     public sealed class LogEventMapper
     {
+        // Serilog's default key generator
+        private static readonly IKeyGenerator KeyGenerator = new DefaultKeyGenerator();
+
         public bool TryMap(LogEventTableEntity entity, LogEventMappingContext mappingContext, out ILogEvent e)
         {
             e = null;
@@ -118,10 +121,44 @@ namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
 
         public string GetPartitionKey(DateTimeOffset timestamp)
         {
-            var keyGenerator = new DefaultKeyGenerator();
-            var dummyLogEvent = new LogEvent(timestamp, LogEventLevel.Debug, null, MessageTemplate.Empty, new LogEventProperty[0]);
-            var partitionKey = keyGenerator.GeneratePartitionKey(dummyLogEvent);
+            var e = new LogEvent(timestamp, LogEventLevel.Debug, null, MessageTemplate.Empty, new LogEventProperty[0]);
+            var partitionKey = KeyGenerator.GeneratePartitionKey(e);
             return partitionKey;
+        }
+
+        public ILogEvent[] SortByTimestamp(IEnumerable<ILogEvent> events)
+        {
+            var result = new List<ILogEvent>(events);
+
+            bool TryParseCounter(string rowKey, out int value)
+            {
+                var index = rowKey.LastIndexOf("|", StringComparison.InvariantCulture);
+                if (index > 0)
+                {
+                    var s = rowKey.Substring(index + 1);
+                    return int.TryParse(s, out value);
+                }
+                value = 0;
+                return false;
+            }
+
+            result.Sort(delegate(ILogEvent e1, ILogEvent e2)
+            {
+                var comp = e1.Timestamp.CompareTo(e2.Timestamp);
+                if (comp == 0)
+                {
+                    var rowKey1 = e1.Properties["RowKey"] as string;
+                    var rowKey2 = e2.Properties["RowKey"] as string;
+
+                    if (TryParseCounter(rowKey1, out var counter1) && TryParseCounter(rowKey2, out var counter2))
+                    {
+                        comp = counter1.CompareTo(counter2);
+                    }
+                }
+                return comp;
+            });
+
+            return result.ToArray();
         }
     }
 }

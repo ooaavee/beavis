@@ -1,18 +1,18 @@
-﻿using BeavisLogs.Models.DataSources;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using BeavisLogs.Drivers.Serilog.AzureTableStorage;
+using BeavisLogs.Models.DataSources;
+using BeavisLogs.Services;
 using Microsoft.Extensions.Configuration;
 
-namespace BeavisLogs.Services
+namespace BeavisLogs.Providers.AzureBlobStorage
 {
-    public class AzureBlobStorageDataSourceProvider : IDataSourceProvider
+    public class DataSourceProvider : IDataSourceProvider
     {
         private readonly IConfiguration _configuration;
 
-        public AzureBlobStorageDataSourceProvider(IConfiguration configuration)
+        public DataSourceProvider(IConfiguration configuration)
         {
             _configuration = configuration;
         }
@@ -35,8 +35,8 @@ namespace BeavisLogs.Services
         {
             DataSource ds = new DataSource();
             ds.DriverType = typeof(Drivers.Serilog.AzureTableStorage.Driver).FullName;
-            ds.DriverProperties.Values.Add(Driver.Properties.ConnectionString, _configuration["DevConnectionString"]);
-            ds.DriverProperties.Values.Add(Driver.Properties.TableName, _configuration["DevTableName"]);           
+            ds.DriverProperties.Values.Add(Driver.ConnectionString, _configuration["DevConnectionString"]);
+            ds.DriverProperties.Values.Add(Driver.TableName, _configuration["DevTableName"]);           
             return ds;
         }
 

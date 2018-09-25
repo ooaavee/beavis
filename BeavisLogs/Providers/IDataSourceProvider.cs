@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BeavisLogs.Models.DataSources;
+using BeavisLogs.Services;
 
-namespace BeavisLogs.Services
+namespace BeavisLogs.Providers
 {
     public interface IDataSourceProvider
     {

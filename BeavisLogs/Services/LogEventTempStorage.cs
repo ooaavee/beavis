@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using BeavisCli;
-using BeavisLogs.Drivers;
+﻿using BeavisLogs.Drivers;
 using BeavisLogs.Models.DataSources;
-using BeavisLogs.Models.Logs;
 using Microsoft.Extensions.Caching.Memory;
+using System;
 
 namespace BeavisLogs.Services
 {
-    
-
     public class LogEventTempStorage
     {
         private readonly IMemoryCache _memoryCache;
@@ -22,34 +14,41 @@ namespace BeavisLogs.Services
             _memoryCache = memoryCache;
         }
 
-
-        public LogEventSlot CreateSlot(DataSourceInfo source)
+        public LogEventSlot CreateSlot(DataSource source)
         {
             var slot = new LogEventSlot();
-
-            string key = KeyUtil.GenerateKey();
-
-                     
+            SetSlot(slot);
             return slot;
         }
 
-        private bool TrySetSlot(LogEventSlot slot)
+        private void SetSlot(LogEventSlot slot)
         {
-            return true;
+            var cacheKey = GetMemoryCacheKey(slot.Key);
+            var options = new MemoryCacheEntryOptions {Priority = CacheItemPriority.High, SlidingExpiration = TimeSpan.FromMinutes(3)};
+            _memoryCache.Set(cacheKey, slot, options);
         }
 
-        private bool TryGetSlot(string key, out LogEventSlot slot)
+        public bool TryGetSlot(string key, out LogEventSlot slot)
         {
+            var cacheKey = GetMemoryCacheKey(key);
+            return _memoryCache.TryGetValue(cacheKey, out slot);
+        }
+
+        public bool TryRemoveSlot(string key, out LogEventSlot slot)
+        {
+            var cacheKey = GetMemoryCacheKey(key);
+            if (_memoryCache.TryGetValue(cacheKey, out slot))
+            {
+                _memoryCache.Remove(cacheKey);
+                return true;
+            }
             slot = null;
-            return true;
+            return false;
         }
 
-        private bool TryRemoveSlot(string key, out LogEventSlot slot)
+        private static string GetMemoryCacheKey(string key)
         {
-            slot = null;
-            return true;
+            return $"__BeavisLogs.Services.LogEventTempStorage.{key}";
         }
-    }
-
-   
+    }   
 }
