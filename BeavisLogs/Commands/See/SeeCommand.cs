@@ -5,7 +5,9 @@ using BeavisLogs.Models.DataSources;
 using BeavisLogs.Services;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
+using BeavisLogs.Jobs;
 using BeavisLogs.Providers;
 using Microsoft.Extensions.Logging;
 
@@ -16,13 +18,13 @@ namespace BeavisLogs.Commands.See
     {
         private readonly IAccessProvider _accessProvider;
         private readonly IDataSourceProvider _dataSourceProvider;
-        private readonly LogEventTempStorage _temp;
+        private readonly LogEventTempStorage _storage;
 
-        public SeeCommand(IAccessProvider accessProvider, IDataSourceProvider dataSourceProvider, LogEventTempStorage temp)
+        public SeeCommand(IAccessProvider accessProvider, IDataSourceProvider dataSourceProvider, LogEventTempStorage storage)
         {
             _accessProvider = accessProvider;
             _dataSourceProvider = dataSourceProvider;
-            _temp = temp;
+            _storage = storage;
         }
 
         public async Task ExecuteAsync(CommandBuilder builder, CommandContext context)
@@ -67,6 +69,10 @@ namespace BeavisLogs.Commands.See
 
                 var handles = new List<(IDriver driver, QueryContext query)>();
 
+                var sss = (await GetDataSources()).Select(x => x.Info);
+
+                LogEventSlot slot = _storage.CreateSlot(sss);
+
                 foreach (DataSource source in await GetDataSources())
                 {
                     // find driver
@@ -76,12 +82,13 @@ namespace BeavisLogs.Commands.See
                         return await context.ExitWithError($"Driver '{source.DriverType}' not found.");
                     }
                   
-                    QueryContext query = CreateQueryContext(source);
+
+                    QueryContext query = new QueryContext(slot, source);
 
                     //query.Parameters.Levels.Add(LogLevel.Error);
                     //query.Parameters.Levels.Add(LogLevel.Critical);
 
-                   // query.Parameters.MessageAndExceptionPattern = "(?i)hinweggeschwunden die die folgt läng";
+                    // query.Parameters.MessageAndExceptionPattern = "(?i)hinweggeschwunden die die folgt läng";
 
                     //query.Parameters.MessageAndExceptionText = "hinweggeschwunden die die folgt läng";
 
@@ -119,16 +126,14 @@ namespace BeavisLogs.Commands.See
 #pragma warning restore CS4014
 
 
+                IJob job = new PollLogEventsJob(slot.Key);
+                context.AddJob(job);
+
                 return await context.ExitAsync();
             });
         }
 
-        private QueryContext CreateQueryContext(DataSource source)
-        {
-            LogEventSlot slot = _temp.CreateSlot(source);
-            QueryContext context = new QueryContext(slot, source);
-            return context;
-        }
+       
 
     }
 }

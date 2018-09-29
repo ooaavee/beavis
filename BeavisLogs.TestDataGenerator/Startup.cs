@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace BeavisLogs.TestDataGenerator
@@ -33,9 +34,17 @@ namespace BeavisLogs.TestDataGenerator
 
         private async Task Middleware(HttpContext context, Func<Task> next)
         {
-            var service = context.RequestServices.GetRequiredService<LogEventGenerator>();
-            service.GenerateLogEvents();
-            await  context.Response.WriteAsync("done");
+            try
+            {
+                var service = context.RequestServices.GetRequiredService<LogEventGenerator>();
+                service.GenerateLogEvents();
+                await context.Response.WriteAsync("done");
+                Debugger.Break();
+            }
+            catch (Exception ex)
+            {
+                Debugger.Break();
+            }
         }
     }
 }

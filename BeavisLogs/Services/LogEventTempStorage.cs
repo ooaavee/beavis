@@ -2,6 +2,7 @@
 using BeavisLogs.Models.DataSources;
 using Microsoft.Extensions.Caching.Memory;
 using System;
+using System.Collections.Generic;
 
 namespace BeavisLogs.Services
 {
@@ -14,9 +15,9 @@ namespace BeavisLogs.Services
             _memoryCache = memoryCache;
         }
 
-        public LogEventSlot CreateSlot(DataSource source)
+        public LogEventSlot CreateSlot(IEnumerable<DataSourceInfo> sources)
         {
-            var slot = new LogEventSlot();
+            var slot = new LogEventSlot(sources, 1000);
             SetSlot(slot);
             return slot;
         }

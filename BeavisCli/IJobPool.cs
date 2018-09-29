@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 
 namespace BeavisCli
 {
-    internal interface IJobPool
+    public interface IJobPool
     {
         /// <summary>
         /// Adds a job and returns its identifier. 

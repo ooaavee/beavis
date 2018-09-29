@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 
 namespace BeavisCli
 {
@@ -11,11 +10,13 @@ namespace BeavisCli
         /// </summary>
         public event EventHandler Sending;
 
+        public ResponseRenderMode RenderMode { get; set; } = ResponseRenderMode.Readable;
+
         /// <summary>
         /// Response messages
         /// </summary>
         [JsonProperty("messages")]
-        public virtual List<ResponseMessage> Messages { get; } = new List<ResponseMessage>();
+        public virtual ResponseMessageCollection Messages { get; } = new ResponseMessageCollection();
 
         /// <summary>
         /// JavaScript statements that will be evaluated on the client-side.
@@ -45,14 +46,9 @@ namespace BeavisCli
         }
     }
 
-
-    public class JavaScriptStatementCollection : List<string>
+    public enum ResponseRenderMode
     {
-        public virtual void Add(IJavaScriptStatement statement)
-        {
-            string code = statement.GetCode();
-            base.Add(code);
-        }
+        Readable,
+        Strict
     }
-
 }

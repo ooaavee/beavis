@@ -1,36 +1,57 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace BeavisLogs.Commands.See
 {
     public static class LogLevelUtil
     {
-        private static readonly List<Tuple<LogLevel, string>> Map = new List<Tuple<LogLevel, string>>(
-            new[]
-            {
-                new Tuple<LogLevel, string>(LogLevel.Trace, "trce"),
-                new Tuple<LogLevel, string>(LogLevel.Debug, "dbug"),
-                new Tuple<LogLevel, string>(LogLevel.Information, "info"),
-                new Tuple<LogLevel, string>(LogLevel.Warning, "warn"),
-                new Tuple<LogLevel, string>(LogLevel.Error, "fail"),
-                new Tuple<LogLevel, string>(LogLevel.Critical, "crit")
-            });
+        private static readonly List<Tuple<LogLevel, string>> All = new List<Tuple<LogLevel, string>>();
+        private static readonly Dictionary<LogLevel, string> Map = new Dictionary<LogLevel, string>();
 
-        public static string GetValuesText()
+        static LogLevelUtil()
+        {
+            void Use(LogLevel level, string text)
+            {
+                All.Add(new Tuple<LogLevel, string>(level, text));
+                Map.Add(level, text);
+            }
+
+            Use(LogLevel.Trace, "TRCE");
+            Use(LogLevel.Debug, "DBUG");
+            Use(LogLevel.Information, "INFO");
+            Use(LogLevel.Warning, "WARN");
+            Use(LogLevel.Error, "FAIL");
+            Use(LogLevel.Critical, "CRIT");
+        }
+
+        public static string GetLevelText(LogLevel level)
+        {
+            if (Map.TryGetValue(level, out var text))
+            {
+                return text;
+            }
+
+            if (level == LogLevel.None)
+            {
+                return "none";
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(level));
+        }
+
+        public static string GetLevelTexts()
         {
             var buf = new StringBuilder();
 
-            for (var i = 0; i < Map.Count; i++)
+            for (var i = 0; i < All.Count; i++)
             {
-                var logLevel = Map[i];
+                var logLevel = All[i];
 
                 var text = logLevel.Item2;
 
-                if (i != Map.Count - 1)
+                if (i != All.Count - 1)
                 {
                     if (i > 0)
                     {

@@ -18,4 +18,8 @@
     <ProjectReference Include="..\BeavisCli\BeavisCli.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="JavaScriptStatements\" />
+  </ItemGroup>
+
 </Project>

@@ -59,7 +59,7 @@ namespace BeavisLogs.TestDataGenerator
         {
             // generate random number of log events
             var rnd = new Random();
-            var count = rnd.Next(1, 500);
+            var count = rnd.Next(2500, 5000);
 
             var entities = new List<LogEventEntity>();
 
@@ -68,7 +68,7 @@ namespace BeavisLogs.TestDataGenerator
                 var entity = CreateLogEvent(handle);
                 entities.Add(entity);
 
-                var millis = rnd.Next(5, 300);
+                var millis = rnd.Next(5, 20);
                 Thread.Sleep(millis);
 
                 Interlocked.Increment(ref _counter);

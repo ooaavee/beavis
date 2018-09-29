@@ -157,7 +157,7 @@ namespace BeavisCli
         {
             foreach (IJavaScriptStatement j in js)
             {
-                context.WriteJs(j);
+                context.Response.Statements.Add(j);
             }
         }
 

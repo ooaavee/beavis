@@ -48,6 +48,7 @@ namespace BeavisLogs
             services.AddTransient<IDataSourceProvider, DataSourceProvider>();
             services.AddSingleton<LogEventTempStorage>();
             services.AddSingleton<LogEventMapper>();
+            services.AddSingleton<LogEventRenderer>();
             services.AddSingleton<QueryBuilder>();
 
             services.AddSingleton<IConfiguration>(Configuration);

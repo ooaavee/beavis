@@ -34,9 +34,10 @@ namespace BeavisLogs.Providers.AzureBlobStorage
         public async Task<DataSource> FindAsync(string idOrName)
         {
             DataSource ds = new DataSource();
+            ds.Info = new DataSourceInfo() {Id = "xxx"};
             ds.DriverType = typeof(Drivers.Serilog.AzureTableStorage.Driver).FullName;
             ds.DriverProperties.Values.Add(Driver.ConnectionString, _configuration["DevConnectionString"]);
-            ds.DriverProperties.Values.Add(Driver.TableName, _configuration["DevTableName"]);           
+            ds.DriverProperties.Values.Add(Driver.TableName, _configuration["DevTableName1"]);           
             return ds;
         }
 

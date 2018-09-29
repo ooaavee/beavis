@@ -254,9 +254,12 @@ namespace BeavisCli.Middlewares
 
         private static async Task RenderResponseAsync(Response response, HttpContext context)
         {
-            if (response.Messages.Any())
+            if (response.RenderMode == ResponseRenderMode.Readable)
             {
-                response.Messages.Add(ResponseMessage.Plain(string.Empty));
+                if (response.Messages.Any())
+                {
+                    response.Messages.Add(ResponseMessage.Plain(string.Empty));
+                }
             }
 
             response.OnSending();

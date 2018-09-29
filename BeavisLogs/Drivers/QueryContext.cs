@@ -1,6 +1,7 @@
 ﻿using BeavisLogs.Models.DataSources;
 using BeavisLogs.Models.Logs;
 using System;
+using BeavisLogs.Services;
 
 namespace BeavisLogs.Drivers
 {
@@ -10,7 +11,7 @@ namespace BeavisLogs.Drivers
         private readonly DataSource _source;
 
         public QueryContext(LogEventSlot slot, DataSource source)
-        {
+        {          
             _slot = slot;
             _source = source;
         }
@@ -27,22 +28,32 @@ namespace BeavisLogs.Drivers
 
         public void OnFound(params ILogEvent[] events)
         {
-            _slot.OnFound(events);
+            _slot.OnFound(_source.Info, events);
         }
 
         public void OnQueryCompleted()
         {
-            _slot.OnQueryCompleted();
+            _slot.OnQueryCompleted(_source.Info);
         }
 
         public void OnErrorOccurred(Exception ex)
         {
-            _slot.OnErrorOccurred(ex);
+            _slot.OnErrorOccurred(_source.Info, ex);
         }
 
         public bool IsAlive()
         {
-            return !_slot.IsCompleted;
+            if (_slot.IsLimitReached)
+            {
+                return false;
+            }
+
+            if (_slot.IsCompleted(_source.Info))
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }
