@@ -4,15 +4,14 @@ using System.Threading.Tasks;
 using BeavisLogs.Drivers.Serilog.AzureTableStorage;
 using BeavisLogs.Models.DataSources;
 using BeavisLogs.Services;
-using Microsoft.Extensions.Configuration;
 
-namespace BeavisLogs.Providers.AzureBlobStorage
+namespace BeavisLogs.Providers.Sqlite
 {
-    public class DataSourceProvider : IDataSourceProvider
+    public class SqliteDataSourceProvider : IDataSourceProvider
     {
-        private readonly IConfiguration _configuration;
+        private readonly ConfigurationAccessor _configuration;
 
-        public DataSourceProvider(IConfiguration configuration)
+        public SqliteDataSourceProvider(ConfigurationAccessor configuration)
         {
             _configuration = configuration;
         }
@@ -34,10 +33,23 @@ namespace BeavisLogs.Providers.AzureBlobStorage
         public async Task<DataSource> FindAsync(string idOrName)
         {
             DataSource ds = new DataSource();
-            ds.Info = new DataSourceInfo() {Id = "xxx"};
-            ds.DriverType = typeof(Drivers.Serilog.AzureTableStorage.Driver).FullName;
-            ds.DriverProperties.Values.Add(Driver.ConnectionString, _configuration["DevConnectionString"]);
-            ds.DriverProperties.Values.Add(Driver.TableName, _configuration["DevTableName1"]);           
+            ds.Info = new DataSourceInfo() {Id = idOrName};
+            ds.DriverType = typeof(Drivers.Serilog.AzureTableStorage.SerilogAzureTableStorageDriver).FullName;
+            ds.DriverProperties.Values.Add(SerilogAzureTableStorageDriver.ConnectionString, _configuration["DevConnectionString"]);
+
+            if (idOrName == "1")
+            {
+                ds.DriverProperties.Values.Add(SerilogAzureTableStorageDriver.TableName, _configuration["DevTableName1"]);
+            }
+            else if (idOrName == "2")
+            {
+                ds.DriverProperties.Values.Add(SerilogAzureTableStorageDriver.TableName, _configuration["DevTableName2"]);
+            }
+            else if (idOrName == "3")
+            {
+                ds.DriverProperties.Values.Add(SerilogAzureTableStorageDriver.TableName, _configuration["DevTableName3"]);
+            }
+
             return ds;
         }
 

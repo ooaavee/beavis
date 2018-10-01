@@ -16,24 +16,31 @@ namespace BeavisCli
         /// </summary>
         public IOption Option(string template, string description, OptionType optionType = OptionType.SingleValue)
         {
-            Microsoft.Extensions.CommandLineUtils.CommandOptionType o;
+            // TODO: Pitäisiköhän tähän tehdä tarkistus, että template alkaa "-" merkillä?
+
+
+            Microsoft.Extensions.CommandLineUtils.CommandOptionType type;
 
             switch (optionType)
             {
                 case OptionType.MultipleValue:
-                    o = Microsoft.Extensions.CommandLineUtils.CommandOptionType.MultipleValue;
+                    type = Microsoft.Extensions.CommandLineUtils.CommandOptionType.MultipleValue;
                     break;
+
                 case OptionType.SingleValue:
-                    o = Microsoft.Extensions.CommandLineUtils.CommandOptionType.SingleValue;
+                    type = Microsoft.Extensions.CommandLineUtils.CommandOptionType.SingleValue;
                     break;
+
                 case OptionType.NoValue:
-                    o = Microsoft.Extensions.CommandLineUtils.CommandOptionType.NoValue;
+                    type = Microsoft.Extensions.CommandLineUtils.CommandOptionType.NoValue;
                     break;
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(optionType), optionType, null);
             }
 
-            return new Option(_context.Processor.Option(template, description, o));
+            var opt = _context.Processor.Option(template, description, type);
+            return new Option(opt);
         }
 
         /// <summary>
@@ -41,8 +48,8 @@ namespace BeavisCli
         /// </summary>
         public IArgument Argument(string name, string description, bool multipleValues = false)
         {
-            return new Argument(_context.Processor.Argument(name, description, multipleValues));
+            var arg = _context.Processor.Argument(name, description, multipleValues);
+            return new Argument(arg);
         }
-
     }
 }

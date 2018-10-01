@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
 using BeavisLogs.Models.Users;
 
-namespace BeavisLogs.Providers.AzureBlobStorage
+namespace BeavisLogs.Providers.Sqlite
 {
-    public class AccessProvider : IAccessProvider
+    public class SqliteAccessProvider : IAccessProvider
     {
         /// <summary>
         /// Checks if the user has the specified role.

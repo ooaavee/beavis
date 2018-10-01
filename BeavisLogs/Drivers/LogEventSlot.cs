@@ -1,55 +1,85 @@
-﻿using System;
+﻿using BeavisCli;
+using BeavisLogs.Models.DataSources;
+using BeavisLogs.Models.Logs;
+using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using BeavisCli;
-using BeavisLogs.Models.DataSources;
-using BeavisLogs.Models.Logs;
 
 namespace BeavisLogs.Drivers
 {
     public class LogEventSlot
     {
         private readonly Dictionary<string, SubSlot> _subs = new Dictionary<string, SubSlot>();
-        private readonly int _limit;
-
-        private int _eventCount = 0;
-
         private readonly List<SlotEnumerator> _enumerators = new List<SlotEnumerator>();
+        private int _eventCount;
 
-        public LogEventSlot(IEnumerable<DataSourceInfo> sources, int limit = 0)
+        public LogEventSlot(LogEventSlotProperties properties)
         {
-            _limit = limit;
+            Properties = properties;
 
-            Key = KeyUtil.GenerateKey();
-
-            foreach (var source in sources)
+            foreach (DataSourceInfo source in properties.Sources)
             {
                 _subs.Add(source.Id, new SubSlot());
                 _enumerators.Add(new SlotEnumerator(this, source));
             }
         }
 
-        public IEnumerable<SlotEnumerator> Enumerators
-        {
-            get
-            {
-                if (IsReadyToServe())
-                {
-                    foreach (var enumerator in _enumerators)
-                    {
-                        if (!enumerator.IsAllServed)
-                        {
-                            yield return enumerator;
-                        }
-                    }
-                }
-            }
-        }
+        public LogEventSlotProperties Properties { get; }
 
         public bool IsLimitReached { get; private set; }
 
-        public string Key { get; }
+        public bool Serve(HttpContext context, Response response)
+        {
+            LogEventOutputRenderer renderer = Properties.Renderer;
+
+            bool more = false;
+
+            SlotEnumerator enumerator = NextEnumerator();
+            if (enumerator != null)
+            {
+                DataSourceInfo source = enumerator.Source;
+
+                if (!enumerator.IsServingStarted)
+                {
+                    renderer.OnServingStarted(source, context, response);
+                }
+               
+                more = enumerator.Pop(renderer.MaxBlockSize, out ILogEvent[] events, out Exception[] exceptions);
+
+                if (!more)
+                {
+                    SlotEnumerator next = NextEnumerator();
+                    if (next != null && !IsLimitReached)
+                    {
+                        more = true;
+                    }
+                }
+
+                if (events.Any())
+                {
+                    renderer.Output(source, events, context, response);
+                }
+
+                if (exceptions.Any())
+                {
+                    renderer.Output(source, exceptions, context, response);
+                }
+            }
+
+            if (!more)
+            {
+                if (IsLimitReached)
+                {
+                    renderer.OnLimitReached(context, response);
+                }
+
+                renderer.OnPollingCompleted(context, response);
+            }
+
+            return more;
+        }
 
         public void OnFound(DataSourceInfo source, ILogEvent[] events)
         {
@@ -64,7 +94,7 @@ namespace BeavisLogs.Drivers
 
                 foreach (ILogEvent e in events)
                 {
-                    if (_limit > 0 && _eventCount >= _limit)
+                    if (Properties.Limit > 0 && _eventCount >= Properties.Limit)
                     {
                         IsLimitReached = true;
                         break;
@@ -110,9 +140,6 @@ namespace BeavisLogs.Drivers
 
         public bool IsReadyToServe()
         {
-            // - jos vain 1 sub-slot, niin on heti
-            // - jos > 1 sub-slotia, niin kaikki pitää olla completed tai limitReached
-
             var count = _subs.Count;
 
             if (count == 1)
@@ -122,23 +149,28 @@ namespace BeavisLogs.Drivers
 
             if (count > 1)
             {
-                if (IsLimitReached)
+                if (IsLimitReached || IsAllCompleted())
                 {
                     return true;
                 }
+            }
 
-                foreach (var sub in _subs.Values)
+            return false;
+        }
+
+        public bool IsAllCompleted()
+        {
+            foreach (var sub in _subs.Values)
+            {
+                lock (sub.Lock)
                 {
                     if (!sub.IsCompleted)
                     {
                         return false;
                     }
                 }
-
-                return true;
             }
-
-            return false;
+            return true;
         }
 
         private SubSlot Sub(DataSourceInfo source)
@@ -150,6 +182,19 @@ namespace BeavisLogs.Drivers
             return value;
         }
 
+        private SlotEnumerator NextEnumerator()
+        {
+            foreach (var enumerator in _enumerators)
+            {
+                if (enumerator.IsAllServed)
+                {
+                    continue;
+                }
+                return enumerator;
+            }
+            return null;
+        }
+
         private class SubSlot
         {
             public readonly object Lock = new object();
@@ -159,7 +204,7 @@ namespace BeavisLogs.Drivers
             public int EventCount;
         }
 
-        public class SlotEnumerator
+        private class SlotEnumerator
         {
             private readonly LogEventSlot _slot;
 
@@ -169,48 +214,46 @@ namespace BeavisLogs.Drivers
                 Source = source;
             }
 
-            public bool IsAllServed { get; }
+            public bool IsAllServed { get; private set; }
+
+            public bool IsServingStarted { get; private set; }
 
             public DataSourceInfo Source { get; }
 
-            public ILogEvent[] Pop(int maxCount, out Exception[] exceptions, out bool pending)
+            public bool Pop(int maxPopCount, out ILogEvent[] events, out Exception[] exceptions)
             {
                 SubSlot sub = _slot.Sub(Source);
 
-                pending = true;
+                IsServingStarted = true;
 
-                ILogEvent[] events;
+                bool more = true;
 
                 lock (sub.Lock)
                 {
                     exceptions = sub.Exceptions.ToArray();
                     sub.Exceptions.Clear();
-             
+
                     int eventCount = sub.Events.Count;
 
-                    int returnCount = maxCount <= eventCount ? maxCount : eventCount;
+                    int popCount = maxPopCount <= eventCount ? maxPopCount : eventCount;
 
-                    events = new ILogEvent[returnCount];
+                    events = new ILogEvent[popCount];
 
-                    if (returnCount > 0)
+                    if (popCount > 0)
                     {
-                        sub.Events.CopyTo(0, events, 0, returnCount);
-
-                        sub.Events.RemoveRange(0, returnCount);
+                        sub.Events.CopyTo(0, events, 0, popCount);
+                        sub.Events.RemoveRange(0, popCount);
                     }
 
-                    if (sub.IsCompleted)
+                    if (sub.IsCompleted && !sub.Events.Any())
                     {
-                        if (!sub.Events.Any())
-                        {
-                            pending = false;
-                        }
+                        more = false;
+                        IsAllServed = true;
                     }
                 }
 
-                return events;
+                return more;
             }
         }
-
     }
 }

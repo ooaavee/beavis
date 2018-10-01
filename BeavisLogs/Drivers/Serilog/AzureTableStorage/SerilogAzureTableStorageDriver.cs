@@ -8,7 +8,7 @@ using ILogEvent = BeavisLogs.Models.Logs.ILogEvent;
 
 namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
 {
-    public sealed class Driver : IDriver
+    public sealed class SerilogAzureTableStorageDriver : IDriver
     {
         public const string ConnectionString = "Azure.TableStorage.ConnectionString";
         public const string TableName = "Azure.TableStorage.TableName";
@@ -16,7 +16,7 @@ namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
         private readonly LogEventMapper _mapper;
         private readonly QueryBuilder _builder;
 
-        public Driver(LogEventMapper mapper, QueryBuilder builder)
+        public SerilogAzureTableStorageDriver(LogEventMapper mapper, QueryBuilder builder)
         {
             _mapper = mapper;
             _builder = builder;
@@ -57,7 +57,9 @@ namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
             // Initialize the continuation token to null to start from the beginning of the table.
             TableContinuationToken continuationToken = null;
 
-            List<ILogEvent> events = new List<ILogEvent>();
+            List<ILogEvent> buffer = new List<ILogEvent>();
+
+            bool alive = false;
 
             do
             {
@@ -70,43 +72,44 @@ namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
 
                 foreach (LogEventTableEntity entity in tableQueryResult.Results)
                 {
-                    bool mapped = _mapper.TryMap(entity, mappingContext, out ILogEvent e);
-
-                    if (mapped)
+                    if (_mapper.TryMap(entity, mappingContext, out ILogEvent e))
                     {
-                        bool pass = filter.Pass(e);
-
-                        if (pass)
+                        if (filter.PassFilters(e))
                         {
-                            Add(e, events, context);
+                            Add(e, buffer, context);
                         }
                     }
+
+                    alive = context.IsAlive();
+                    if (!alive)
+                    {
+                        break;
+                    }
                 }
+            } while (continuationToken != null && alive);
 
-            } while (continuationToken != null && context.IsAlive());
-
-            if (events.Any())
+            if (buffer.Any())
             {
-                Flush(events, context);
+                Flush(buffer, context);
             }
         }
 
-        private void Add(ILogEvent e, List<ILogEvent> events, QueryContext context)
+        private void Add(ILogEvent e, List<ILogEvent> buffer, QueryContext context)
         {
-            if (events.Any())
+            if (buffer.Any())
             {
-                if (!BufferItem(e, events.Last()))
+                if (!BufferItem(e, buffer.Last()))
                 {
-                    Flush(events, context);
+                    Flush(buffer, context);
                 }
             }
-            events.Add(e);
+            buffer.Add(e);
         }
 
-        private void Flush(List<ILogEvent> events, QueryContext context)
+        private void Flush(List<ILogEvent> buffer, QueryContext context)
         {
-            ILogEvent[] sorted = _mapper.SortByTimestamp(events);
-            events.Clear();
+            ILogEvent[] sorted = _mapper.SortByTimestamp(buffer);
+            buffer.Clear();
             context.OnFound(sorted);
         }
 
@@ -120,7 +123,6 @@ namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
                    ts1.Hour == ts2.Hour &&
                    ts1.Minute == ts2.Minute &&
                    ts1.Second == ts2.Second;
-        }
-       
+        }       
     }
 }

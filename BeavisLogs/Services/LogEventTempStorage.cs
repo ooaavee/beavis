@@ -1,8 +1,6 @@
 ﻿using BeavisLogs.Drivers;
-using BeavisLogs.Models.DataSources;
 using Microsoft.Extensions.Caching.Memory;
 using System;
-using System.Collections.Generic;
 
 namespace BeavisLogs.Services
 {
@@ -10,40 +8,37 @@ namespace BeavisLogs.Services
     {
         private readonly IMemoryCache _memoryCache;
 
+        private readonly MemoryCacheEntryOptions _entryOptions = new MemoryCacheEntryOptions
+        {
+            Priority = CacheItemPriority.High,
+            SlidingExpiration = TimeSpan.FromMinutes(3)
+        };
+
         public LogEventTempStorage(IMemoryCache memoryCache)
         {
             _memoryCache = memoryCache;
         }
 
-        public LogEventSlot CreateSlot(IEnumerable<DataSourceInfo> sources)
+        public void Set(LogEventSlot slot)
         {
-            var slot = new LogEventSlot(sources, 1000);
-            SetSlot(slot);
-            return slot;
+            string cacheKey = GetMemoryCacheKey(slot.Properties.Key);          
+            _memoryCache.Set(cacheKey, slot, _entryOptions);
         }
-
-        private void SetSlot(LogEventSlot slot)
+ 
+        public bool TryGet(string key, out LogEventSlot slot)
         {
-            var cacheKey = GetMemoryCacheKey(slot.Key);
-            var options = new MemoryCacheEntryOptions {Priority = CacheItemPriority.High, SlidingExpiration = TimeSpan.FromMinutes(3)};
-            _memoryCache.Set(cacheKey, slot, options);
-        }
-
-        public bool TryGetSlot(string key, out LogEventSlot slot)
-        {
-            var cacheKey = GetMemoryCacheKey(key);
+            string cacheKey = GetMemoryCacheKey(key);
             return _memoryCache.TryGetValue(cacheKey, out slot);
         }
 
-        public bool TryRemoveSlot(string key, out LogEventSlot slot)
+        public bool Remove(string key)
         {
-            var cacheKey = GetMemoryCacheKey(key);
-            if (_memoryCache.TryGetValue(cacheKey, out slot))
+            string cacheKey = GetMemoryCacheKey(key);
+            if (_memoryCache.TryGetValue(cacheKey, out _))
             {
                 _memoryCache.Remove(cacheKey);
                 return true;
             }
-            slot = null;
             return false;
         }
 

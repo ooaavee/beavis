@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BeavisLogs.Drivers
@@ -19,11 +15,14 @@ namespace BeavisLogs.Drivers
         {
             foreach (IDriver driver in context.RequestServices.GetServices<IDriver>())
             {
-                if (driverType == driver.GetType().FullName)
+                string tmp = driver.GetType().FullName;
+
+                if (driverType == tmp)
                 {
                     return driver;
                 }
             }
+
             return null;
         }
     }

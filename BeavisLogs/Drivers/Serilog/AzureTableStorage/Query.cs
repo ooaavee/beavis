@@ -18,13 +18,9 @@ namespace BeavisLogs.Drivers.Serilog.AzureTableStorage
 
         public Predicate<ILogEvent>[] Filters { get; }
 
-        public bool Pass(ILogEvent e)
+        public bool PassFilters(ILogEvent e)
         {
-            if (Filters.All(r => r(e)))
-            {
-                return true;
-            }
-            return false;
+            return Filters.All(filter => filter(e));
         }
     }
 }

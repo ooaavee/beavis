@@ -54,13 +54,17 @@ namespace BeavisLogs.Commands.See
             // data sources for this command execution
             async Task<IEnumerable<DataSource>> GetDataSources()
             {
-                DataSource source = await _dataSourceProvider.FindAsync("foobar");
-                return new[] { source };
+                return new[]
+                {
+                    await _dataSourceProvider.FindAsync("1"),
+                    await _dataSourceProvider.FindAsync("2"),
+                    await _dataSourceProvider.FindAsync("3")
+                };
             }
 
             await context.OnExecuteAsync(async () =>
             {
-               
+
                 //var l = optLevels.Values;
 
                 //var sources = new List<DataSource>();
@@ -71,7 +75,17 @@ namespace BeavisLogs.Commands.See
 
                 var sss = (await GetDataSources()).Select(x => x.Info);
 
-                LogEventSlot slot = _storage.CreateSlot(sss);
+                string slotKey = KeyUtil.GenerateKey();
+
+                LogEventSlotProperties properties = new LogEventSlotProperties();
+                properties.Renderer = new LogEventTerminalRenderer();
+                //properties.Limit = 103;
+                properties.Sources = sss.ToArray();
+                properties.Key = slotKey;
+
+                LogEventSlot slot = new LogEventSlot(properties);
+                _storage.Set(slot);
+
 
                 foreach (DataSource source in await GetDataSources())
                 {
@@ -81,9 +95,9 @@ namespace BeavisLogs.Commands.See
                     {
                         return await context.ExitWithError($"Driver '{source.DriverType}' not found.");
                     }
-                  
 
-                    QueryContext query = new QueryContext(slot, source);
+
+                    QueryContext query = new QueryContext(slot, source.Info, source.DriverProperties);
 
                     //query.Parameters.Levels.Add(LogLevel.Error);
                     //query.Parameters.Levels.Add(LogLevel.Critical);
@@ -96,6 +110,8 @@ namespace BeavisLogs.Commands.See
                     //query.Parameters.PropertyText.Add("Exception", "DataException");
 
 
+                    query.Parameters.Levels.Add(LogLevel.Error);
+
                     query.Parameters.From = DateTimeOffset.Now.AddDays(-100);
                     query.Parameters.Until = DateTimeOffset.Now;
 
@@ -103,13 +119,15 @@ namespace BeavisLogs.Commands.See
                 }
 
 #pragma warning disable CS4014
-
+                // run queries in background tasks
                 Task.Run(async () =>
                 {
                     foreach (var (driver, query) in handles)
                     {
                         try
                         {
+                            query.OnQueryStarted();
+
                             await driver.ExecuteQueryAsync(query);
                         }
                         catch (Exception ex)
@@ -122,18 +140,14 @@ namespace BeavisLogs.Commands.See
                         }
                     }
                 });
-
 #pragma warning restore CS4014
 
-
-                IJob job = new PollLogEventsJob(slot.Key);
+                // initialize a client-side job that polls log events from the server
+                IJob job = new PollLogEventsJob(slotKey);
                 context.AddJob(job);
 
                 return await context.ExitAsync();
             });
         }
-
-       
-
     }
 }

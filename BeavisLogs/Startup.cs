@@ -1,9 +1,4 @@
-using BeavisLogs.Commands.See;
-using BeavisLogs.Drivers;
-using BeavisLogs.Drivers.Serilog.AzureTableStorage;
-using BeavisLogs.Providers;
-using BeavisLogs.Providers.AzureBlobStorage;
-using BeavisLogs.Services;
+using BeavisLogs.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -37,21 +32,11 @@ namespace BeavisLogs
                 options.Title = "Log viewer powered by Beavis CLI";
             });
 
-            // commands
-            services.AddTransientCommand<SeeCommand>();
+            services.AddCommands(Configuration);
+            services.AddDrivers(Configuration);
+            services.AddProviders(Configuration);
+            services.AddTools(Configuration);
 
-            // drivers
-            services.AddTransient<IDriver, Driver>();
-
-            // application services
-            services.AddTransient<IAccessProvider, AccessProvider>();
-            services.AddTransient<IDataSourceProvider, DataSourceProvider>();
-            services.AddSingleton<LogEventTempStorage>();
-            services.AddSingleton<LogEventMapper>();
-            services.AddSingleton<LogEventRenderer>();
-            services.AddSingleton<QueryBuilder>();
-
-            services.AddSingleton<IConfiguration>(Configuration);
             services.AddMemoryCache();
         }
 

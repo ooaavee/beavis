@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using BeavisLogs.Models.DataSources;
 
 namespace BeavisLogs.Drivers
 {

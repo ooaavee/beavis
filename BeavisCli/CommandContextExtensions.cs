@@ -33,40 +33,7 @@ namespace BeavisCli
 
             await Task.CompletedTask;
         }
-
-        /////// <summary>
-        /////// Creates a new command options.
-        /////// </summary>
-        ////public static ICommandOption Option(this CommandContext context, string template, string description, CommandOptionType optionType)
-        ////{
-        ////    Microsoft.Extensions.CommandLineUtils.CommandOptionType o;
-
-        ////    switch (optionType)
-        ////    {
-        ////        case CommandOptionType.MultipleValue:
-        ////            o = Microsoft.Extensions.CommandLineUtils.CommandOptionType.MultipleValue;
-        ////            break;
-        ////        case CommandOptionType.SingleValue:
-        ////            o = Microsoft.Extensions.CommandLineUtils.CommandOptionType.SingleValue;
-        ////            break;
-        ////        case CommandOptionType.NoValue:
-        ////            o = Microsoft.Extensions.CommandLineUtils.CommandOptionType.NoValue;
-        ////            break;
-        ////        default:
-        ////            throw new ArgumentOutOfRangeException(nameof(optionType), optionType, null);
-        ////    }
-
-        ////    return new CommandOption(context.Processor.Option(template, description, o));
-        ////}
-
-        /////// <summary>
-        /////// Creates a new command argument.
-        /////// </summary>
-        ////public static ICommandArgument Argument(this CommandContext context, string name, string description, bool multipleValues = false)
-        ////{
-        ////    return new CommandArgument(context.Processor.Argument(name, description, multipleValues));
-        ////}
-
+    
         /// <summary>
         /// Checks if the command is built-in.
         /// </summary>
@@ -581,16 +548,7 @@ namespace BeavisCli
         /// </summary>
         public static void AddJob(this CommandContext context, IJob job)
         {
-            // this will be invoked just before we are sending the response
-            context.Response.Sending += (sender, args) =>
-            {
-                // push a new job into the pool and add a JavaScript statement that
-                // begins the job on the client-side
-                IJobPool pool = context.HttpContext.RequestServices.GetRequiredService<IJobPool>();
-                string key = pool.Push(job);
-                IJavaScriptStatement js = new BeginJob(key);
-                context.WriteJs(js);
-            };
+            JobScheduler.New(job, context.Response, context.HttpContext);
         }
 
         private static ILogger Logger(this CommandContext context)

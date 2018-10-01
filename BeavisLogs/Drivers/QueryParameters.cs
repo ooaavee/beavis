@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using BeavisLogs.Models.Logs;
-using Microsoft.Extensions.Logging;
 
 namespace BeavisLogs.Drivers
 {
@@ -35,6 +35,5 @@ namespace BeavisLogs.Drivers
         /// Filter for <see cref="ILogEvent.Properties"/> by using case-insensitive search.
         /// </summary>
         public Dictionary<string, string> PropertyText { get; } = new Dictionary<string, string>();
-
     }
 }

@@ -3,16 +3,22 @@ using BeavisLogs.Models.Logs;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace BeavisLogs.Services
 {
-    public class LogEventRenderer
+    public class LogEventFormatter
     {
-        public string Render(ILogEvent e, bool detailed = false)
+        public string Format(ILogEvent e, bool detailed = false)
         {
             string timestamp = FormatTimestamp(e.Timestamp);
+
             string level = LogLevelUtil.GetLevelText(e.Level);
-            string body = FormatBody(e.Message, e.Exception, e.Properties, detailed);
+
+            string body = detailed ? 
+                FormatBody(e.Properties) : 
+                FormatBody(e.Message, e.Exception);
+
             string text = $"{timestamp} [{level}] {body}";
             return text;
         }
@@ -64,7 +70,7 @@ namespace BeavisLogs.Services
             return _customOutputTimeZone;
         }
 
-        private string FormatBody(string message, string exception, Dictionary<string, object> properties, bool detailed)
+        private static string FormatBody(string message, string exception)
         {
             StringBuilder text = new StringBuilder();
 
@@ -87,6 +93,12 @@ namespace BeavisLogs.Services
             }
 
             return text.ToString();
+        }
+
+        private static string FormatBody(Dictionary<string, object> properties)
+        {
+            string json = JsonConvert.SerializeObject(properties, Formatting.Indented);
+            return $"{Environment.NewLine}{json}";
         }
     }
 }
