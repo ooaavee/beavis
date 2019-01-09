@@ -20,6 +20,8 @@ namespace BeavisCli
 
         public string Prompt { get; set; } = "> ";
 
+        public string Title { get; set; } = "Beavis CLI";
+
         /// <summary>
         /// IUnauthorizedHandler
         /// </summary>

@@ -5,7 +5,7 @@ namespace BeavisCli.Commands
     [Command("clear", "Clears the terminal.")]
     public class Clear : ICommand
     {
-        public async Task ExecuteAsync(CommandContext context)
+        public async Task ExecuteAsync(CommandBuilder builder, CommandContext context)
         {
             await context.OnExecuteAsync(() =>
             {

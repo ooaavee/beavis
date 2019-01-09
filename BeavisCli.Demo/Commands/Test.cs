@@ -8,7 +8,7 @@ namespace BeavisCli.Demo.Commands
     [Command("test", "test")]
     public class Test : ICommand
     {
-        public async Task ExecuteAsync(CommandContext context)
+        public async Task ExecuteAsync(CommandBuilder builder, CommandContext context)
         {
             await context.OnExecuteAsync(() =>
             {

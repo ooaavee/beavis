@@ -5,7 +5,7 @@ namespace BeavisCli.Commands
     [Command("upload", "A tool for uploading files.")]
     public class Upload : ICommand
     {
-        public async Task ExecuteAsync(CommandContext context)
+        public async Task ExecuteAsync(CommandBuilder builder, CommandContext context)
         {
             await context.OnExecuteAsync(() =>
             {            

@@ -5,7 +5,7 @@ namespace BeavisCli.Commands
     [Command("shortcuts", "Displays terminal keyboard shortcuts.")]
     public class Shortcuts : ICommand
     {
-        public async Task ExecuteAsync(CommandContext context)
+        public async Task ExecuteAsync(CommandBuilder builder, CommandContext context)
         {
             await context.OnExecuteAsync(() =>
             {

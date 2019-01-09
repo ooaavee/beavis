@@ -6,7 +6,7 @@ namespace BeavisCli.Commands
     [Command("reset", "Resets the terminal.")]
     public class Reset : ICommand
     {
-        public async Task ExecuteAsync(CommandContext context)
+        public async Task ExecuteAsync(CommandBuilder builder, CommandContext context)
         {
             await context.OnExecuteAsync(() =>
             {

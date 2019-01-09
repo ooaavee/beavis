@@ -17,6 +17,6 @@ namespace BeavisCli.JavaScriptStatements
         public string GetCode()
         {
             return _js;
-        }
+        }       
     }
 }
