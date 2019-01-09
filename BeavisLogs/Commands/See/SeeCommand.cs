@@ -7,8 +7,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using BeavisLogs.Drivers.Renderers;
 using BeavisLogs.Jobs;
-using BeavisLogs.Providers;
+using BeavisLogs.Repositories;
 using Microsoft.Extensions.Logging;
 
 namespace BeavisLogs.Commands.See
@@ -16,14 +17,12 @@ namespace BeavisLogs.Commands.See
     [Command("see", "A powerful tool for fetching log data from multiple data sources.")]
     public class SeeCommand : ICommand
     {
-        private readonly IAccessProvider _accessProvider;
-        private readonly IDataSourceProvider _dataSourceProvider;
+        private readonly RepositoryFactory _factory;
         private readonly LogEventTempStorage _storage;
 
-        public SeeCommand(IAccessProvider accessProvider, IDataSourceProvider dataSourceProvider, LogEventTempStorage storage)
+        public SeeCommand(RepositoryFactory factory, LogEventTempStorage storage)
         {
-            _accessProvider = accessProvider;
-            _dataSourceProvider = dataSourceProvider;
+            _factory = factory;
             _storage = storage;
         }
 
@@ -50,15 +49,16 @@ namespace BeavisLogs.Commands.See
             // -regex
             // A regular expression...
 
+            var repo = _factory.Create();
 
             // data sources for this command execution
             async Task<IEnumerable<DataSource>> GetDataSources()
             {
                 return new[]
                 {
-                    await _dataSourceProvider.FindAsync("1"),
-                    await _dataSourceProvider.FindAsync("2"),
-                    await _dataSourceProvider.FindAsync("3")
+                    await repo.GetDataSourceAsync("1"),
+                    await repo.GetDataSourceAsync("2"),
+                    await repo.GetDataSourceAsync("3")
                 };
             }
 
@@ -73,14 +73,17 @@ namespace BeavisLogs.Commands.See
 
                 var handles = new List<(IDriver driver, QueryContext query)>();
 
-                var sss = (await GetDataSources()).Select(x => x.Info);
+                DataSourceInfo[] sources = (await GetDataSources()).Select(x => x.Info).ToArray();
 
                 string slotKey = KeyUtil.GenerateKey();
 
                 LogEventSlotProperties properties = new LogEventSlotProperties();
-                properties.Renderer = new LogEventTerminalRenderer();
+//                properties.Renderer = new LogEventTerminalRenderer();
+                properties.Renderer = new FileRenderer(sources, FileRenderBehaviour.SingleFiles);
+
+
                 //properties.Limit = 103;
-                properties.Sources = sss.ToArray();
+                properties.Sources = sources;
                 properties.Key = slotKey;
 
                 LogEventSlot slot = new LogEventSlot(properties);

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using BeavisLogs.Drivers.Renderers;
 
 namespace BeavisLogs.Drivers
 {
@@ -37,6 +38,7 @@ namespace BeavisLogs.Drivers
             bool more = false;
 
             SlotEnumerator enumerator = NextEnumerator();
+
             if (enumerator != null)
             {
                 DataSourceInfo source = enumerator.Source;

@@ -11,9 +11,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CLI", "CLI", "{0AD558D0-15C
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Logs", "Logs", "{24D9AB28-41FC-43A2-AB48-E2F793425BB1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeavisLogs", "BeavisLogs\BeavisLogs.csproj", "{A7991577-2C68-4131-8923-C42643CAA761}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeavisLogs", "BeavisLogs\BeavisLogs.csproj", "{A7991577-2C68-4131-8923-C42643CAA761}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeavisLogs.TestDataGenerator", "BeavisLogs.TestDataGenerator\BeavisLogs.TestDataGenerator.csproj", "{C259D536-2DD7-4B15-B9F6-8051B0518467}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeavisLogs.TestDataGenerator", "BeavisLogs.TestDataGenerator\BeavisLogs.TestDataGenerator.csproj", "{C259D536-2DD7-4B15-B9F6-8051B0518467}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

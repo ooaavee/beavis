@@ -15,14 +15,11 @@ namespace BeavisLogs.Drivers
         {
             foreach (IDriver driver in context.RequestServices.GetServices<IDriver>())
             {
-                string tmp = driver.GetType().FullName;
-
-                if (driverType == tmp)
+                if (driverType == driver.GetType().FullName)
                 {
                     return driver;
                 }
             }
-
             return null;
         }
     }

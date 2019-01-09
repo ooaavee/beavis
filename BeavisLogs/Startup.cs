@@ -32,10 +32,9 @@ namespace BeavisLogs
                 options.Title = "Log viewer powered by Beavis CLI";
             });
 
+            services.AddCommon(Configuration);
             services.AddCommands(Configuration);
             services.AddDrivers(Configuration);
-            services.AddProviders(Configuration);
-            services.AddTools(Configuration);
 
             services.AddMemoryCache();
         }
