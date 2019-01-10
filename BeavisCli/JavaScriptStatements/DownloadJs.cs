@@ -17,14 +17,14 @@ namespace BeavisCli.JavaScriptStatements
 
         public DownloadJs(byte[] data, string fileName, string mimeType)
         {
-            var tmp = new StringBuilder();
+            var s = new StringBuilder();
 
-            tmp.Append($"var s = atob('{Convert.ToBase64String(data)}'); ");
-            tmp.Append("var arr = new Array(s.length); ");
-            tmp.Append("for (var i = 0; i < s.length; i++) arr[i] = s.charCodeAt(i); ");           
-            tmp.Append($"download(new Blob([new Uint8Array(arr)], {{type: \"{mimeType}\"}}), \"{fileName}\", \"{mimeType}\");");
+            s.Append($"var s = atob('{Convert.ToBase64String(data)}'); ");
+            s.Append("var arr = new Array(s.length); ");
+            s.Append("for (var i = 0; i < s.length; i++) arr[i] = s.charCodeAt(i); ");           
+            s.Append($"download(new Blob([new Uint8Array(arr)], {{type: \"{mimeType}\"}}), \"{fileName}\", \"{mimeType}\");");
 
-            _js = tmp.ToString();
+            _js = s.ToString();
         }
 
         public string GetCode()

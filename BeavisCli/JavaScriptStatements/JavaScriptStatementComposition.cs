@@ -9,15 +9,15 @@ namespace BeavisCli.JavaScriptStatements
 
         public JavaScriptStatementComposition(IEnumerable<IJavaScriptStatement> statements)
         {
-            var js = new StringBuilder();
+            var s = new StringBuilder();
 
             foreach (IJavaScriptStatement statement in statements)
             {
-                js.Append(statement.GetCode());
-                js.Append(";");
+                s.Append(statement.GetCode());
+                s.Append(";");
             }
 
-            _js = js.ToString();
+            _js = s.ToString();
         }
 
         public string GetCode()
