@@ -8,11 +8,11 @@ using System.Reflection;
 
 namespace BeavisCli.Services
 {
-    public class TerminalInitializer : ITerminalInitializer
+    public class DefaultTerminalInitializer : ITerminalInitializer
     {
         private readonly BeavisCliOptions _options;
 
-        public TerminalInitializer(IOptions<BeavisCliOptions> options)
+        public DefaultTerminalInitializer(IOptions<BeavisCliOptions> options)
         {
             _options = options.Value;
         }

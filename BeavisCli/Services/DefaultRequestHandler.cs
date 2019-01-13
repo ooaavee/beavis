@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace BeavisCli.Services
 {
-    public class RequestHandler : IRequestHandler
+    public class DefaultRequestHandler : IRequestHandler
     {
-        private readonly ILogger<RequestHandler> _logger;
+        private readonly ILogger<DefaultRequestHandler> _logger;
         private readonly BeavisCliOptions _options;
 
-        public RequestHandler(ILoggerFactory loggerFactory, IOptions<BeavisCliOptions> options)
+        public DefaultRequestHandler(ILoggerFactory loggerFactory, IOptions<BeavisCliOptions> options)
         {
-            _logger = loggerFactory.CreateLogger<RequestHandler>();
+            _logger = loggerFactory.CreateLogger<DefaultRequestHandler>();
             _options = options.Value;
         }
 

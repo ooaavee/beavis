@@ -30,23 +30,15 @@ namespace BeavisCli.Middlewares
         {
             BeavisCliRequestTypes type = GetRequestType(context.Request);
 
-            if (type == BeavisCliRequestTypes.None)
+            if (!IsEnabled(type, context))
             {
-                await _next(context);
-                return;
-            }
-
-            Func<BeavisCliRequestTypes, HttpContext, bool> checker = _options.IsRequestTypeBlocked;
-            if (checker != null && checker(type, context))
-            {
-                _logger.LogInformation($"Skipping the request type of '{type}'.");
                 await _next(context);
                 return;
             }
 
             try
             {
-                _logger.LogInformation($"Started to process a request for a path '{context.Request.Path.ToString()}'.");
+                _logger.LogDebug($"Started to process a request for a path '{context.Request.Path.ToString()}'.");
 
                 switch (type)
                 {
@@ -86,19 +78,36 @@ namespace BeavisCli.Middlewares
                 return;
             }
 
-            _logger.LogInformation($"Processed a request for a path '{context.Request.Path.ToString()}'.");
+            _logger.LogDebug($"Processed a request for a path '{context.Request.Path.ToString()}'.");
+        }
+
+        private bool IsEnabled(BeavisCliRequestTypes type, HttpContext context)
+        {
+            if (type == BeavisCliRequestTypes.None)
+            {
+                return false;
+            }
+
+            Func<BeavisCliRequestTypes, HttpContext, bool> checker = _options.IsRequestTypeBlocked;
+
+            if (checker != null && checker(type, context))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private static async Task HandleHtml(HttpContext context)
         {
-            string text = await GetResourcesAsync("BeavisCli.Resources.html.index.html");
+            var text = await GetResourcesAsync("BeavisCli.Resources.html.index.html");
 
             await WriteAsync(text, context.Response, "text/html");
         }
 
         private static async Task HandleCss(HttpContext context)
         {
-            string text = await GetResourcesAsync(
+            var text = await GetResourcesAsync(
                 "BeavisCli.Resources.css.jquery.terminal.min.css",
                 "BeavisCli.Resources.css.site.css");
 
@@ -107,7 +116,7 @@ namespace BeavisCli.Middlewares
 
         private static async Task HandleJs(HttpContext context)
         {
-            string text = await GetResourcesAsync(
+            var text = await GetResourcesAsync(
                 "BeavisCli.Resources.js.jquery.min.js",
                 "BeavisCli.Resources.js.jquery.terminal.min.js",
                 "BeavisCli.Resources.js.jquery.mousewheel-min.js",

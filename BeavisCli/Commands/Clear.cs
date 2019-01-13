@@ -9,7 +9,8 @@ namespace BeavisCli.Commands
         {
             await context.OnExecuteAsync(() =>
             {
-                // nothing special here -> all the work will be done on the client-side by the jQuery Terminal component 
+                // Nothing special here:
+                // All the work will be done on the client-side by the jQuery Terminal component 
                 return context.Exit();
             });
         }

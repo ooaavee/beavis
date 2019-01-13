@@ -28,7 +28,7 @@ namespace BeavisCli
         public ServiceDefinition UnauthorizedHandlerService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(UnauthorizedHandler),
+            ImplementationType = typeof(DefaultUnauthorizedHandler),
             ServiceType = typeof(IUnauthorizedHandler)
         };
 
@@ -38,7 +38,7 @@ namespace BeavisCli
         public ServiceDefinition TerminalInitializerService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(TerminalInitializer),
+            ImplementationType = typeof(DefaultTerminalInitializer),
             ServiceType = typeof(ITerminalInitializer)
         };
 
@@ -48,7 +48,7 @@ namespace BeavisCli
         public ServiceDefinition FileStorageService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(FileStorage),
+            ImplementationType = typeof(DefaultFileStorage),
             ServiceType = typeof(IFileStorage)
         };
 
@@ -58,7 +58,7 @@ namespace BeavisCli
         public ServiceDefinition CommandExecutionEnvironmentService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(CommandExecutionEnvironment),
+            ImplementationType = typeof(DefaultCommandExecutionEnvironment),
             ServiceType = typeof(ICommandExecutionEnvironment)
         };
 
@@ -68,7 +68,7 @@ namespace BeavisCli
         public ServiceDefinition CommandProviderService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(CommandProvider),
+            ImplementationType = typeof(DefaultCommandProvider),
             ServiceType = typeof(ICommandProvider)
         };
 
@@ -78,7 +78,7 @@ namespace BeavisCli
         public ServiceDefinition RequestHandlerService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(RequestHandler),
+            ImplementationType = typeof(DefaultRequestHandler),
             ServiceType = typeof(IRequestHandler)
         };
 
@@ -88,7 +88,7 @@ namespace BeavisCli
         public ServiceDefinition JobPoolService { get; } = new ServiceDefinition
         {
             Lifetime = ServiceLifetime.Singleton,
-            ImplementationType = typeof(JobPool),
+            ImplementationType = typeof(DefaultJobPool),
             ServiceType = typeof(IJobPool)
         };
 

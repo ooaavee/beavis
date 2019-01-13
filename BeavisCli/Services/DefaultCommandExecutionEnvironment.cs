@@ -3,11 +3,11 @@ using Microsoft.Extensions.Options;
 
 namespace BeavisCli.Services
 {
-    public class CommandExecutionEnvironment : ICommandExecutionEnvironment
+    public class DefaultCommandExecutionEnvironment : ICommandExecutionEnvironment
     {
         private readonly BeavisCliOptions _options;
 
-        public CommandExecutionEnvironment(IOptions<BeavisCliOptions> options)
+        public DefaultCommandExecutionEnvironment(IOptions<BeavisCliOptions> options)
         {
             _options = options.Value;
         }
