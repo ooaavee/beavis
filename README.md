@@ -4,10 +4,9 @@ Beavis CLI is a library which enables you to use a web-cli/terminal/console with
 
 ## Install
 
-You can get the library from NuGet: <a href="https://www.nuget.org/packages/Ooaavee.Xxxx">sss</a>
-
-asds
+You can get the library from <a href="https://www.nuget.org/packages/Ooaavee.Xxxx">NuGet</a>.
 
 ```
 PM> Install-Package Ooaavee.BeavisCli
 ```
+
