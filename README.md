@@ -12,7 +12,13 @@ PM> Install-Package Ooaavee.BeavisCli
 
 ## Setup
 
-first
+Add services to the container.
+
+```cs
+PM> Install-Package Ooaavee.BeavisCli
+```
+
+Configure HTTP request
 
 ```cs
 PM> Install-Package Ooaavee.BeavisCli
