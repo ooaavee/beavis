@@ -29,5 +29,5 @@ public class Startup
 }
 ```
 
-jjj
+That's all, voilà! Just start your application and open the address `/terminal` in your web browser.
 
