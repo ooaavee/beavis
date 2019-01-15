@@ -1,6 +1,6 @@
 # Beavis CLI
 
-Beavis CLI is a library which enables you to use a web-cli/terminal/console with your ASP.NET Core applications. It is very easy to setup and implement your own custom commands.
+Beavis CLI library enables you to use a web-cli/terminal/console with your ASP.NET Core applications. It is very easy to configure and implement your own custom commands.
 
 ## Install
 
@@ -10,11 +10,24 @@ You can get the library from <a href="https://www.nuget.org/packages/Ooaavee.Xxx
 PM> Install-Package Ooaavee.BeavisCli
 ```
 
-## Setup
+## Basic configuration
 
-first
+To configure your ASP.NET Core application to use the Beavis CLI library: Just add services to the container and configure the HTTP request pipeline in the application startup code.
 
 ```cs
-PM> Install-Package Ooaavee.BeavisCli
+public class Startup
+{
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddBeavisCli();
+    }
+
+    public void Configure(IApplicationBuilder app)
+    {
+        app.UseBeavisCli();
+    }
+}
 ```
+
+That's all, voilà! After this, just start your application and open the address `/terminal` in your web browser and the terminal is shown.
 
