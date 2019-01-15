@@ -15,17 +15,19 @@ PM> Install-Package Ooaavee.BeavisCli
 It is very easy to configure your ASP.NET Core application to use the Beavis CLI library: Just add services to the container and configure the HTTP request pipeline in the application startup code.
 
 ```cs
-public void ConfigureServices(IServiceCollection services)
+public class Startup
 {
-    services.AddBeavisCli();
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddBeavisCli();
+    }
+
+    public void Configure(IApplicationBuilder app)
+    {
+        app.UseBeavisCli();
+    }
 }
 ```
 
-```cs
-public void Configure(IApplicationBuilder app)
-{
-    app.UseBeavisCli();
-}
-
-```
+jjj
 
