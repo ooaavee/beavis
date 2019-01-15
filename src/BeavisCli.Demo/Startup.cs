@@ -9,30 +9,21 @@ namespace BeavisCli.Demo
 {
     public class Startup
     {
-        
-
         public void ConfigureServices(IServiceCollection services)
         {
-
-
             services.AddAuthentication("Demo")
                 .AddCookie("Demo");
 
-            services.AddBeavisCli(options =>
-            {
-                options.Path = "/terminal";
-                options.DisplayExceptions = true;
-            });
+            services.AddBeavisCli();
 
             services.AddScopedCommand<Login>();
 
             services.AddScopedCommand<Test>();
 
             services.AddScoped<IUserRepository, DemoUserRepository>();
-
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
             app.UseAuthentication();
 
