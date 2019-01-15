@@ -31,5 +31,5 @@ public class Startup
 
 That's all, voilà! After this, just start your application and open the address `/terminal` in your web browser and the terminal is shown.
 
-<img src="/doc/images/empty_terminal.jpg">
+<img src="/doc/images/empty_terminal.jpg" style="width: 100%">
 
