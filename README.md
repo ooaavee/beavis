@@ -15,20 +15,12 @@ PM> Install-Package Ooaavee.BeavisCli
 Add services to the container.
 
 ```cs
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddAuthentication("Demo")
-                .AddCookie("Demo");
-
-            services.AddBeavisCli();
-
-            services.AddScopedCommand<Login>();
-
-            services.AddScopedCommand<Test>();
-
-            services.AddScoped<IUserRepository, DemoUserRepository>();
-        }
-
+public void ConfigureServices(IServiceCollection services)
+{
+    ...
+    services.AddBeavisCli();
+    ...
+}
 ```
 
 Configure HTTP request
