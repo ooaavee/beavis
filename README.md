@@ -17,15 +17,17 @@ Add services to the container.
 ```cs
 public void ConfigureServices(IServiceCollection services)
 {
-    ...
     services.AddBeavisCli();
-    ...
 }
 ```
 
 Configure HTTP request
 
 ```cs
-PM> Install-Package Ooaavee.BeavisCli
+public void Configure(IApplicationBuilder app)
+{
+    app.UseBeavisCli();
+}
+
 ```
 
