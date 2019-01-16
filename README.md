@@ -37,4 +37,4 @@ That's all, voilà! After this, just start your application and open the address
 
 ## Developing custom commands
 
-xx
+By the default, there is a small set of built-in commands available in the Beavis CLI library (you can see them by executing the 'ss')
