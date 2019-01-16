@@ -37,4 +37,4 @@ That's all, voilà! After this, just start your application and open the address
 
 ## Developing custom commands
 
-By the default, there is a small set of built-in commands available in the Beavis CLI library (you can see them by executing the 'ss')
+By the default, there is a small set of built-in commands available in the Beavis CLI library (you can see them by executing the `help` command on the terminal), but if you want to get much out of this library, then you should develop your own custom commands.
