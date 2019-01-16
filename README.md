@@ -1,6 +1,6 @@
 # Beavis CLI
 
-Beavis CLI library enables a web-cli support for ASP.NET Core applications. It is very easy to configure and of course develope new custom commands with .NET Core.
+Beavis CLI library adds a web-cli (terminal in web browser) support for ASP.NET Core applications. It's very easy to configure and of course develope new custom commands with .NET Core.
 
 ## Install
 
