@@ -1,11 +1,11 @@
-﻿using BeavisCli.Demo.Commands;
-using BeavisCli.Demo.Services;
+﻿using BeavisCli;
+using DemoWebApp.Commands;
+using DemoWebApp.Services;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BeavisCli.Demo
+namespace DemoWebApp
 {
     public class Startup
     {
@@ -15,6 +15,8 @@ namespace BeavisCli.Demo
                 .AddCookie("Demo");
 
             services.AddBeavisCli();
+
+            services.AddScopedCommand<Hello>();
 
             services.AddScopedCommand<Login>();
 

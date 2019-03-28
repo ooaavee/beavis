@@ -1,10 +1,11 @@
-﻿using BeavisCli.Demo.Models;
-using BeavisCli.Demo.Services;
-using Microsoft.AspNetCore.Authentication;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Threading.Tasks;
+using BeavisCli;
+using DemoWebApp.Models;
+using DemoWebApp.Services;
+using Microsoft.AspNetCore.Authentication;
 
-namespace BeavisCli.Demo.Commands
+namespace DemoWebApp.Commands
 {
     [Command("login", "This demo command is used for login.")]
     public class Login : ICommand

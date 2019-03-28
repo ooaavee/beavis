@@ -1,4 +1,4 @@
-﻿namespace BeavisCli.Demo.Models
+﻿namespace DemoWebApp.Models
 {
     public class UserModel
     {

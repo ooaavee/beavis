@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using BeavisCli;
 
-namespace BeavisCli.Demo.Commands
+namespace DemoWebApp.Commands
 {
     [Command("test", "test")]
     public class Test : ICommand
