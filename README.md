@@ -1,6 +1,6 @@
 # Beavis CLI
 
-Beavis CLI library enables you to use a web-cli/terminal/console with your ASP.NET Core applications. It is very easy to configure and implement your own custom commands.
+Beavis CLI library adds a web-cli (terminal in web browser) support for ASP.NET Core applications. It's very easy to configure and develope new custom commands with .NET Core.
 
 ## Install
 
@@ -12,7 +12,7 @@ PM> Install-Package Ooaavee.BeavisCli
 
 ## Basic configuration
 
-To configure your ASP.NET Core application to use the Beavis CLI library: Just add services to the container and configure the HTTP request pipeline in the application startup code.
+To configure your ASP.NET Core application to use the Beavis CLI library: Just add services to the container and configure the HTTP request pipeline in the application `Startup` code.
 
 ```cs
 public class Startup
@@ -29,5 +29,42 @@ public class Startup
 }
 ```
 
+
 That's all, voilà! After this, just start your application and open the address `/terminal` in your web browser and the terminal is shown.
 
+<img src="/doc/images/empty_terminal.jpg" style="width: 100%">
+
+
+## Developing custom commands
+
+By the default, there is a small set of built-in commands available in the Beavis CLI library (you can see them by executing the `help` command on the terminal), but if you want to get much out of this library, then you should develop your own custom commands - luckily it's a pretty straightforward process.
+
+First you create a new class that implements the `ICommand` interface and use the `CommandAttribute` to give a name and a description for your custom command. 
+
+```cs
+using System.Threading.Tasks;
+using BeavisCli;
+
+[Command("hello", "This demo say Hello World!")]
+public class Hello : ICommand
+{
+    public async Task ExecuteAsync(CommandBuilder builder, CommandContext context)
+    {
+        await context.OnExecuteAsync(async () =>
+        {
+            return await context.ExitAsync("Hello World", ResponseMessageTypes.Success);
+        });
+    }
+}
+```
+
+...and...
+
+```cs
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddBeavisCli();
+    services.AddScopedCommand<Hello>();
+}
+
+```
