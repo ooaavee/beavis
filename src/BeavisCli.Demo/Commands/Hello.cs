@@ -10,7 +10,7 @@ public class Hello : ICommand
     {
         await context.OnExecuteAsync(async () =>
         {
-            return await context.ExitAsync("Hello World", ResponseMessageTypes.Success);
+            return await context.ExitAsync("Hello World", ResponseMessageType.Success);
         });
     }
 }

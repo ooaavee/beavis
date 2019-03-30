@@ -14,12 +14,20 @@ namespace DemoWebApp
             services.AddAuthentication("Demo")
                 .AddCookie("Demo");
 
-            services.AddBeavisCli();
+            services.AddBeavisCli(options =>
+            {
+                //options.BuiltInCommandBehaviours["clear"].IsVisibleForHelp = false;
+                //options.BuiltInCommandBehaviours["files"].IsVisibleForHelp = false;
+                //options.BuiltInCommandBehaviours["help"].IsVisibleForHelp = false;
+                //options.BuiltInCommandBehaviours["license"].IsVisibleForHelp = false;
+                //options.BuiltInCommandBehaviours["reset"].IsVisibleForHelp = false;
+                //options.BuiltInCommandBehaviours["shortcuts"].IsVisibleForHelp = false;
+                //options.BuiltInCommandBehaviours["upload"].IsVisibleForHelp = false;
+
+            });
 
             services.AddScopedCommand<Hello>();
-
             services.AddScopedCommand<Login>();
-
             services.AddScopedCommand<Test>();
 
             services.AddScoped<IUserRepository, DemoUserRepository>();

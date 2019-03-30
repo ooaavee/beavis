@@ -1,7 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BeavisCli.Jobs;
+using BeavisCli.Resources;
+using BeavisCli.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json;
 using System;
 using System.IO;
@@ -15,14 +19,16 @@ namespace BeavisCli.Middlewares
 {
     public class BeavisCliMiddleware
     {
+        private const string ApiRoot = "/api/beaviscli";
+
         private readonly RequestDelegate _next;
         private readonly ILogger<BeavisCliMiddleware> _logger;
         private readonly BeavisCliOptions _options;
 
-        public BeavisCliMiddleware(RequestDelegate next, ILoggerFactory loggerFactory, IOptions<BeavisCliOptions> options)
+        public BeavisCliMiddleware(RequestDelegate next, ILogger<BeavisCliMiddleware> logger, IOptions<BeavisCliOptions> options)
         {
             _next = next;
-            _logger = loggerFactory.CreateLogger<BeavisCliMiddleware>();
+            _logger = logger;
             _options = options.Value;
         }
 
@@ -30,7 +36,7 @@ namespace BeavisCli.Middlewares
         {
             BeavisCliRequestTypes type = GetRequestType(context.Request);
 
-            if (!IsEnabled(type, context))
+            if (!_options.IsRequestApproved(type, context))
             {
                 await _next(context);
                 return;
@@ -42,130 +48,105 @@ namespace BeavisCli.Middlewares
 
                 switch (type)
                 {
-                    case BeavisCliRequestTypes.Html:
-                        await HandleHtml(context);
+                    case BeavisCliRequestTypes.GetTerminalHtml:
+                        await GetTerminalHtmlAsync(context);
                         break;
 
-                    case BeavisCliRequestTypes.Css:
-                        await HandleCss(context);
+                    case BeavisCliRequestTypes.GerTerminalCss:
+                        await GetTerminalCssAsync(context);
                         break;
 
-                    case BeavisCliRequestTypes.Js:
-                        await HandleJs(context);
+                    case BeavisCliRequestTypes.GerTerminalJs:
+                        await GetTerminalJsAsync(context);
                         break;
 
-                    case BeavisCliRequestTypes.Initialize:
-                        await HandleInitialize(context);
+                    case BeavisCliRequestTypes.InitializeTerminal:
+                        await InitializeTerminalAsync(context);
                         break;
 
-                    case BeavisCliRequestTypes.Job:
-                        await HandleJob(context);
+                    case BeavisCliRequestTypes.RunJob:
+                        await RunJobAsync(context);
                         break;
 
-                    case BeavisCliRequestTypes.Command:
-                        await HandleCommand(context);
+                    case BeavisCliRequestTypes.HandleCommand:
+                        await HandleCommandAsync(context);
                         break;
 
-                    case BeavisCliRequestTypes.Upload:
-                        await HandleUpload(context);
+                    case BeavisCliRequestTypes.UploadFile:
+                        await UploadFileAsync(context);
+                        break;
+
+                    case BeavisCliRequestTypes.None:
                         break;
                 }
             }
             catch (Exception e)
             {
-                _logger.LogError($"An error occurred while processing the request type of '{type}'.", e);
+                _logger.LogError(e, $"An error occurred while processing the request type of '{type}'.");
                 await WriteErrorResponseAsync(e, context);
                 return;
             }
 
             _logger.LogDebug($"Processed a request for a path '{context.Request.Path.ToString()}'.");
         }
-
-        private bool IsEnabled(BeavisCliRequestTypes type, HttpContext context)
+       
+        private static async Task GetTerminalHtmlAsync(HttpContext context)
         {
-            if (type == BeavisCliRequestTypes.None)
-            {
-                return false;
-            }
-
-            Func<BeavisCliRequestTypes, HttpContext, bool> checker = _options.IsRequestTypeBlocked;
-
-            if (checker != null && checker(type, context))
-            {
-                return false;
-            }
-
-            return true;
+            string s = await ResourceReader.GetHtmlAsync();
+            await WriteAsync(s, context.Response, "text/html");
         }
 
-        private static async Task HandleHtml(HttpContext context)
+        private static async Task GetTerminalCssAsync(HttpContext context)
         {
-            var text = await GetResourcesAsync("BeavisCli.Resources.html.index.html");
-
-            await WriteAsync(text, context.Response, "text/html");
+            string s = await ResourceReader.GetCssAsync();
+            await WriteAsync(s, context.Response, "text/css");
         }
 
-        private static async Task HandleCss(HttpContext context)
+        private static async Task GetTerminalJsAsync(HttpContext context)
         {
-            var text = await GetResourcesAsync(
-                "BeavisCli.Resources.css.jquery.terminal.min.css",
-                "BeavisCli.Resources.css.site.css");
-
-            await WriteAsync(text, context.Response, "text/css");
+            string s = await ResourceReader.GetJsAsync();
+            await WriteAsync(s, context.Response, "application/javascript");
         }
 
-        private static async Task HandleJs(HttpContext context)
+        private static async Task InitializeTerminalAsync(HttpContext context)
         {
-            var text = await GetResourcesAsync(
-                "BeavisCli.Resources.js.jquery.min.js",
-                "BeavisCli.Resources.js.jquery.terminal.min.js",
-                "BeavisCli.Resources.js.jquery.mousewheel-min.js",
-                "BeavisCli.Resources.js.angular.min.js",
-                "BeavisCli.Resources.js.download.js",
-                "BeavisCli.Resources.js.beaviscli.js");
-
-            await WriteAsync(text, context.Response, "application/javascript");
-        }
-
-        private static async Task HandleInitialize(HttpContext context)
-        {
-            var initializer = context.RequestServices.GetRequiredService<ITerminalInitializer>();
-            var response = new Response();
+            ITerminalInitializer initializer = context.RequestServices.GetRequiredService<ITerminalInitializer>();
+            Response response = new Response();
             initializer.Initialize(response, context);
             await RenderResponseAsync(response, context);
         }
 
-        private static async Task HandleJob(HttpContext context)
+        private static async Task RunJobAsync(HttpContext context)
         {
-            var jobs = context.RequestServices.GetRequiredService<IJobPool>();
-            var response = new Response();
-            var key = context.Request.Query["key"];
-            var content = await ReadBodyAsync(context);
-            var jc = new JobContext(content, context, response);
+            IJobPool jobs = context.RequestServices.GetRequiredService<IJobPool>();
+            Response response = new Response();
+            StringValues key = context.Request.Query["key"];
+            string content = await ReadBodyAsync(context);
+            JobContext jc = new JobContext(content, context, response);
             await jobs.RunAsync(key, jc);
             await RenderResponseAsync(response, context);
         }
 
-        private static async Task HandleCommand(HttpContext context)
+        private static async Task HandleCommandAsync(HttpContext context)
         {
-            var executor = context.RequestServices.GetRequiredService<IRequestHandler>();
-            var json = await ReadBodyAsync(context);
-            var request = JsonConvert.DeserializeObject<Request>(json);
-            var response = await executor.HandleAsync(request, context);
+            IRequestHandler executor = context.RequestServices.GetRequiredService<IRequestHandler>();
+            string json = await ReadBodyAsync(context);
+            Request request = JsonConvert.DeserializeObject<Request>(json);
+            Response response = await executor.HandleAsync(request, context);
             await RenderResponseAsync(response, context);
         }
 
-        private static async Task HandleUpload(HttpContext context)
+        private static async Task UploadFileAsync(HttpContext context)
         {
-            var files = context.RequestServices.GetRequiredService<IFileStorage>();
-            var body = await ReadBodyAsync(context);
-            var response = new Response();
-            var file = JsonConvert.DeserializeObject<FileContent>(body);
+            IFileStorage files = context.RequestServices.GetRequiredService<IFileStorage>();
+            string body = await ReadBodyAsync(context);
+            Response response = new Response();
+            FileContent file = JsonConvert.DeserializeObject<FileContent>(body);
             if (string.IsNullOrEmpty(file.Type))
             {
                 file.Type = FileContent.ResolveType(file.Name);
             }
-            var id = await files.StoreAsync(file);
+            string id = await files.StoreAsync(file);
             response.Messages.Add(ResponseMessage.Plain("File upload completed, the file ID is:"));
             response.Messages.Add(ResponseMessage.Plain(id));
             await RenderResponseAsync(response, context);
@@ -173,15 +154,11 @@ namespace BeavisCli.Middlewares
 
         private BeavisCliRequestTypes GetRequestType(HttpRequest request)
         {
-            const string fixedPath = "/beaviscli-api";
+            bool potentialMatch =
+                request.Path.StartsWithSegments(_options.Path, StringComparison.InvariantCultureIgnoreCase) ||
+                request.Path.StartsWithSegments(ApiRoot, StringComparison.InvariantCultureIgnoreCase);
 
-            bool IsPotentialMatch()
-            {
-                return request.Path.StartsWithSegments(_options.Path, StringComparison.InvariantCultureIgnoreCase) ||
-                       request.Path.StartsWithSegments(fixedPath, StringComparison.InvariantCultureIgnoreCase);
-            }
-
-            if (!IsPotentialMatch())
+            if (!potentialMatch)
             {
                 return BeavisCliRequestTypes.None;
             }
@@ -193,37 +170,37 @@ namespace BeavisCli.Middlewares
 
             if (Match(_options.Path, HttpMethods.Get))
             {
-                return BeavisCliRequestTypes.Html;
+                return BeavisCliRequestTypes.GetTerminalHtml;
             }
 
-            if (Match($"{fixedPath}/css", HttpMethods.Get))
+            if (Match($"{ApiRoot}/css", HttpMethods.Get))
             {
-                return BeavisCliRequestTypes.Css;
+                return BeavisCliRequestTypes.GerTerminalCss;
             }
 
-            if (Match($"{fixedPath}/js", HttpMethods.Get))
+            if (Match($"{ApiRoot}/js", HttpMethods.Get))
             {
-                return BeavisCliRequestTypes.Js;
+                return BeavisCliRequestTypes.GerTerminalJs;
             }
 
-            if (Match($"{fixedPath}/initialize", HttpMethods.Post))
+            if (Match($"{ApiRoot}/initialize", HttpMethods.Post))
             {
-                return BeavisCliRequestTypes.Initialize;
+                return BeavisCliRequestTypes.InitializeTerminal;
             }
 
-            if (Match($"{fixedPath}/job", HttpMethods.Post))
+            if (Match($"{ApiRoot}/job", HttpMethods.Post))
             {
-                return BeavisCliRequestTypes.Job;
+                return BeavisCliRequestTypes.RunJob;
             }
 
-            if (Match($"{fixedPath}/request", HttpMethods.Post))
+            if (Match($"{ApiRoot}/request", HttpMethods.Post))
             {
-                return BeavisCliRequestTypes.Command;
+                return BeavisCliRequestTypes.HandleCommand;
             }
 
-            if (Match($"{fixedPath}/upload", HttpMethods.Post))
+            if (Match($"{ApiRoot}/upload", HttpMethods.Post))
             {
-                return BeavisCliRequestTypes.Upload;
+                return BeavisCliRequestTypes.UploadFile;
             }
 
             return BeavisCliRequestTypes.None;
@@ -231,9 +208,9 @@ namespace BeavisCli.Middlewares
 
         private async Task WriteErrorResponseAsync(Exception e, HttpContext context)
         {
-            var text = _options.DisplayExceptions ?
-                e.ToString() :
-                "An error occurred. Please check your application logs for more details.";
+            string text = _options.DisplayExceptions
+                ? e.ToString()
+                : "An error occurred. Please check your application logs for more details.";
 
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             context.Response.ContentType = "text/plain";
@@ -246,7 +223,7 @@ namespace BeavisCli.Middlewares
             {
                 using (var reader = new StreamReader(stream, Encoding.UTF8))
                 {
-                    var s = await reader.ReadToEndAsync();
+                    string s = await reader.ReadToEndAsync();
                     return s;
                 }
             }
@@ -264,36 +241,17 @@ namespace BeavisCli.Middlewares
 
             response.OnSending();
 
-            var text = JsonConvert.SerializeObject(response);
+            string text = JsonConvert.SerializeObject(response);
 
             await WriteAsync(text, context.Response, "application/json");
         }
 
         private static async Task WriteAsync(string text, HttpResponse response, string contentType)
         {
-            var content = Encoding.UTF8.GetBytes(text);
+            byte[] content = Encoding.UTF8.GetBytes(text);
             response.ContentType = contentType;
-            response.StatusCode = (int)HttpStatusCode.OK;
+            response.StatusCode = (int) HttpStatusCode.OK;
             await response.Body.WriteAsync(content, 0, content.Length);
-        }
-
-        private static async Task<string> GetResourcesAsync(params string[] files)
-        {
-            var buf = new StringBuilder();
-
-            foreach (var file in files)
-            {
-                using (var stream = Assembly.GetAssembly(typeof(BeavisCliMiddleware)).GetManifestResourceStream(file))
-                {
-                    using (var reader = new StreamReader(stream))
-                    {
-                        var s = await reader.ReadToEndAsync();
-                        buf.Append(s);
-                    }
-                }
-            }
-
-            return buf.ToString();
         }
     }
 }

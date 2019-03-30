@@ -3,12 +3,12 @@
     public enum BeavisCliRequestTypes
     {
         None,
-        Html,
-        Css,
-        Js,
-        Initialize,
-        Job,
-        Command,
-        Upload
+        GetTerminalHtml,
+        GerTerminalCss,
+        GerTerminalJs,
+        InitializeTerminal,
+        RunJob,
+        HandleCommand,
+        UploadFile
     }
 }

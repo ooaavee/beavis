@@ -9,7 +9,7 @@ namespace Microsoft.AspNetCore.Builder
     {
         public static IApplicationBuilder UseBeavisCli(this IApplicationBuilder app)
         {
-            if (!BeavisCliServiceCollectionExtensions.Flag)
+            if (!BeavisCliServiceCollectionExtensions.ServicesRegistered)
             {
                 throw new InvalidOperationException($"Unable to find the required services. Please add all the required services by calling \'IServiceCollection.{nameof(BeavisCliServiceCollectionExtensions.AddBeavisCli)}\' inside the call to \'ConfigureServices(...)\' in the application startup code.");
             }

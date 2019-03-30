@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace BeavisCli
 {
@@ -51,5 +52,68 @@ namespace BeavisCli
             var arg = _context.Processor.Argument(name, description, multipleValues);
             return new Argument(arg);
         }
+    }
+
+    public interface IOption
+    {
+        List<string> Values { get; }
+
+        bool HasValue();
+
+        string Value();
+    }
+
+    public interface IArgument
+    {
+        List<string> Values { get; }
+
+        bool MultipleValues { get; }
+
+        string Value { get; }
+    }
+
+    public enum OptionType
+    {
+        MultipleValue,
+        SingleValue,
+        NoValue
+    }
+
+    internal sealed class Option : IOption
+    {
+        private readonly Microsoft.Extensions.CommandLineUtils.CommandOption _target;
+
+        public Option(Microsoft.Extensions.CommandLineUtils.CommandOption target)
+        {
+            _target = target;
+        }
+
+        public List<string> Values => _target.Values;
+
+        public bool HasValue()
+        {
+            return _target.HasValue();
+        }
+
+        public string Value()
+        {
+            return _target.Value();
+        }
+    }
+
+    internal sealed class Argument : IArgument
+    {
+        private readonly Microsoft.Extensions.CommandLineUtils.CommandArgument _target;
+
+        public Argument(Microsoft.Extensions.CommandLineUtils.CommandArgument target)
+        {
+            _target = target;
+        }
+
+        public List<string> Values => _target.Values;
+
+        public bool MultipleValues => _target.MultipleValues;
+
+        public string Value => _target.Value;
     }
 }

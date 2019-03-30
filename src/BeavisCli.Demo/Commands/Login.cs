@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using System.Threading.Tasks;
 using BeavisCli;
+using BeavisCli.Services;
 using DemoWebApp.Models;
 using DemoWebApp.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -54,7 +55,7 @@ namespace DemoWebApp.Commands
                 _initializer.Initialize(context.Response, context.HttpContext, true);
 
                 // exit and show simple message
-                return await context.ExitAsync($"Hello {user.UserName}!", ResponseMessageTypes.Success);
+                return await context.ExitAsync($"Hello {user.UserName}!", ResponseMessageType.Success);
             });
         }
     }

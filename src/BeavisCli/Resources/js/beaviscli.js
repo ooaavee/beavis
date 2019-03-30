@@ -29,7 +29,7 @@ var BeavisCli;
                 }
             };
             this.freeze();
-            this.$http.post("/beaviscli-api/initialize", null, { headers: { 'Content-Type': "application/json" } })
+            this.$http.post(CliController.apiRoot + "/initialize", null, { headers: { 'Content-Type': "application/json" } })
                 .success(function (data) {
                 _this.onResponse(data);
             }).error(function (data, status) {
@@ -53,7 +53,7 @@ var BeavisCli;
                 return;
             }
             this.freeze();
-            this.$http.post("/beaviscli-api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
+            this.$http.post(CliController.apiRoot + "/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
                 .success(function (data) {
                 _this.onResponse(data);
             }).error(function (data, status) {
@@ -71,7 +71,7 @@ var BeavisCli;
             reader.onload = function () {
                 _this.uploader.file.dataUrl = reader.result;
                 _this.freeze();
-                _this.$http.post("/beaviscli-api/upload", JSON.stringify(_this.uploader.file), { headers: { 'Content-Type': "application/json" } })
+                _this.$http.post(CliController.apiRoot + "/upload", JSON.stringify(_this.uploader.file), { headers: { 'Content-Type': "application/json" } })
                     .success(function (data) {
                     _this.onResponse(data);
                     $("#uploader").val("");
@@ -107,7 +107,7 @@ var BeavisCli;
         CliController.prototype.beginJob = function (key, content) {
             var _this = this;
             this.freeze();
-            this.$http.post("/beaviscli-api/job?key=" + encodeURIComponent(key), content, { headers: { 'Content-Type': "application/json" } })
+            this.$http.post(CliController.apiRoot + "/job?key=" + encodeURIComponent(key), content, { headers: { 'Content-Type': "application/json" } })
                 .success(function (data) {
                 _this.onResponse(data);
             }).error(function (data, status) {
@@ -134,6 +134,7 @@ var BeavisCli;
         CliController.prototype.awake = function () {
             window["terminal"].freeze(false);
         };
+        CliController.apiRoot = "/api/beaviscli";
         CliController.$inject = ["$rootScope", "$http"];
         return CliController;
     }());

@@ -35,6 +35,8 @@ namespace BeavisCli {
     }
 
     class CliController {
+        private static apiRoot: string = "/api/beaviscli";
+
         private uploader: IUploader;
         private jobQueue: IQueuedJob[] = [];
 
@@ -73,7 +75,7 @@ namespace BeavisCli {
 
             this.freeze();
 
-            this.$http.post<IResponse>("/beaviscli-api/initialize", null, { headers: { 'Content-Type': "application/json" } })
+            this.$http.post<IResponse>(`${CliController.apiRoot}/initialize`, null, { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
                     this.onResponse(data);
                 }).error((data, status) => {
@@ -106,7 +108,7 @@ namespace BeavisCli {
             this.freeze();
 
             // send server request
-            this.$http.post<IResponse>("/beaviscli-api/request", JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
+            this.$http.post<IResponse>(`${CliController.apiRoot}/request`, JSON.stringify({ input: input }), { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
                     this.onResponse(data);
                 }).error((data, status) => {
@@ -128,11 +130,11 @@ namespace BeavisCli {
             reader.readAsDataURL(file);
 
             reader.onload = () => {
-                this.uploader.file.dataUrl = reader.result;
+                this.uploader.file.dataUrl = <any>reader.result;
 
                 this.freeze();
 
-                this.$http.post<IResponse>("/beaviscli-api/upload", JSON.stringify(this.uploader.file), { headers: { 'Content-Type': "application/json" } })
+                this.$http.post<IResponse>(`${CliController.apiRoot}/upload`, JSON.stringify(this.uploader.file), { headers: { 'Content-Type': "application/json" } })
                     .success((data: IResponse) => {
                         this.onResponse(data);
                         $("#uploader").val("");
@@ -187,7 +189,7 @@ namespace BeavisCli {
         private beginJob(key: string, content: any) {
             this.freeze();
 
-            this.$http.post<IResponse>(`/beaviscli-api/job?key=${encodeURIComponent(key)}`, content, { headers: { 'Content-Type': "application/json" } })
+            this.$http.post<IResponse>(`${CliController.apiRoot}/job?key=${encodeURIComponent(key)}`, content, { headers: { 'Content-Type': "application/json" } })
                 .success((data: IResponse) => {
                     this.onResponse(data);
                 }).error((data, status) => {

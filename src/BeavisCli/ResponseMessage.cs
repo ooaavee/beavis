@@ -18,7 +18,7 @@ namespace BeavisCli
             return new ResponseMessage
             {
                 Text = text ?? string.Empty,
-                Type = ResponseMessageTypes.Error.ToString()
+                Type = ResponseMessageType.Error.ToString()
             };
         }
 
@@ -27,7 +27,7 @@ namespace BeavisCli
             return new ResponseMessage
             {
                 Text = text ?? string.Empty,
-                Type = ResponseMessageTypes.Plain.ToString()
+                Type = ResponseMessageType.Plain.ToString()
             };
         }
 
@@ -36,7 +36,7 @@ namespace BeavisCli
             return new ResponseMessage
             {
                 Text = text ?? string.Empty,
-                Type = ResponseMessageTypes.Success.ToString()
+                Type = ResponseMessageType.Success.ToString()
             };
         }
     }

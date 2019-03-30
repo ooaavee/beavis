@@ -5,10 +5,11 @@ namespace BeavisCli
     [AttributeUsage(AttributeTargets.Class)]
     public class CommandAttribute : Attribute
     {
-        public CommandAttribute(string name, string description)
+        public CommandAttribute(string name, string description, string longDescription = null)
         {
             Name = name;
-            FullName = description;
+            Description = description;
+            LongDescription = longDescription;
         }
 
         /// <summary>
@@ -17,8 +18,13 @@ namespace BeavisCli
         public string Name { get; }
 
         /// <summary>
-        /// Command full name
+        /// Description text
         /// </summary>
-        public string FullName { get; }
+        public string Description { get; }
+
+        /// <summary>
+        /// Long description text
+        /// </summary>
+        public string LongDescription { get; }
     }
 }
