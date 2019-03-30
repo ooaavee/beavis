@@ -4,13 +4,14 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <AssemblyName>BeavisCli</AssemblyName>
     <AssemblyVersion>0.9.6.0</AssemblyVersion>
-    <FileVersion>0.9.5.0</FileVersion>
-    <Version>0.9.6</Version>
+    <FileVersion>0.9.6.0</FileVersion>
+    <Version>0.9.6-beta1</Version>
     <Authors>Ossi Vartiainen</Authors>
     <Company />
     <Product>Beavis CLI</Product>
     <PackageId>BeavisCLI</PackageId>
     <Copyright>Copyright (c) 2019 Ossi Vartiainen</Copyright>
+    <PackageLicenseUrl>https://github.com/ooaavee/beavis/blob/master/LICENSE</PackageLicenseUrl>
   </PropertyGroup>
 
   <ItemGroup>
