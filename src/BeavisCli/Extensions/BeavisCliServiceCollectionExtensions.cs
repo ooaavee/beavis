@@ -35,12 +35,10 @@ namespace Microsoft.Extensions.DependencyInjection
             // register built-in commands
             foreach (CommandBehaviour command in options.BuiltInCommandBehaviours.Values)
             {
-                if (!command.IsEnabled)
+                if (command.IsEnabled)
                 {
-                    continue;
+                    services.Add(ServiceDescriptor.Singleton(typeof(ICommand), command.ImplementationType));
                 }
-
-                services.Add(ServiceDescriptor.Singleton(typeof(ICommand), command.ImplementationType));
             }
 
             ServicesRegistered = true;

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using BeavisCli.JsInterop.Statements;
 
 namespace BeavisCli.Jobs.Defaults
@@ -11,9 +12,9 @@ namespace BeavisCli.Jobs.Defaults
 
         public WriteFile(byte[] content, string fileName, string mimeType)
         {
-            _content = content;
-            _fileName = fileName;
-            _mimeType = mimeType;
+            _content = content ?? throw new ArgumentException(nameof(content));
+            _fileName = fileName ?? throw new ArgumentNullException(nameof(fileName));
+            _mimeType = mimeType ?? throw new ArgumentNullException(nameof(mimeType));
         }
 
         public Task RunAsync(JobContext context)

@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
-using BeavisCli.Jobs;
+﻿using BeavisCli.Jobs;
 using BeavisCli.Utils;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace BeavisCli.Services.Defaults
 {
@@ -12,9 +12,9 @@ namespace BeavisCli.Services.Defaults
         private readonly ConcurrentDictionary<string, IJob> _jobs = new ConcurrentDictionary<string, IJob>();
         private readonly ILogger<JobPool> _logger;
 
-        public JobPool(ILoggerFactory loggerFactory)
+        public JobPool(ILogger<JobPool> logger)
         {
-            _logger = loggerFactory.CreateLogger<JobPool>();
+            _logger = logger;
         }
 
         /// <summary>

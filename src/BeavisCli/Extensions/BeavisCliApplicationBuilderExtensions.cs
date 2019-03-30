@@ -11,7 +11,8 @@ namespace Microsoft.AspNetCore.Builder
         {
             if (!BeavisCliServiceCollectionExtensions.ServicesRegistered)
             {
-                throw new InvalidOperationException($"Unable to find the required services. Please add all the required services by calling \'IServiceCollection.{nameof(BeavisCliServiceCollectionExtensions.AddBeavisCli)}\' inside the call to \'ConfigureServices(...)\' in the application startup code.");
+                throw new InvalidOperationException(
+                    $"Unable to find the required services. Please add all the required services by calling \'IServiceCollection.{nameof(BeavisCliServiceCollectionExtensions.AddBeavisCli)}\' inside the call to \'ConfigureServices(...)\' in the application startup code.");
             }
 
             app.UseMiddleware<BeavisCliMiddleware>();
