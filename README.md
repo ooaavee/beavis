@@ -4,11 +4,16 @@ Beavis CLI library adds a web-cli (terminal in web browser) support for ASP.NET 
 
 ## Install
 
-You can get the library from <a href="https://www.nuget.org/packages/Ooaavee.Xxxx">NuGet</a>.
+You can get the library from <a href="https://www.nuget.org/packages/BeavisCLI/">NuGet</a>.
 
 ```
-PM> Install-Package Ooaavee.BeavisCli
+PM> Install-Package BeavisCLI -Version 0.9.6-beta1
 ```
+or
+```
+> dotnet add package BeavisCLI --version 0.9.6-beta1
+```
+
 
 ## Basic configuration
 
