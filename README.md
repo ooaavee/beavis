@@ -7,11 +7,11 @@ Beavis CLI library adds a web-cli (terminal in web browser) support for ASP.NET 
 You can get the library from <a href="https://www.nuget.org/packages/BeavisCLI/">NuGet</a>.
 
 ```
-PM> Install-Package BeavisCLI -Version 0.9.6-beta1
+PM> Install-Package BeavisCLI -Version 0.9.6-beta2
 ```
 or
 ```
-> dotnet add package BeavisCLI --version 0.9.6-beta1
+> dotnet add package BeavisCLI --version 0.9.6-beta2
 ```
 
 
@@ -64,7 +64,7 @@ public class Hello : ICommand
 }
 ```
 
-...and register `ICommand` service with the concrete type `Hello`.
+After that you register `ICommand` service with the concrete type (any service lifetime can be used).
 
 ```cs
 public void ConfigureServices(IServiceCollection services)
@@ -74,6 +74,8 @@ public void ConfigureServices(IServiceCollection services)
 }
 
 ```
+
+That's all!
 
 <img src="/doc/images/hello_terminal.jpg" style="width: 100%">
 
