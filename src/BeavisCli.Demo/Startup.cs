@@ -26,7 +26,7 @@ namespace DemoWebApp
 
             });
 
-            services.AddScopedCommand<Hello>();
+            services.AddScoped<ICommand, Hello>();
             services.AddScopedCommand<Login>();
             services.AddScopedCommand<Test>();
 
