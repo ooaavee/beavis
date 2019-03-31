@@ -1,11 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
-using BeavisCli.Extensions;
+﻿using BeavisCli.Extensions;
 using BeavisCli.Microsoft.Extensions.CommandLineUtils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System;
+using System.Threading.Tasks;
 
 namespace BeavisCli.Services.Defaults
 {
@@ -14,9 +14,9 @@ namespace BeavisCli.Services.Defaults
         private readonly ILogger<RequestHandler> _logger;
         private readonly BeavisCliOptions _options;
 
-        public RequestHandler(ILoggerFactory loggerFactory, IOptions<BeavisCliOptions> options)
+        public RequestHandler(ILogger<RequestHandler> logger, IOptions<BeavisCliOptions> options)
         {
-            _logger = loggerFactory.CreateLogger<RequestHandler>();
+            _logger = logger;
             _options = options.Value;
         }
 
@@ -58,31 +58,31 @@ namespace BeavisCli.Services.Defaults
 
                 ctx = new CommandContext(context, request, response, info, cmd);
 
-                CommandBuilder builder = new CommandBuilder(ctx);
-
                 if (await IsAuthorizedAsync(ctx))
                 {
-                    // execute command if authorized
-                    await cmd.ExecuteAsync(builder, ctx);
+                    try
+                    {
+                        await ExecuteCommandAsync(ctx);
+                    }
+                    catch (UnauthorizedException)
+                    {
+                        // ...nope, command says unauthorized
+                        await unauthorized.OnUnauthorizedAsync(ctx);
+                    }
                 }
                 else
                 {
-                    // handle unauthorized execution attempts
                     await unauthorized.OnUnauthorizedAsync(ctx);
                 }
             }
             catch (CommandParsingException e)
             {
                 _logger.LogDebug($"An error occurred while parsing the input '{request.Input}'.", e);
-
-                if (ctx != null)
-                {
-                    ctx.WriteError(e);
-                }
+                ctx?.WriteError(e);
             }
             catch (Exception e)
             {
-                _logger.LogError($"An error occurred while processing the request with the input '{request.Input}'.", e);
+                _logger.LogError(e, $"An error occurred while processing the request with the input '{request.Input}'.");
 
                 if (ctx != null)
                 {
@@ -100,6 +100,13 @@ namespace BeavisCli.Services.Defaults
             return response;
         }
 
+        private static async Task ExecuteCommandAsync(CommandContext context)
+        {
+            var builder = new CommandBuilder(context);
+
+            await context.Command.ExecuteAsync(builder, context);
+        }
+
         /// <summary>
         /// Checks if the command execution is authorized.
         /// </summary>
@@ -109,7 +116,12 @@ namespace BeavisCli.Services.Defaults
 
             bool authorized = await environment.IsAuthorizedAsync(context);
 
-            _logger.LogInformation($"The authorization status for the command '{context.Command.GetType().FullName}' is {authorized}.");
+            if (!authorized)
+            {
+                CommandInfo info = context.Command.GetType().GetCommandInfo();
+
+                _logger.LogInformation($"Command '{info.Name}' execution is unauthorized.");
+            }
 
             return authorized;
         }

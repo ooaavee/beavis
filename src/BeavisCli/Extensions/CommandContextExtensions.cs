@@ -1,4 +1,5 @@
-﻿using BeavisCli.Jobs;
+﻿using BeavisCli.Extensions;
+using BeavisCli.Jobs;
 using BeavisCli.Jobs.Defaults;
 using BeavisCli.JsInterop;
 using BeavisCli.JsInterop.Statements;
@@ -29,51 +30,37 @@ namespace BeavisCli
             // get arguments for the command
             string[] args = context.Request.GetCommandArgs();
 
-            context.Logger().LogDebug($"Started to execute '{context.Command.GetType().FullName}' with arguments '{string.Join(" ", args)}'.");
+            context.Logger().LogDebug(args.Any()
+                ? $"Started to execute command '{context.CommandName()}' with arguments '{string.Join(" ", args)}'."
+                : $"Started to execute command '{context.CommandName()}'.");
 
             // execute the command
             int statusCode = context.Processor.Execute(args);
 
-            context.Logger().LogDebug($"'{context.Command.GetType().FullName}' execution completed with status code {statusCode}.");
+            context.Logger().LogDebug($"Command '{context.CommandName()}' execution completed with status code {statusCode}.");
 
             await Task.CompletedTask;
         }
-           
-        /// <summary>
-        /// Writes a plain text message.
-        /// </summary>
-        public static void WriteText(this CommandContext context, string text)
-        {
-            context.Response.Messages.Add(ResponseMessage.Plain(text));
-        }
-
+                 
         /// <summary>
         /// Writes plain text messages.
         /// </summary>
-        public static void WriteText(this CommandContext context, IEnumerable<string> texts)
+        public static void WriteText(this CommandContext context, params string[] messages)
         {
-            foreach (string text in texts)
+            foreach (var message in messages)
             {
-                context.WriteText(text);
+                context.Response.Messages.Add(ResponseMessage.Plain(message));
             }
-        }
-
-        /// <summary>
-        /// Writes a success/ very positive message.
-        /// </summary>
-        public static void WriteSuccess(this CommandContext context, string text)
-        {
-            context.Response.Messages.Add(ResponseMessage.Success(text));
         }
 
         /// <summary>
         /// Writes success/ very positive messages.
         /// </summary>
-        public static void WriteSuccess(this CommandContext context, IEnumerable<string> texts)
+        public static void WriteSuccess(this CommandContext context, params string[] messages)
         {
-            foreach (var text in texts)
+            foreach (var message in messages)
             {
-                context.WriteSuccess(text);
+                context.Response.Messages.Add(ResponseMessage.Success(message));
             }
         }
 
@@ -82,40 +69,24 @@ namespace BeavisCli
         /// </summary>
         public static void WriteError(this CommandContext context, Exception e, bool returnStackTrace = false)
         {
-            context.WriteError(returnStackTrace ? e.ToString() : e.Message);
-        }
-
-        /// <summary>
-        /// Writes an error message.
-        /// </summary>
-        public static void WriteError(this CommandContext context, string text)
-        {
-            context.Response.Messages.Add(ResponseMessage.Error(text));
+            context.Response.Messages.Add(ResponseMessage.Error(returnStackTrace ? e.ToString() : e.Message));
         }
 
         /// <summary>
         /// Writes error messages.
         /// </summary>
-        public static void WriteError(this CommandContext context, IEnumerable<string> texts)
+        public static void WriteError(this CommandContext context, params string[] messages)
         {
-            foreach (var text in texts)
+            foreach (var message in messages)
             {
-                context.WriteError(text);
+                context.Response.Messages.Add(ResponseMessage.Error(message));
             }
-        }
-
-        /// <summary>
-        /// Writes a JavaScript statement that will be invoked on the client-side.
-        /// </summary>
-        public static void WriteJs(this CommandContext context, IStatement statement)
-        {
-            context.Response.Statements.Add(statement.GetJs());
         }
 
         /// <summary>
         /// Writes JavaScript statements that will be invoked on the client-side.
         /// </summary>
-        public static void WriteJs(this CommandContext context, IEnumerable<IStatement> statements)
+        public static void WriteJs(this CommandContext context, params IStatement[] statements)
         {
             foreach (var statement in statements)
             {
@@ -360,7 +331,7 @@ namespace BeavisCli
 
         public static Task<CommandResult> Exit(this CommandContext context)
         {
-            context.Logger().LogDebug($"Exiting '{context.Command.GetType().FullName}'.");
+            context.Logger().LogDebug($"Exiting '{context.CommandName()}'.");
             return Task.FromResult(CommandResult.Default);
         }
 
@@ -372,7 +343,7 @@ namespace BeavisCli
 
         public static Task<CommandResult> Exit(this CommandContext context, string text, ResponseMessageType type = ResponseMessageType.Plain)
         {
-            context.Logger().LogDebug($"Exiting '{context.Command.GetType().FullName}' with message type '{type}' and text '{text}'.");
+            context.Logger().LogDebug($"Exiting '{context.CommandName()}' with message type '{type}' and text '{text}'.");
 
             switch (type)
             {
@@ -400,7 +371,7 @@ namespace BeavisCli
 
         public static Task<CommandResult> ExitWithHelp(this CommandContext context)
         {
-            context.Logger().LogDebug($"Exiting '{context.Command.GetType().FullName}' with help.");
+            context.Logger().LogDebug($"Exiting '{context.CommandName()}' with help.");
 
             if (context.Response.Messages.Any())
             {
@@ -419,7 +390,7 @@ namespace BeavisCli
 
         public static Task<CommandResult> ExitWithUnauthorized(this CommandContext context)
         {
-            context.Logger().LogDebug($"Exiting '{context.Command.GetType().FullName}' with unauthorized.");
+            context.Logger().LogDebug($"Exiting '{context.CommandName()}' with unauthorized.");
             IUnauthorizedHandler handler = context.HttpContext.RequestServices.GetRequiredService<IUnauthorizedHandler>();
             handler.OnUnauthorizedAsync(context);
             return Task.FromResult(CommandResult.Default);
@@ -433,7 +404,7 @@ namespace BeavisCli
 
         public static Task<CommandResult> ExitWithError(this CommandContext context, string text)
         {
-            context.Logger().LogDebug($"Exiting '{context.Command.GetType().FullName}' with error '{text}'.");
+            context.Logger().LogDebug($"Exiting '{context.CommandName()}' with error '{text}'.");
             context.WriteError(text);
             return Task.FromResult(CommandResult.Default);
         }
@@ -446,7 +417,7 @@ namespace BeavisCli
 
         public static Task<CommandResult> ExitWithError(this CommandContext context, string text, Exception e)
         {
-            context.Logger().LogDebug($"Exiting '{context.Command.GetType().FullName}' with error '{text}' and exception '{e}'.");
+            context.Logger().LogDebug($"Exiting '{context.CommandName()}' with error '{text}' and exception '{e}'.");
             context.WriteError(text);
             context.WriteError(e, true);
             return Task.FromResult(CommandResult.Default);
@@ -460,7 +431,7 @@ namespace BeavisCli
 
         public static Task<CommandResult> ExitWithError(this CommandContext context, Exception e)
         {
-            context.Logger().LogDebug($"Exiting '{context.Command.GetType().FullName}' with exception '{e}'.");
+            context.Logger().LogDebug($"Exiting '{context.CommandName()}' with exception '{e}'.");
             context.WriteError(e, true);
             return Task.FromResult(CommandResult.Default);
         }
@@ -486,7 +457,8 @@ namespace BeavisCli
             var questions = new[]
             {
                 question,
-                "Only 'yes' will be accepted to approve."
+                "Only 'yes' will be accepted to approve.",
+                "Enter a value:"
             };
 
             return AskQuestion(context, questions, false, null, handler);
@@ -561,6 +533,12 @@ namespace BeavisCli
             ILogger<CommandContext> logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<CommandContext>>();
             context.HttpContext.Items[key] = logger;
             return logger;
+        }
+
+        public static string CommandName(this CommandContext context)
+        {
+            CommandInfo info = context.Command.GetType().GetCommandInfo();
+            return info.Name;
         }
     }
 }

@@ -1,17 +1,17 @@
 # Beavis CLI
 
-Beavis CLI library adds a web-cli (terminal in web browser) support for ASP.NET Core applications. It's very easy to configure and develope new custom commands with .NET Core.
+Beavis CLI library adds a web-cli (terminal in web browser) support for ASP.NET Core applications. It's very easy to configure and develope new commands with .NET Core.
 
 ## Install
 
 You can get the library from <a href="https://www.nuget.org/packages/BeavisCLI/">NuGet</a>.
 
 ```
-PM> Install-Package BeavisCLI -Version 0.9.6-beta1
+PM> Install-Package BeavisCLI -Version 0.9.6-beta2
 ```
 or
 ```
-> dotnet add package BeavisCLI --version 0.9.6-beta1
+> dotnet add package BeavisCLI --version 0.9.6-beta2
 ```
 
 
@@ -35,16 +35,16 @@ public class Startup
 ```
 
 
-That's all, voilà! After this, just start your application and open the address `/terminal` in your web browser and the terminal is shown.
+That's all, voilà! After this, just start your application and open the address `/terminal` in your web browser and the terminal will open.
 
 <img src="/doc/images/empty_terminal.jpg" style="width: 100%">
 
 
-## Developing custom commands
+## Developing commands
 
 By the default, there is a small set of built-in commands available in the Beavis CLI library (you can see them by executing the `help` command on the terminal), but if you want to get much out of this library, then you should develop your own custom commands - luckily it's a pretty straightforward process.
 
-First you create a new class that implements the `ICommand` interface and use the `CommandAttribute` to give a name and a description for your custom command. 
+First you create a new class that implements the `ICommand` interface and use the `CommandAttribute` to give a name and a description for your command. 
 
 ```cs
 using System.Threading.Tasks;
@@ -57,21 +57,27 @@ public class Hello : ICommand
     {
         await context.OnExecuteAsync(async () =>
         {
-            return await context.ExitAsync("Hello World", ResponseMessageTypes.Success);
+            context.WriteText("Hello World");
+            return await context.ExitAsync();
         });
     }
 }
 ```
 
-...and...
+After that you register `ICommand` service with the concrete type (any service lifetime can be used).
 
 ```cs
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddBeavisCli();
-    services.AddScopedCommand<Hello>();
+    services.AddScoped<ICommand, Hello>();
 }
 
 ```
+
+That's all!
+
+<img src="/doc/images/hello_terminal.jpg" style="width: 100%">
+
 
 ...to be continued :)

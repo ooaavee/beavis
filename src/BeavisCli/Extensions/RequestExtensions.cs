@@ -15,8 +15,10 @@ namespace BeavisCli
                 return null;
             }
 
-            var value = request.Input.Trim();
-            var tokens = value.Split(' ');
+            string value = request.Input.Trim();
+
+            string[] tokens = value.Split(' ');
+
             if (tokens.Length > 0)
             {
                 value = tokens[0];
@@ -37,13 +39,13 @@ namespace BeavisCli
                 return args.ToArray();
             }
 
-            var tokens = request.Input.Trim().Split(' ');
+            string[] tokens = request.Input.Trim().Split(' ');
 
             if (tokens.Length > 1)
             {
                 for (var i = 1; i <= tokens.Length - 1; i++)
                 {
-                    var arg = tokens[i].Trim();
+                    string arg = tokens[i].Trim();
                     if (arg.Length > 0)
                     {
                         args.Add(arg);

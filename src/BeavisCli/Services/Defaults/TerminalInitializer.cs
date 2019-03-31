@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Reflection;
-using BeavisCli.BuiltInCommands;
+﻿using BeavisCli.BuiltInCommands;
 using BeavisCli.Extensions;
 using BeavisCli.JsInterop;
 using BeavisCli.JsInterop.Statements;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace BeavisCli.Services.Defaults
 {
@@ -38,11 +38,10 @@ namespace BeavisCli.Services.Defaults
         protected virtual IEnumerable<ResponseMessage> GetMessages(HttpContext context)
         {        
             Assembly assembly = GetType().GetTypeInfo().Assembly;
-            AssemblyName name = assembly.GetName();
             AssemblyProductAttribute product = assembly.GetCustomAttribute<AssemblyProductAttribute>();
             AssemblyCopyrightAttribute copyright = assembly.GetCustomAttribute<AssemblyCopyrightAttribute>();
 
-            yield return ResponseMessage.Success($"{product.Product} {name.Version.Major}.{name.Version.Minor}.{name.Version.Build}");
+            yield return ResponseMessage.Success(product.Product);
             yield return ResponseMessage.Success($"{copyright.Copyright}. Code released under the MIT License. Usage 'license' for more details.");
         }
 

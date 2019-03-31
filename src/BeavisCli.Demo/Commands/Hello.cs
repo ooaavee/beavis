@@ -1,17 +1,18 @@
 ﻿namespace DemoWebApp.Commands
 {
-using System.Threading.Tasks;
-using BeavisCli;
+    using System.Threading.Tasks;
+    using BeavisCli;
 
-[Command("hello", "This demo say Hello World!")]
-public class Hello : ICommand
-{
-    public async Task ExecuteAsync(CommandBuilder builder, CommandContext context)
+    [Command("hello", "This demo says Hello World!")]
+    public class Hello : ICommand
     {
-        await context.OnExecuteAsync(async () =>
+        public async Task ExecuteAsync(CommandBuilder builder, CommandContext context)
         {
-            return await context.ExitAsync("Hello World", ResponseMessageType.Success);
-        });
+            await context.OnExecuteAsync(async () =>
+            {
+                context.WriteText("Hello World");
+                return await context.ExitAsync();
+            });
+        }
     }
-}
 }

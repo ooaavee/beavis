@@ -1,9 +1,9 @@
-﻿using System;
+﻿using BeavisCli.Utils;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BeavisCli.Utils;
-using Microsoft.Extensions.Logging;
 
 namespace BeavisCli.Services.Defaults
 {
@@ -13,9 +13,9 @@ namespace BeavisCli.Services.Defaults
 
         private readonly ConcurrentDictionary<string, FileContent> _files = new ConcurrentDictionary<string, FileContent>();
 
-        public FileStorage(ILoggerFactory loggerFactory)
+        public FileStorage(ILogger<FileStorage> logger)
         {
-            _logger = loggerFactory.CreateLogger<FileStorage>();
+            _logger = logger;
         }
 
         public virtual Task<string> StoreAsync(FileContent file)
